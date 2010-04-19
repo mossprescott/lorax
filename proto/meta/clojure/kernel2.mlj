@@ -1,0 +1,92 @@
+; Grammar/presentation for the 'kernel' language, which is directly translatable to 
+; ordinary Clojure forms.
+; This version uses the higher-level "grammar" language, which specifies structure as 
+; well as a presentation reduction, and which can be reduced/compiled down into both a
+; regular structure program and a presentation reduction.
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(node :grammar/language
+  :rules [
+  
+    (node :grammar/rule
+      :type 
+      :clojure/kernel/bind
+      
+      :supers []
+      
+      :display
+      ; (node :core/sooner (node :clojure/kernel/app ...)))
+      (node :view/chars :str "x" :font :cmmi10))
+
+    (node :grammar/rule
+      :type
+      :clojure/kernel/lambda
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/flow
+        :boxes [
+          (node :view/expr/keyword :str "lambda")
+          (node :grammar/sequence
+            :name
+            :clojure/kernel/lambda/params
+            
+            :options [
+              :clojure/kernel/bind
+            ]
+            
+            :min 0
+            
+            :separator
+            (node :view/chars :str ", " :font :cmr10)
+            
+            :node
+            :view/expr/binary)
+            
+          (node :grammar/attr
+            :name 
+            :clojure/kernel/lambda/body
+            
+            :options [
+              :clojure/kernel/expr
+            ])
+        ]))
+
+    (node :grammar/rule
+      :type
+      :clojure/kernel/app
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/flow
+        :boxes [
+          (node :view/expr/keyword :str "apply")
+            
+          (node :grammar/attr
+            :name 
+            :clojure/kernel/app/expr
+            
+            :options [
+              :clojure/kernel/expr
+            ])
+
+          (node :grammar/sequence
+            :name
+            :clojure/kernel/app/args
+            
+            :options [
+              :clojure/kernel/expr
+            ]
+            
+            :min 0
+            
+            :separator
+            (node :view/chars :str ", " :font :cmr10)
+            
+            :node
+            :view/expr/binary)
+        ]))
+  ])

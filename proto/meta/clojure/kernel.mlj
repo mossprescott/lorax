@@ -1,0 +1,587 @@
+; Structure of the 'kernel' language, which is directly translatable to 
+; ordinary Clojure forms.
+; This version uses the low-level "structure" language, which does not specify
+; any presentation.
+
+; Some constraints this grammar cannot express:
+; ???
+
+(use 'meta.core)  ; ignored by load-nodes
+
+(node :structure/language
+  :rules [
+  
+    (node :structure/rule
+      :type 
+      :clojure/kernel/bind
+      
+      :attrs [])
+
+;   :clojure/kernel/lambda
+;   (rule :clojure/kernel/lambda
+;     (:clojure/kernel/lambda/bind (option (node :clojure/kernel/bind)))
+;     (:clojure/kernel/lambda/params (repeat (node :clojure/kernel/bind) 0 nil))
+;     (:clojure/kernel/lambda/body (node :clojure/kernel/expr))),
+    (node :structure/rule
+      :type
+      :clojure/kernel/lambda
+      
+      :attrs [
+        ; (node :structure/simpleAttr
+        ;   :name 
+        ;   :clojure/kernel/lambda/bind
+        ;   
+        ;   :options [
+        ;     (node :structure/node
+        ;       :type :clojure/kernel/bind)
+        ;   ]
+        ;   
+        ;   :optional true)
+          
+        (node :structure/sequenceAttr
+          :name 
+          :clojure/kernel/lambda/params
+          
+          :options [
+            (node :structure/node
+              :type :clojure/kernel/bind)
+          ]
+          
+          :min 0)
+        (node :structure/simpleAttr
+          :name 
+          :clojure/kernel/lambda/body
+          
+          :options [
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :optional false)
+      ])
+
+;   :clojure/kernel/app
+;   (rule :clojure/kernel/app
+;     (:clojure/kernel/app/fn (node :clojure/kernel/expr))
+;     (:clojure/kernel/app/args (repeat (node :clojure/kernel/expr) 0 nil))),
+    (node :structure/rule
+      :type
+      :clojure/kernel/app
+      
+      :attrs [
+        (node :structure/simpleAttr
+          :name
+          :clojure/kernel/app/expr
+          
+          :options [
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :optional false)
+        
+        (node :structure/sequenceAttr
+          :name
+          :clojure/kernel/app/args
+          
+          :options [
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :min 0)
+      ])
+
+;   :clojure/kernel/if
+;   (rule :clojure/kernel/if
+;     (:clojure/kernel/if/test (node :clojure/kernel/expr))
+;     (:clojure/kernel/if/then (node :clojure/kernel/expr))
+;     (:clojure/kernel/if/else (node :clojure/kernel/expr))),
+    (node :structure/rule
+      :type
+      :clojure/kernel/if
+      
+      :attrs [
+        (node :structure/simpleAttr
+          :name
+          :clojure/kernel/if/test
+          
+          :options [
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :optional false)
+          
+        (node :structure/simpleAttr
+          :name
+          :clojure/kernel/if/then
+          
+          :options [
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :optional false)
+
+        (node :structure/simpleAttr
+          :name
+          :clojure/kernel/if/else
+          
+          :options [
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :optional false)
+          
+        ])
+
+;   :clojure/kernel/let
+;   (rule :clojure/kernel/let
+;     (:clojure/kernel/let/bind (node :clojure/kernel/bind))
+;     (:clojure/kernel/let/expr (node :clojure/kernel/expr))
+;     (:clojure/kernel/let/body (node :clojure/kernel/expr))),
+    (node :structure/rule
+      :type
+      :clojure/kernel/let
+      
+      :attrs [
+        (node :structure/simpleAttr
+          :name 
+          :clojure/kernel/let/bind
+          
+          :options [
+            (node :structure/node
+              :type :clojure/kernel/bind)
+          ]
+          
+          :optional false)
+
+        (node :structure/simpleAttr
+          :name :clojure/kernel/let/expr
+
+          :options [
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :optional false)
+
+        (node :structure/simpleAttr
+          :name :clojure/kernel/let/body
+
+          :options [
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :optional false)
+      ])
+      
+;   :clojure/kernel/var
+;   (rule :clojure/kernel/var
+;     (:clojure/kernel/var/ref (node :core/ref))),
+    (node :structure/rule
+      :type
+      :clojure/kernel/var
+      
+      :attrs [
+        (node :structure/simpleAttr
+          :name 
+          :clojure/kernel/var/ref
+          
+          :options [
+            (node :structure/ref
+              :type :clojure/kernel/bind)
+            (node :structure/ref
+              :type :clojure/kernel/lambda)
+          ]
+          
+          :optional false)
+      ])
+
+;   :clojure/kernel/int
+    (node :structure/rule
+      :type 
+      :clojure/kernel/int
+      
+      :attrs [
+        (node :structure/simpleAttr
+          :name
+          :clojure/kernel/int/value
+          
+          :options [
+            (node :structure/int)
+          ]
+          
+          :optional false)
+      ])
+
+;   :clojure/kernel/true
+    (node :structure/rule
+      :type 
+      :clojure/kernel/true
+      
+      :attrs [])
+
+;   :clojure/kernel/false
+    (node :structure/rule
+      :type 
+      :clojure/kernel/false
+      
+      :attrs [])
+
+;   :clojure/kernel/nil
+    (node :structure/rule
+      :type 
+      :clojure/kernel/nil
+      
+      :attrs [])
+
+;   :clojure/kernel/extern
+;   (rule :clojure/kernel/extern
+;     (:clojure/kernel/extern/name :core/symbol))
+    (node :structure/rule
+      :type 
+      :clojure/kernel/extern
+      
+      :attrs [
+        (node :structure/simpleAttr
+          :name
+          :clojure/kernel/extern/name
+          
+          :options [
+            (node :structure/string)
+          ]
+          
+          :optional false)
+      ])
+
+    ; HACK: not really a kernel language construct?
+    (node :structure/rule
+      :type 
+      :clojure/kernel/program
+      
+      :attrs [
+        (node :structure/sequenceAttr
+          :name
+          :clojure/kernel/program/exprs
+          
+          :options [
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :min 0)
+      ])
+
+;       ; HACK: refs will eventually get special treatment...
+; ;   :core/ref
+;     (node :structure/rule
+;       :type 
+;       :core/ref
+;       
+;       :attrs [
+;         (node :structure/simpleAttr
+;           :name
+;           :core/ref/id
+;           
+;           :options [
+;             (node :structure/name)
+;           ]
+;           
+;           :optional false)
+;       ])
+
+    ; HACK: not really a kernel language construct
+    (node :structure/rule
+      :type 
+      :core/later
+      
+      :attrs [
+        (node :structure/simpleAttr
+          :name
+          :core/later/node
+          
+          :options [
+            ; Note: this should allow any recognized node whatsoever?
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :optional false)
+      ])
+    ; HACK: not really a kernel language construct
+    (node :structure/rule
+      :type 
+      :core/sooner
+      
+      :attrs [
+        (node :structure/simpleAttr
+          :name
+          :core/sooner/node
+          
+          :options [
+            ; Note: this should allow any recognized node whatsoever?
+            ; expr:
+            (node :structure/node
+              :type :clojure/kernel/lambda)
+            (node :structure/node
+              :type :clojure/kernel/app)
+            (node :structure/node
+              :type :clojure/kernel/if)
+            (node :structure/node
+              :type :clojure/kernel/let)
+            (node :structure/node
+              :type :clojure/kernel/var)
+            (node :structure/node
+              :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/true)
+            (node :structure/node
+              :type :clojure/kernel/false)
+            (node :structure/node
+              :type :clojure/kernel/nil)
+            (node :structure/node
+              :type :clojure/kernel/extern)
+            (node :structure/node
+              :type :core/later)
+            (node :structure/node
+              :type :core/sooner)
+          ]
+          
+          :optional false)
+      ])
+
+  ])

@@ -1,0 +1,48 @@
+Pseudo-REPL
+	- kernel/program
+	- evaluate each expression and render result
+	- un-read: convert clojure data structures to syntax
+
+fancier grammar language
+  - reduce it to the :structure language
+  - abstract types and instances
+  - extensible/open: you can add instances to a type defined earlier
+
+integrated grammar/reduction language
+	- pattern matching?
+		- check the syntax of the patterns
+		- allow bindings in the patterns
+	
+
+clojure/core
+	- constructors: list, map
+	- essential operators
+	- list comprehensions
+	- several lambda forms (lightweight to heavyweight)
+
+
+editing:
+	- selection actions: next/previous sibling, parent, first child
+    - paths?
+    - zipper?
+	- bug in selection hilite: paren in :app in some cases, lambda in let, 
+	- show selected node in separate view, with info on each child
+
+
+- quote/unquote
+  - better rendering
+
+	
+rendering:
+	- :view/scripted - /sub
+	- :view/over - /lineweight
+	- :view/radical (later)
+	- :view/array - layout, alignment?
+	
+infrastructure:
+	- svn project
+	- some way to declare what language is in force in each file?
+	
+big picture:
+	- REPL - evaluate one statement at a time, with statements to introduce syntax
+	

@@ -1,0 +1,90 @@
+AST nodes and their structure
+
+Each node is a mapping from names to values. Some values are nodes.
+
+Concretely, use Clojure maps with keywords?
+{ :core/type :clojure/kernel/app,
+  :clojure/kernel/app/expr 
+    { :core/type :clojure/builtin/plus }
+  :clojure/kernel/app/args
+    [ { :core/type :clojure/literal,
+        :clojure/literal/value 1 },
+      { :core/type :clojure/literal,
+        :clojure/literal/value 2 } ]
+}
+
+A simple pretty-printer?
+clojure/kernel/app(
+	expr: clojure/builtin/plus,
+	args: clojure/kernel/literal(value: 1),
+			clojure/kernel/literal(value: 2))
+
+
+Fundamentals:
+
+:core/ - common to all languages?
+
+:core/id - unique identifier for the node
+	- value is what?
+:core/type - type of node, which determines what productions apply to it, which languages see it, etc.
+	- value is string which must be a namespace-qualified name known to the system
+
+:core/ref
+	- /id
+
+
+Clojure plus extensions:
+
+:clojure/ - syntax specific to a language based on Clojure
+
+:clojure/kernel/ - syntax for the "core" language, which is basically the lambda calculus
+:clojure/kernel/expr - everything matches it
+:clojure/kernel/literal - 
+:clojure/kernel/app
+	- /expr: clojure/kernel/expr
+	- /args: (clojure/kernel/expr)*
+:clojure/kernel/lambda
+	- /bind: (clojure/kernel/bind)? (optional, for recursion)
+	- /params: (clojure/kernel/bind)*
+	- /body: clojure/kernel/expr (scope: lambda itself and every param bound here)
+:clojure/kernel/bind - represents the identity of a binding (name), does not necessarily need a name associated with it
+:clojure/kernel/if - conditional
+	- /test: clojure/kernel/expr
+	- /then: clojure/kernel/expr
+	- /else: clojure/kernel/expr
+:clojure/kernel/var - a reference to a binding
+	- /ref: core/ref
+:clojure/kernel/let - primitive let
+	- /bind: clojure/kernel/bind
+	- /expr: clojure/kernel/expr
+	- /body: clojure/kernel/expr (scope: name bound here)
+:clojure/kernel/extern
+	- /name: symbol (name of a function in the platform language)
+
+:clojure/core/ - the regular core language of Clojure, constructed from kernel & extern
+:clojure/core/+,-,*,/,sqrt,power
+:clojure/core/and,or,not
+:clojure/core/
+:clojure/core/conj,first,rest,contains,assoc,dissoc,get
+
+
+Not language-specific:
+
+:doc/ - nodes which are not relevant to execution, but aid understanding (ignored by the compiler, etc.)
+
+:doc/name - a user-provided identifier, for human consumption only
+	- /base: UTF8
+	- /sub: UTF8? (subscript)
+	- /primes: int? (number of prime ticks)
+	- /region: regionId? (EN_US, etc.)
+:doc/comment
+	- /value: text/span
+
+:text/ - for representing text, which can be names, comments, literals, etc.
+:text/span
+	- /style: text/italic, /bold, etc.
+	- /face: name of font?
+:text/superscript
+:text/subscript
+:text/para
+:text/prime,pprime,ppprime?

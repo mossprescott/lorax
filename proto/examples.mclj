@@ -1,0 +1,70 @@
+; An example of meta source code, represented as a single s-expression.
+; The entire expression is quoted, which allows it to be read/evaluated with 
+; load-file, hopefully.
+
+; This small program using only the kernel language and one builtin function 
+; simply defines a fn and applies it to two integers.
+
+; All of the below is essentially implementing this:
+;   (#(+ %1 %2) 1 2)
+; or, equivalently:
+;   ((fn [x y] (+ x y)) 1 2) 
+
+'{
+  :core/id :1,
+  :core/type :clojure/kernel/app,
+  :clojure/kernel/app/fn {
+    :core/id :2,
+    :core/type :clojure/kernel/lambda,
+    :clojure/kernel/lambda/args [
+      {
+        :core/id :3,
+        :core/type :clojure/kernel/bind,
+      },
+      {
+        :core/id :4,
+        :core/type :clojure/kernel/bind,
+      },
+    ],
+    :clojure/kernel/lambda/body {
+      :core/id :5,
+      :core/type :clojure/kernel/app,
+      :clojure/kernel/app/fn {
+        :core/id :6,
+        :clojure/builtin/plus,
+      },
+      :clojure/kernel/app/args [
+        {
+          :core/id :7,
+          :core/type :clojure/kernel/var,
+          :clojure/kernel/var/ref {
+            :core/id :8,
+            :core/type :core/ref,
+            :core/ref/id :3,
+          },
+        },  
+        {
+          :core/id :9,
+          :core/type :clojure/kernel/var,
+          :clojure/kernel/var/ref {
+            :core/id :10,
+            :core/type :core/ref,
+            :core/ref/id :4,
+          },
+        },  
+      ]
+    }
+  },
+  :clojure/kernel/app/args [
+    {
+      :core/id :11,
+      :core/type :clojure/kernel/int,
+      :clojure/kernel/int/value 1,
+    },
+    {
+      :core/id :12,
+      :core/type :clojure/kernel/int,
+      :clojure/kernel/int/value 2,
+    },
+  ]
+}
