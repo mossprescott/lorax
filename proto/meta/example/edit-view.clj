@@ -1,6 +1,7 @@
 (ns meta.example.edit-view
   (:use (meta.edit draw expr nodes)
-        (meta core reduce kernel))
+        (meta core reduce)
+        (meta.clojure kernel))
   (:import (java.lang Integer)))
 
 ; (def p 
@@ -104,6 +105,10 @@
               :font :cmr10-script))
         ])
       
+        (node :view/chars :str " " :font :cmr10)  ; HACK: need a vspace node?
+        (node :view/chars :str "cmsy10 font table:" :font :times)
+        (node :view/chars :str " " :font :cmr10)  ; HACK: need a vspace node?
+        
         (charSeq 0x00 0x10 :cmsy10)
         (charSeq 0x10 0x20 :cmsy10)
         (charSeq 0x20 0x30 :cmsy10)

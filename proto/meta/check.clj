@@ -48,24 +48,32 @@
     true))  ; TODO: rest of the types
 
 (defn- checkValue
-  [options n value]
+  [options n value label]
   (if (some #(checkOption % value) options)
     []
     [ [ (node-id (if (node? value) value n))
-        (str "unexpected value: " (if (node? value) (node-type value) value)) ] ]))
+        (str "unexpected value for " label ": " (if (node? value) (node-type value) value)) ] ]))
 
 (defn- checkSimpleAttr
   [attr n value]
   (if (vector? value)
     [ [ (node-id n) (str "expected a single value, found a sequence for attribute: " (node-attr attr :structure/simpleAttr/name)) ] ]
-    (checkValue (node-attr attr :structure/simpleAttr/options) n value)))
+    (checkValue 
+      (node-attr attr :structure/simpleAttr/options) 
+      n 
+      value 
+      (node-attr attr :structure/simpleAttr/name))))
 
 (defn- checkSequenceAttr
   [attr n value]
   (if (not (vector? value))
     [ [ (node-id n) (str "expected a sequence, found a single value for attribute: " (node-attr attr :structure/sequenceAttr/name)) ] ]
     (apply concat 
-      (for [v value] (checkValue (node-attr attr :structure/sequenceAttr/options) n v)))))
+      (for [i (range (count value))] (checkValue 
+                                        (node-attr attr :structure/sequenceAttr/options) 
+                                        n 
+                                        (get value i) 
+                                        (str (node-attr attr :structure/sequenceAttr/name) "[" i "]"))))))
 
 (defn- checkAttr
   [attr n value]

@@ -88,6 +88,10 @@
 (def SCRIPT_SCRIPT_SIZE (* DISPLAY_SIZE 0.5))
 
 (def FONTS {
+  ;
+  ; TeX fonts, used for most purposes:
+  ;
+  
   ; extended symbols
   :cmex10 (Font. "jsMath-cmex10" Font/PLAIN DISPLAY_SIZE)
 
@@ -106,11 +110,16 @@
   ; although the jsMath site claims they are present.
   :cmsy10 (Font. "jsMath-cmsy10" Font/PLAIN DISPLAY_SIZE)
   
+  ;
+  ; Other fonts, for special purposes:
+  ;
+  
   ; Times, a unicode font...
   ; Unfortunately the spacing is quite different than the jsMath fonts
-  :times (Font. "Times New Roman Regular" Font/PLAIN 14)
+  :times (Font. "Times New Roman" Font/PLAIN 14)
   :timesItalic (Font. "Times New Roman" Font/ITALIC DISPLAY_SIZE)
   
+  ; used for monospace in a few places
   :courier (Font. "Courier New" Font/PLAIN DISPLAY_SIZE)
   :courierItalic (Font. "Courier New" Font/ITALIC DISPLAY_SIZE)
 })

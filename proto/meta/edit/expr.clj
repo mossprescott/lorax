@@ -24,6 +24,9 @@
 ; - /nucleus, /super?, /sup?
 
 
+(defn- synthetic-color-node
+  []
+  (node :view/rgb :red 0.5 :green 0.5 :blue 1))
 
 (defn parenthesize
   "Reduction that adds parens around nested expressions where spacing isn't
@@ -53,7 +56,7 @@
             (node :view/parens
               :left "("
               :right ")"
-              :view/drawable/color (node :view/rgb :red 0.5 :green 0.5 :blue 1)
+              :view/drawable/color (synthetic-color-node)
               :content n))
         reduceBinary
           (fn [n]
@@ -108,8 +111,10 @@
 
   "-" [ "\u00c0" :cmsy10 ]  ; 0x00
    
-  ; :times [ "\u00d7" :times ] 
-  :times [ "\u00c2" :cmsy10 ] ; !!! Should be x02, according to the table on the jsMath site, even, but this works
+  ; :times [ "\u00d7" :times ]
+  ; !!! Should be x02, according to the table on the jsMath site, even, but 
+  ; this works and matches what jsMath actually does
+  :times [ "\u00c2" :cmsy10 ]
   
   "!" [ "!" :cmr10 ]
   
@@ -126,6 +131,9 @@
 
 
 ; Reduction to the lower-level language:
+; TODO: keep track of [displaymode (D(D'),T,S,SS), meta-level]
+; TODO: select font based on mode
+; TODO: reduce core/later and core/sooner using meta-level
 (def exprRules {
   :view/expr/juxt
   (fn relation [n]
@@ -165,6 +173,7 @@
         :str c
         :font f)))
 
+  ; TODO: handle primes and subscripts somehow?
   :view/expr/var
   (fn [n]
     (node :view/chars
@@ -201,9 +210,11 @@
   (fn [n]
     (node :view/chars
       :str "?"
-      :font :cmr10))
+      :font :cmr10
+      :view/drawable/color (synthetic-color-node)))
 
-  ; HACK: this is easier than actually implementing growable parens for now...
+  ; HACK: this is easier than actually implementing growable parens for now, but this
+  ; node should really be handled in nodes.clj with custom rendering
   :view/parens
   (fn [n]
     (node :view/sequence

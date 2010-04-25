@@ -58,7 +58,13 @@
 ; (celsius)
 
 (def MARGIN 10)
-(def SELECTED_COLOR (Color. (float 1.0) (float 0.7) (float 0.85)))
+(def SELECTED_COLOR 
+  (Color. (float 1.0) (float 0.7) (float 0.85)))
+(def BACKGROUND_COLOR
+  Color/WHITE)
+  ;(Color. (float 0.7) (float 0.7) (float 0.7)))
+  ; (Color. (float 0.5) (float 0.5) (float 0.5)))
+
 
 (def resolveOne) ; forward decl.
 
@@ -108,10 +114,6 @@
                     ())))]          
       (find n g x y ())))
   
-(def BACKGROUND_COLOR
-  (Color. (float 0.7) (float 0.7) (float 0.7)))
-  ; (Color. (float 0.5) (float 0.5) (float 0.5)))
-
 (defn makePanel
   "Makes a component which draws the node in nref, with the debug flag in dref,
   and drawing a hilite box behind every node whose id appears in the set sref."
