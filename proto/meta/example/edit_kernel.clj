@@ -46,23 +46,46 @@
       (node :clojure/kernel/int :value 1)
     ]))
     
-(def x2  ; identity fxn
-  (node :clojure/kernel/lambda
-    :params [
-      (node :clojure/kernel/bind :core/id :y)
-    ]
+; (def x2  ; identity fxn
+;   (node :clojure/kernel/lambda
+;     :params [
+;       (node :clojure/kernel/bind :core/id :y)
+;     ]
+;     
+;     :body
+;     (node :clojure/kernel/var :ref (node :core/ref :id :y))))
+; 
+; (def x3
+;   (node :clojure/kernel/app
+;     :expr
+;     x2
+;     
+;     :args [
+;       (node :clojure/kernel/int :value 1)
+;     ]))
+    
+(def x3
+  (node :clojure/kernel/let
+    :bind
+    (node :clojure/kernel/bind :core/id :id)
+    
+    :expr
+    (node :clojure/kernel/lambda
+      :params [
+        (node :clojure/kernel/bind :core/id :y)
+      ]
+      
+      :body
+      (node :clojure/kernel/var :ref (node :core/ref :id :y)))
     
     :body
-    (node :clojure/kernel/var :ref (node :core/ref :id :y))))
+    (node :clojure/kernel/app
+      :expr
+      (node :clojure/kernel/var :ref (node :core/ref :id :id))
 
-(def x3
-  (node :clojure/kernel/app
-    :expr
-    x2
-    
-    :args [
-      (node :clojure/kernel/int :value 1)
-    ]))
+      :args [
+        (node :clojure/kernel/int :value 1)
+      ])))
 
 (def x4
   (node :clojure/kernel/let
@@ -105,7 +128,7 @@
     (node :clojure/kernel/int :value 1)
     
     :else
-    (node :clojure/kernel/nil)))
+    (node :clojure/kernel/string :value "abc")))
 
 (def x7
   (node :clojure/kernel/bind :core/id :w))

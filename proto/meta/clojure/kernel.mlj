@@ -67,6 +67,8 @@
             (node :structure/node
               :type :clojure/kernel/int)
             (node :structure/node
+              :type :clojure/kernel/string)
+            (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node
               :type :clojure/kernel/false)
@@ -111,6 +113,8 @@
             (node :structure/node
               :type :clojure/kernel/int)
             (node :structure/node
+              :type :clojure/kernel/string)
+            (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node
               :type :clojure/kernel/false)
@@ -144,6 +148,8 @@
               :type :clojure/kernel/var)
             (node :structure/node
               :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/string)
             (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node
@@ -190,6 +196,8 @@
             (node :structure/node
               :type :clojure/kernel/int)
             (node :structure/node
+              :type :clojure/kernel/string)
+            (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node
               :type :clojure/kernel/false)
@@ -224,6 +232,8 @@
             (node :structure/node
               :type :clojure/kernel/int)
             (node :structure/node
+              :type :clojure/kernel/string)
+            (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node
               :type :clojure/kernel/false)
@@ -257,6 +267,8 @@
               :type :clojure/kernel/var)
             (node :structure/node
               :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/string)
             (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node
@@ -314,6 +326,8 @@
             (node :structure/node
               :type :clojure/kernel/int)
             (node :structure/node
+              :type :clojure/kernel/string)
+            (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node
               :type :clojure/kernel/false)
@@ -346,6 +360,8 @@
               :type :clojure/kernel/var)
             (node :structure/node
               :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/string)
             (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node
@@ -397,6 +413,23 @@
           
           :options [
             (node :structure/int)
+          ]
+          
+          :optional false)
+      ])
+
+;   :clojure/kernel/string
+    (node :structure/rule
+      :type 
+      :clojure/kernel/string
+      
+      :attrs [
+        (node :structure/simpleAttr
+          :name
+          :clojure/kernel/string/value
+          
+          :options [
+            (node :structure/string)
           ]
           
           :optional false)
@@ -467,6 +500,8 @@
             (node :structure/node
               :type :clojure/kernel/int)
             (node :structure/node
+              :type :clojure/kernel/string)
+            (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node
               :type :clojure/kernel/false)
@@ -527,6 +562,8 @@
             (node :structure/node
               :type :clojure/kernel/int)
             (node :structure/node
+              :type :clojure/kernel/string)
+            (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node
               :type :clojure/kernel/false)
@@ -567,6 +604,8 @@
               :type :clojure/kernel/var)
             (node :structure/node
               :type :clojure/kernel/int)
+            (node :structure/node
+              :type :clojure/kernel/string)
             (node :structure/node
               :type :clojure/kernel/true)
             (node :structure/node

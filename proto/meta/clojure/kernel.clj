@@ -125,13 +125,13 @@
     (let [refNode (node-attr n :clojure/kernel/var/ref)  ; TODO: handle missing ref
           refId (node-attr refNode :core/ref/id)]         ; TODO: handle missing id?
       (node :view/expr/var :str (nameFromId refId))))
-
+      
+  ; ugly generic syntax with keywords "function" and ???:
   :clojure/kernel/lambda
   (fn [n]
-    (node :view/expr/binary
+    (node :view/expr/flow
       :boxes [
-        ; (node :view/expr/keyword :str "lambda")
-        (node :view/expr/symbol :str :lambda) ; HACK?
+        (node :view/expr/keyword :str "function")
         (node :view/expr/juxt
           :boxes
           (vec (interpose 
@@ -141,17 +141,55 @@
                       (node :view/thinspace)
                     ])
                   (with-attr-seq n :clojure/kernel/lambda/params))))
-        (node :view/expr/keyword :str ".")
+        (node :view/expr/symbol :str :to)
         (with-attr-node n :clojure/kernel/lambda/body)
       ]))
 
-  :clojure/kernel/app  ; "Haskell"-style application by juxtaposition (here, with medium space)
+  ; Lambda-calculus-style syntax with lambda and ".":
+  ; :clojure/kernel/lambda
+  ; (fn [n]
+  ;   (node :view/expr/binary
+  ;     :boxes [
+  ;       ; (node :view/expr/keyword :str "lambda")
+  ;       (node :view/expr/symbol :str :lambda) ; HACK?
+  ;       (node :view/expr/juxt
+  ;         :boxes
+  ;         (vec (interpose 
+  ;                 (node :view/sequence
+  ;                   :items [
+  ;                     (node :view/expr/keyword :str ",")
+  ;                     (node :view/thinspace)
+  ;                   ])
+  ;                 (with-attr-seq n :clojure/kernel/lambda/params))))
+  ;       (node :view/expr/keyword :str ".")
+  ;       (with-attr-node n :clojure/kernel/lambda/body)
+  ;     ]))
+  ; 
+  :clojure/kernel/app  ; ugly generic syntax with the keywords "apply" and "to"
   (fn [n]
-    (node :view/expr/relation
-      :boxes
-      (vec (cons (with-attr-node n :clojure/kernel/app/expr) 
-                (with-attr-seq n :clojure/kernel/app/args)))
-      ))
+    (node :view/expr/flow
+      :boxes [
+        (node :view/expr/keyword :str "apply")
+        (with-attr-node n :clojure/kernel/app/expr)
+        (node :view/expr/keyword :str "to")
+        (node :view/expr/juxt
+          :boxes 
+          (vec (interpose 
+                  (node :view/sequence
+                    :items [
+                      (node :view/expr/keyword :str ",")
+                      (node :view/thinspace)
+                    ])
+                    (with-attr-seq n :clojure/kernel/app/args))))
+      ]))
+      
+  ; :clojure/kernel/app  ; "Haskell"-style application by juxtaposition (here, with medium space)
+  ; (fn [n]
+  ;   (node :view/expr/relation
+  ;     :boxes
+  ;     (vec (cons (with-attr-node n :clojure/kernel/app/expr) 
+  ;               (with-attr-seq n :clojure/kernel/app/args)))
+  ;     ))
       
   ; :clojure/kernel/app  ; "C"-style application with parens
   ; (fn [n]
@@ -168,6 +206,13 @@
   (fn [n]
     (with-attr-node n :clojure/kernel/int/value v
       (node :view/expr/int 
+        :str 
+        (str v))))
+
+  :clojure/kernel/string
+  (fn [n]
+    (with-attr-node n :clojure/kernel/string/value v
+      (node :view/expr/string
         :str 
         (str v))))
   

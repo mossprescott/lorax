@@ -76,14 +76,15 @@
     (let [ [w h b] (size n g) ]
       (doto g
         (.setColor SELECTED_COLOR)
-        (.fill (Rectangle2D$Float. 0 0 w h)))))
+        (.setStroke (BasicStroke. 2))
+        (.draw (Rectangle2D$Float. -2 -2 (+ w 4) (+ h 4)))))) ; TODO: align to pixels?
   ; the node's content:
   (draw n g debug?)
   ; the node's children:
   (doseq [ [child x y w h] (layout n g) ]
     (let [ gp (doto (.create g) (.translate x y)) ]
       (drawNode child gp debug? selected errors o))) ; no clipping for now  
-; (drawNode child (.create g x y w h) debug? selected)))  ; clipping
+      ; (drawNode child (.create g x y w h) debug? selected)))  ; clipping
   ; error indicator: 
   (if (errors (resolveOne (node-id n) o))
     (let [ [w h b] (size n g)
@@ -137,7 +138,7 @@
                   ;                                   (.getGraphics this))) ; HACK
                   ;         (println "size" (size (node :view/sequence :items [ (node :view/chars :str "abc" :font :cmr10) (node :view/chars :str "a" :font :cmmi10) ]) 
                   ;                                   (.getGraphics this))) ; HACK
-                  (drawNode @nref (.create g MARGIN MARGIN 10000 10000) @dref @sref errors @oref)))
+                  (drawNode @nref (doto (.create g) (.translate MARGIN MARGIN)) @dref @sref errors @oref)))
               (getPreferredSize []
                 (let [this #^JComponent this
                       g (.getGraphics this)
