@@ -1,0 +1,55 @@
+; Grammar/presentation for 'meta core' language, which defines a few nodes 
+; which can be used in any language.
+
+; This version uses the higher-level "grammar" language, which specifies structure as 
+; well as a presentation reduction, and which can be reduced/compiled down into both a
+; regular structure program and a presentation reduction.
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(node :grammar/language
+  :rules [
+  
+    (node :grammar/rule
+      :type 
+      :core/later
+      
+      :supers []
+      
+      :display
+      (node :view/expr/later
+        :node
+        (node :grammar/attr
+          :name
+          :core/later/node
+        
+          :options [
+            (node :structure/any)
+          ])))
+
+    (node :grammar/rule
+      :type 
+      :core/sooner
+      
+      :supers []
+      
+      :display
+      (node :view/expr/sooner
+        :node
+        (node :grammar/attr
+          :name
+          :core/sooner/node
+        
+          :options [
+            (node :structure/any)
+          ])))
+
+    (node :grammar/rule
+      :type 
+      :core/ref
+      
+      :supers []
+      
+      :display
+      (node :view/expr/missing))  ; HACK
+  ])

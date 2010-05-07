@@ -1,0 +1,81 @@
+; Grammar/presentation for the 'grammar' language, which specifies structure 
+; as well as a presentation reduction, and which can be reduced/compiled down 
+; into both a regular 'structure' program and a presentation reduction.
+
+; Once again, this is painfuly circular.
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(node :grammar/language
+  :rules [
+  
+    (node :grammar/rule
+      :type 
+      :grammar/language
+      
+      :supers []
+      
+      :display
+      (node :view/section
+        :items
+        (node :grammar/sequence
+          :name
+          :grammar/language/rules
+          
+          :options [
+            (node :structure/node
+              :type :grammar/rule)
+          ]
+          
+          :min 0)))
+    
+    (node :grammar/rule
+      :type 
+      :grammar/rule
+      
+      :supers []
+      
+      :display
+      (node :view/section
+        :items [
+          (node :view/expr/flow
+            :boxes [
+              (node :grammar/attr
+                :name
+                :grammar/rule/type
+              
+                :options [
+                  (node :structure/name)
+                ])
+              (node :view/expr/keyword :str ":")
+              (node :view/sequence
+                :items
+                (node :grammar/sequence
+                  :name
+                  :grammar/rule/supers
+          
+                  :options [
+                    (node :structure/node
+                      :type :structure/node)
+                  ]
+          
+                  :min 0
+                
+                  :separator
+                  (node :view/expr/keyword :str ", ")))
+              ])
+          (node :view/sequence
+            :items [
+              (node :view/quad)
+              (node :grammar/attr
+                :name
+                :grammar/rule/display
+                
+                :options [
+                  ; ??? this will be a drawable, but maybe it should be quoted?
+                  (node :structure/node
+                    :type :view/drawable)
+                ])
+            ])
+        ]))
+  ])

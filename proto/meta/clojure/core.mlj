@@ -1,0 +1,93 @@
+; Grammar/presentation for the 'core' language of Clojure, which is reducible 
+; to the kernel language.
+
+; This version uses the higher-level "grammar" language, which specifies structure as 
+; well as a presentation reduction, and which can be reduced/compiled down into both a
+; regular structure program and a presentation reduction.
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(node :grammar/language
+  :rules [
+  
+    ; HACK: ":kernel"-language program node (was using this in my example)
+    (node :grammar/rule
+      :type 
+      :clojure/kernel/program
+      
+      :supers []
+      
+      :display
+      (node :view/section
+        :items
+        (node :grammar/sequence
+          :name
+          :clojure/kernel/program/exprs
+        
+          :options [
+            (node :structure/node
+              :type :clojure/kernel/expr)
+          ]
+          
+          :min 0
+          
+          :separator
+          (node :view/expr/keyword :str " "))))
+
+    (node :grammar/rule
+      :type 
+      :clojure/core/program
+      
+      :supers []
+      
+      :display
+      (node :view/section
+        :items
+        (node :grammar/sequence
+          :name
+          :clojure/core/program/exprs
+        
+          :options [
+            (node :structure/node
+              :type :clojure/kernel/expr)
+          ]
+          
+          :min 0
+          
+          :separator
+          (node :view/expr/keyword :str " "))
+      
+      ; TODO: reduction to :clojure/kernel
+      ))
+
+    (node :grammar/rule
+      :type
+      :clojure/core/and
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/relation
+        :boxes [
+          (node :grammar/attr
+            :name 
+            :clojure/core/and/left
+            
+            :options [
+              (node :structure/node
+                :type :clojure/kernel/expr)
+            ])
+          (node :view/expr/keyword :str "and")
+          (node :grammar/attr
+            :name 
+            :clojure/core/and/right
+            
+            :options [
+              (node :structure/node
+                :type :clojure/kernel/expr)
+            ])
+        ])
+        
+        ; TODO: reduction to :clojure/kernel
+        )
+  ])
