@@ -1,5 +1,9 @@
 DONE - make "missing" node indicators blue (establishing a convention for notation added during the presentation reduction)
 
+fancier grammar language
+  - compile/interpret presentation to/as a reduction fxn
+  - presentation for the :grammar language itself (_in_ itself?)
+
 presentation reduction:
   DONE - white b/g (for constrast)
   - use b/g color for 'meta' levels (white, blue, red, green, ..., all unsaturated)
@@ -7,12 +11,8 @@ presentation reduction:
   - better underline for errors (squiggle?)
   - auto-font sizing for fractions/scripts
 
-fancier grammar language
-  - compile presentation to a reduction fxn
-  - presentation for the :grammar language itself (_in_ itself?)
-
 Pseudo-REPL
-	- start with core/program (not kernel/program)
+	- start with core/program (not kernel/program, which should go away)
 	- evaluate each expression and render result
 	- un-read: convert clojure data structures to syntax
 	- a way to introduce new syntax!

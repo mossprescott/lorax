@@ -52,6 +52,8 @@
 ; of the result.
 ; ===========================================================================
 
+(def PRINT false)
+
 (def meta-reduce-one2) ; forward-decl!
 
 (defn- meta-reduce-child2
@@ -94,15 +96,17 @@
   in the 'original' program."
   [n f]
   (if (node? n)
-    (let [ ;foo (print-node n)  ; HACK
+    (let [ _ (if PRINT (print-node n))
             origId (node-id n)
             np (f n) ]
       ; (println "origId" origId)
       ; (println "np" np)
       (let [ [ npp o ] (if (nil? np)
-                        (meta-reduce-children2 n f)  ; n is fully-reduced; recursively reduce its children
-                        (meta-reduce-one2 np f)) ; n may need additional reduction
-              op (assoc o (node-id npp) origId) ] ; this includes all nodes in the result, mapping new nodes to themselves
+                          (meta-reduce-children2 n f)  ; n is fully-reduced; recursively reduce its children
+                          (meta-reduce-one2 np f)) ; n may need additional reduction
+              op (if (node? npp)
+                  (assoc o (node-id npp) origId) ; this includes all nodes in the result, mapping new nodes to themselves
+                  o) ] ; if the result is not a node (e.g. it's a vector) then the id mapping is lost
               ; [;op (if (nil? np) o (assoc o (node-id npp) origId)) ]
           [ npp op ]))
     [ n {} ]))
@@ -155,7 +159,7 @@
 
 (defmacro with-attr
   "Macro which binds _c_ to the value of an attribute, if present, and then 
-  evalueates _body_ (which can refer to _c_). Otherwise, _missing_ is evaluated."
+  evaluates _body_ (which can refer to _c_). Otherwise, _missing_ is evaluated."
   [n attrName c body missing]
   `(if-let [~c (~n ~attrName)]
       ~body
@@ -172,8 +176,9 @@
       (node :view/expr/missing))))
   
 (defmacro with-attr-seq
-  "With 2 arguments, returns either the value of the attribute or a 'missing'
-  node. With 4 arguments, evaluates _body_ if the attribute is found."
+  "With 2 arguments, returns either the value of the attribute or a sequence
+  containing only a 'missing' node. With 4 arguments, evaluates _body_ if the 
+  attribute is found."
   ; TODO: some more validation of the child?
   ([n attrName]
     `(with-attr-seq ~n ~attrName c# c#))
@@ -220,6 +225,26 @@
     (is (= (meta-reduce2 n3 r)
             [n4 {:2 :1, :3 :3}])
       "One reduced and one not.")))
+      
+(deftest semi-vec
+  (let [n1 (node :foo :core/id :1)
+        n2 (node :bar :core/id :2)
+        n3 (node :baz :core/id :3 :children [ n1 ])
+        n4 (node :baz :core/id :3 :children [ n2 ])
+        r (fn [n] (if (= (node-type n) :foo) n2 nil)) ]
+    (is (= (meta-reduce2 n3 r)
+            [n4 {:2 :1, :3 :3}])
+      "One reduced and one not, in a vector.")))
+      
+(deftest node-to-vec
+  (let [n1 (node :foo :core/id :1)
+        n2 (node :bar :core/id :2)
+        n3 (node :baz :core/id :3 :children n1)
+        n4 (node :baz :core/id :3 :children [ n2 ])
+        r (fn [n] (if (= (node-type n) :foo) [ n2 ] nil)) ]
+    (is (= (meta-reduce2 n3 r)
+            [n4 {:3 :3}])  ; TODO
+      "A node is reduced to a vector (and the original id is lost in the process for now).")))
       
 (deftest introduced
   (let [n1 (node :foo :core/id :1)

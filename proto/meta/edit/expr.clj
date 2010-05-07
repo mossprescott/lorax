@@ -213,6 +213,35 @@
       :font :cmr10
       :view/drawable/color (synthetic-color-node)))
 
+  ; TODO: use bg instead of border (requires an inherited attr.)
+  :view/expr/later
+  (fn [n]
+    (node :view/border
+      :weight 1
+      :margin 2
+      :view/drawable/colors [
+        (node :view/gray :brightness 0.5)
+        (node :view/gray :brightness 0.9)
+      ]
+      
+      :item 
+      (with-attr-node n :view/expr/later/node)))
+
+  ; TODO: use bg instead of border (requires an inherited attr.)
+  :view/expr/sooner
+  (fn [n]
+    (node :view/border
+      :weight 1
+      :margin 2
+      :view/drawable/colors [
+        (node :view/gray :brightness 0.9)
+        (node :view/gray :brightness 0.5)
+      ]
+      
+      :item 
+      (with-attr-node n :view/expr/later/node)))
+
+
   ; HACK: this is easier than actually implementing growable parens for now, but this
   ; node should really be handled in nodes.clj with custom rendering
   :view/parens

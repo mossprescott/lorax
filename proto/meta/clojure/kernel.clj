@@ -4,6 +4,12 @@
 (ns meta.clojure.kernel
   (:use (meta core reduce)))
   
+
+
+;
+; Compilation from nodes of :clojure/kernel language to ordinary Clojure forms:
+;
+
 (def meta-compile-later)  ;; forward declaration!
 (def meta-eval)
 
@@ -40,13 +46,14 @@
         (symbolFromId (-> n (node-attr :clojure/kernel/var/ref) (node-attr :core/ref/id)))
         
       (= t :clojure/kernel/true) true
+      
       (= t :clojure/kernel/false) false
         
       (= t :clojure/kernel/int) 
-        (n :clojure/kernel/int/value)
+        (node-attr n :clojure/kernel/int/value)
         
       (= t :clojure/kernel/extern) 
-        (n :clojure/kernel/extern/name)
+        (node-attr n :clojure/kernel/extern/name)
 
       (= t :core/later) 
         ; Note: nodes are represented as maps, and therefore implicitly quoted
@@ -107,7 +114,7 @@
 ; Reduction rules for presentation:
 ;
 (defn nameFromId 
-  "Take a node id (a keyword) and produces a vaguely human-readable variable name,
+  "Take a node id (a keyword) and return a vaguely human-readable variable name,
   currently 'x---'. This is good enough to make programs make sense, but obviously
   something better will be needed eventually."
   [id]
@@ -284,10 +291,10 @@
       
   :clojure/kernel/extern
   (fn [n]
-    (with-attr-node n :clojure/kernel/extern/name n
+    (with-attr-node n :clojure/kernel/extern/name nm
       (node :view/expr/mono
         :str
-        (str "\"" n "\""))))
+        (str "\"" nm "\""))))
 
   ; ; Backtick:
   ; :core/later

@@ -215,3 +215,16 @@
 (doseq [[k v] errors] (println k "->" (apply str (interpose "; " v))))
 
 (makeKernelFrame p3 "clojure/kernel" errors)
+
+(let [cgr (first (load-nodes "meta/core.mlj"))
+      kgr (first (load-nodes "meta/clojure/kernel2.mlj"))
+      clgr (first (load-nodes "meta/clojure/core.mlj"))
+      gr (compose-grammars cgr kgr clgr)
+      struc (grammar-to-structure gr)
+      display (grammar-to-display gr)
+      [np o] (meta-reduce2 x5 display)]
+  (makeSyntaxFrame struc "clojure/kernel example (grammar -> structure)" (reduceByType structurePresRules) {})
+  ; (print-node np true)
+  (makeSyntaxFrame p3 "clojure/kernel example (grammar -. display)" display {}))
+  
+  

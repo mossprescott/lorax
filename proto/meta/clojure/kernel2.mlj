@@ -10,14 +10,13 @@
   :rules [
   
     (node :grammar/rule
-      :type 
-      :clojure/kernel/bind
-      
-      :supers []
-      
-      :display
-      ; (node :core/sooner (node :clojure/kernel/app ...)))
-      (node :view/chars :str "x" :font :cmmi10))
+         :type 
+         :clojure/kernel/bind
+         
+         :supers []
+         
+         :display
+         (node :view/expr/var :str "x"))  ; TODO
 
     (node :grammar/rule
       :type
@@ -28,29 +27,32 @@
       :display
       (node :view/expr/flow
         :boxes [
-          (node :view/expr/keyword :str "lambda")
-          (node :grammar/sequence
-            :name
-            :clojure/kernel/lambda/params
+          (node :view/expr/keyword :str "fn")
+          (node :view/expr/juxt
+            :boxes
+            (node :grammar/sequence
+              :name
+              :clojure/kernel/lambda/params
             
-            :options [
-              :clojure/kernel/bind
-            ]
+              :options [
+                (node :structure/node
+                  :type :clojure/kernel/bind)
+              ]
             
-            :min 0
+              :min 0
             
-            :separator
-            (node :view/chars :str ", " :font :cmr10)
-            
-            :node
-            :view/expr/binary)
-            
+              :separator
+              (node :view/chars :str ", " :font :cmr10)))
+          
+          (node :view/expr/symbol :str :to)
+          
           (node :grammar/attr
             :name 
             :clojure/kernel/lambda/body
             
             :options [
-              :clojure/kernel/expr
+              (node :structure/node
+                :type :clojure/kernel/expr)
             ])
         ]))
 
@@ -70,23 +72,238 @@
             :clojure/kernel/app/expr
             
             :options [
-              :clojure/kernel/expr
+              (node :structure/node
+                :type :clojure/kernel/expr)
             ])
 
-          (node :grammar/sequence
-            :name
-            :clojure/kernel/app/args
+          (node :view/expr/keyword :str "to")
             
-            :options [
-              :clojure/kernel/expr
-            ]
+          (node :view/expr/juxt
+            :boxes
+            (node :grammar/sequence
+              :name
+              :clojure/kernel/app/args
             
-            :min 0
+              :options [
+                (node :structure/node
+                  :type :clojure/kernel/expr)
+              ]
             
-            :separator
-            (node :view/chars :str ", " :font :cmr10)
+              :min 0
             
-            :node
-            :view/expr/binary)
+              :separator
+              (node :view/chars :str ", " :font :cmr10)))
         ]))
+        
+    (node :grammar/rule
+      :type
+      :clojure/kernel/if
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/section
+        :items [
+          (node :view/expr/flow
+            :boxes [
+              (node :view/expr/keyword :str "if")
+              (node :grammar/attr
+                :name 
+                :clojure/kernel/if/test
+            
+                :options [
+                  (node :structure/node
+                    :type :clojure/kernel/expr)
+                ])
+            ])
+          (node :view/sequence
+            :items [
+              (node :view/quad)
+              (node :view/expr/flow
+                :boxes [
+                  (node :view/expr/keyword :str "then")
+                  (node :grammar/attr
+                    :name 
+                    :clojure/kernel/if/then
+            
+                    :options [
+                      (node :structure/node
+                        :type :clojure/kernel/expr)
+                    ])
+                ])
+            ])
+          (node :view/sequence
+            :items [
+              (node :view/quad)
+              (node :view/expr/flow
+                :boxes [
+                  (node :view/expr/keyword :str "else")
+                  (node :grammar/attr
+                    :name 
+                    :clojure/kernel/if/else
+            
+                    :options [
+                      (node :structure/node
+                        :type :clojure/kernel/expr)
+                    ])
+                ])
+            ])
+        ]))
+
+    (node :grammar/rule
+      :type
+      :clojure/kernel/let
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/section
+        :items [
+          (node :view/expr/flow
+            :boxes [
+              (node :view/expr/keyword :str "let")
+              (node :grammar/attr
+                :name 
+                :clojure/kernel/let/bind
+            
+                :options [
+                  (node :structure/node
+                    :type :clojure/kernel/bind)
+                ])
+              (node :view/expr/symbol :str "=")
+                (node :grammar/attr
+                  :name 
+                  :clojure/kernel/let/expr
+          
+                  :options [
+                    (node :structure/node
+                      :type :clojure/kernel/expr)
+                  ])
+            ])
+          (node :view/sequence
+            :items [
+              (node :view/quad)
+              (node :view/expr/flow
+                :boxes [
+                  (node :view/expr/keyword :str "in")
+                  (node :grammar/attr
+                    :name 
+                    :clojure/kernel/let/body
+            
+                    :options [
+                      (node :structure/node
+                        :type :clojure/kernel/expr)
+                    ])
+                ])
+            ])
+        ]))
+
+    (node :grammar/rule
+      :type
+      :clojure/kernel/var
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/juxt  ; HACK
+        :boxes [
+          (node :view/expr/var :str "x")  ; HACK
+          (node :grammar/attr  ; TODO: a special :grammar construct for refs?
+            :name 
+            :clojure/kernel/var/ref
+    
+            :options [
+              (node :structure/ref
+                :type :clojure/kernel/bind)
+              (node :structure/ref
+                :type :clojure/kernel/lambda)
+            ])
+        ]))
+
+    (node :grammar/rule
+      :type
+      :clojure/kernel/extern
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/sequence
+        :items [
+          (node :view/expr/mono :str "\"")
+          (node :view/expr/mono
+            :str
+            (node :grammar/attr
+              :name 
+              :clojure/kernel/extern/name
+          
+              :options [
+                (node :structure/string)
+              ]))
+          (node :view/expr/mono :str "\"")
+        ]))
+        
+    (node :grammar/rule
+      :type
+      :clojure/kernel/int
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/int
+        :str
+        (node :grammar/attr
+          :name 
+          :clojure/kernel/int/value
+          
+          :options [
+            (node :structure/int)
+          ])))
+        
+    (node :grammar/rule
+      :type
+      :clojure/kernel/string
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/string
+        :str
+        (node :grammar/attr
+          :name 
+          :clojure/kernel/string/value
+          
+          :options [
+            (node :structure/string)
+          ])))
+        
+    (node :grammar/rule
+      :type
+      :clojure/kernel/true
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/keyword
+        :str "true"))
+          
+    (node :grammar/rule
+      :type
+      :clojure/kernel/false
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/keyword
+        :str "false"))
+          
+    (node :grammar/rule
+      :type
+      :clojure/kernel/nil
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/keyword
+        :str "nil"))
+          
   ])

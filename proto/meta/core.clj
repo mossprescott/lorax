@@ -68,7 +68,9 @@
 (defn node-attrs
 	"List of attribute/field names."
 	[n]
-	(for [k (keys n) :when (not (#{ :core/type, :core/id } k))] k))
+	(do
+    (assert (node? n))
+	  (for [k (keys n) :when (not (#{ :core/type, :core/id } k))] k)))
 
 (defn node-attr
   [n attrName]
@@ -160,26 +162,30 @@
         (println (str indent ":core/id " (node-id n))))
       (doseq [ k (keys n) :when (not (#{:core/type :core/id} k)) ]
         ; (println)
-        (let [ kstr (short-attr-name n k) ]
+        (let [ kstr (short-attr-name n k)
+                v (node-attr n k)]
           (do
             (cond
-              (node? (n k))
+              (node? v)
               (do
                 (println (str indent kstr))
-                (print-node (n k) allIds indent))
+                (print-node v allIds indent))
           
-              (vector? (n k))
+              (vector? v)
               (do
                 (println (str indent kstr " ["))
                 (dorun
                   (map #(if (node? %) 
                           (print-node % allIds (str indent "  ")) 
                           (println (str indent "  " %))) 
-                      (n k)))
+                      v))
                 (println (str indent "]")))
           
+              (string? v)
+              (println (str indent kstr " \"" v "\""))
+              
               true
-              (println (str indent kstr " " (n k))))))))
+              (println (str indent kstr " " v)))))))
     (println (str indent ")"))))
 
 (defn load-nodes
@@ -234,6 +240,10 @@
 ;
 ; Tests:
 ;
+
+(deftest node-attrs1
+  (is (= #{:a/b :a/c}
+        (set (node-attrs (node :a :b 1 :c 2))))))
 
 (deftest children
   (let [n1 (node :foo)]

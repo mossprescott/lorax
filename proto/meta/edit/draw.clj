@@ -1,4 +1,5 @@
-; preliminary drawing tests
+; Shell for the editor, including window management as well as all event 
+; handling.
 
 (ns meta.edit.draw
   (:use (clojure test)

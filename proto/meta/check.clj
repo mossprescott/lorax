@@ -1,10 +1,13 @@
 ; Support for "checker" functions, which run over the structure of a node
 ; and produce a map of node ids to vectors of errors (just strings, at the 
-; moment).
+; moment). The main checker is an interpreter for the :structure language, 
+; which is a low-level language for structural constraints.
+
+; Also, compilers/interpreters for the higher-level :grammar language.
 
 (ns meta.check
   (:use (clojure set test)
-        (meta core)))
+        (meta core reduce)))
   
 
 ; Structure language:
@@ -117,7 +120,7 @@
   As a checker, the resulting fxn takes a node and returns a map of node ids to
   errors.
   The function is therefore essentially an interpreter for the structure language
-  Of course, it would probably be possible to compile it instead..."
+  Of course, it would be possible to compile it instead..."
   [struc]
   (let [ visitor (fn [n env] 
                     [ (checkNode struc n) nil ]) ]
@@ -127,12 +130,17 @@
           { k [v] })))))
 
 
+;
+; Compiler from the :grammar language to the :structure language:
+;
+
 (defn invert-set-map
   "Returns a map where each element of each val is mapped to a set of the keys that 
   contain it."
   [m]
   (reduce 
     #(merge-with union {} %1 %2)
+    {}
     (apply concat
       (for [ [k s] m ] 
         (for [v s]
@@ -140,17 +148,24 @@
           
 (deftest invert-set-map1
   (is (= (invert-set-map { :a #{1 2} :b #{2 3} })
-        {3 #{:b}, 2 #{:a :b}, 1 #{:a}})))
+        {3 #{:b}, 2 #{:a :b}, 1 #{:a}}))
+  (is (= (invert-set-map {})
+          {})))
 
 
 (defn- makeOptions
-  [ts instances]
+  "Given a sequence of node/ref/int/string nodes and a map from type names to
+  names of specific instances, returns a sequence of :structure/node nodes."
+  [os instances]
   (vec (apply concat 
-    (for [t ts] 
-      (if-let [iset (instances t)]
-        (for [i iset]
-          (node :structure/node :type i))
-        [ (node :structure/node :type t) ])))))
+    (for [opt os]
+      (if (= :structure/node (node-type opt))
+        (let [typ (node-attr opt :structure/node/type)] 
+          (if-let [iset (instances typ)]
+            (for [i iset]
+              (node :structure/node :type i))
+            [ (node :structure/node :type typ) ]))
+        [ opt ])))))
 
 
 (defn- findAttrs
@@ -197,7 +212,8 @@
                       (fn [n env] 
                         [ (if (= (node-type n) :grammar/rule)
                             { (node-attr n :grammar/rule/type)
-                               (set (node-attr n :grammar/rule/supers)) }
+                               (set (cons (node-attr n :grammar/rule/type) 
+                                        (node-attr n :grammar/rule/supers))) }
                             {})
                           nil])
                       nil))
@@ -214,21 +230,76 @@
                 (vec (findAttrs (node-attr r :grammar/rule/display) instances)))))))) ; TODO
 
 
-(deftest grammar1
-  (is (= 1 1))) ; TODO  
+; (deftest grammar1
+;   (is (= 1 1))) ; TODO  
 
 ;
-; Compile a grammar program to a "display" reduction:
+; Compile/interpret a grammar program to/as a "display" reduction:
 ;
 
+(defn- getGrammarRule
+  "Rule node for the given type, or nil"
+  [grammar nodeType]
+  (let [ matches (for [r (node-attr grammar :grammar/language/rules) 
+                    :when (= nodeType (node-attr r :grammar/rule/type))] r) ]
+    (condp = (count matches)
+      0 nil
+      1 (first matches)
+      (assert false))))  ; multiple rules for this type; TODO: better error?
+
+(defn- reduceEmbedded
+  [target]
+  (fn [n] 
+    ; (println "reduceEmbedded:")
+    ; (println "  " (node-type target))
+    ; (print-node n true)
+    (condp = (node-type n)
+      :grammar/attr
+      (let [v (with-attr-node target (node-attr n :grammar/attr/name))]
+        (if (integer? v) 
+          (str v)  ; HACK: automatically cast to string for now...
+          v))
+    
+      :grammar/sequence
+      (with-attr-seq target (node-attr n :grammar/sequence/name) s
+        (with-attr n :grammar/sequence/separator sep 
+          (vec (interpose sep s))
+          s))
+    
+      nil)))
 
 (defn grammar-to-display
-  "Takes a :grammar/language node and returns a map of type to reduction functions."
+  "Takes a :grammar/language node and returns a reduction function which
+  performs the presentation reduction described in the grammar."
+  ; TODO: need to _evaluate_ the display nodes, so that they end up getting
+  ; renamed. Currently, this reduction effectively copies the display ndoes
+  ; into multiple parts of the tree, which is a no-no.
   [grammar]
-  ()
-  )
+  (fn [n]
+    ; (println "type for display:" (node-type n))
+    ; (print-node n true)
+    (let [typ (node-type n)]
+      (if-let [rule (getGrammarRule grammar typ)]
+        (let [;_ (println "found rule:")
+              ;_ (print-node rule true)
+              display (node-attr rule :grammar/rule/display)
+              [np o] (meta-reduce2 display (reduceEmbedded n))]
+          np)
+        nil))))
 
-
+(defn compose-grammars
+  [& more]
+  (node :grammar/language
+    :rules
+    (vec (mapcat #(node-attr % :grammar/language/rules) more))))
+  ; ([g1 g2]
+  ;   (node :grammar/language
+  ;     :rules
+  ;     (vec (concat (node-attr g1 :grammar)))))
+  ; ([g1 g2 g3 & more]
+  ;   ; this seems awkward... there must be a simpler way
+  ;   (apply compose-grammars (compose-grammars g1 g2) g3 more)
+  ; )
 
 ;
 ; Presentation for the structure specification language:
@@ -245,10 +316,6 @@
         s
         (subs s (inc idx)))))
         
-;
-; Presentation reduction for the primitive structure language:
-;
-
 (def structurePresRules {
   :structure/language
   (fn [n]
@@ -352,6 +419,10 @@
         (node :view/expr/keyword :str "ref")
         (node :view/expr/prod :str (simpleName (node-attr n :structure/ref/type)))
       ]))
+
+  :structure/any
+  (fn [n]
+    (node :view/expr/symbol :str "*"))
   })
 
 ;
