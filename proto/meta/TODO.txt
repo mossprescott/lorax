@@ -1,7 +1,4 @@
-DONE - make "missing" node indicators blue (establishing a convention for notation added during the presentation reduction)
-
 fancier grammar language
-  - compile/interpret presentation to/as a reduction fxn
   - presentation for the :grammar language itself (_in_ itself?)
 
 presentation reduction:

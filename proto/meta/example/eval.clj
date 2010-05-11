@@ -1,7 +1,8 @@
 ;; This is just tests now
 
-(ns meta.eval
-  (:use (meta core kernel reduce clojurecore)))
+(ns meta.example.eval
+  (:use (meta core reduce)
+        (meta.clojure kernel core)))
   
 
 (def n1 
@@ -17,8 +18,6 @@
   (print-node n true)
   (println o))
 
-(println "bailing...")
-(use nil)  ;; exit!
   
 ;;
 ;; Some simple tests...
@@ -29,7 +28,7 @@
     (let [n# ~n]
       (println "Compiling:")
       (print-node n# "  ")
-      (let [ c# (meta.kernel/meta-compile n#) ]
+      (let [ c# (meta-compile n#) ]
         (println "Clojure:")
         (println (str "  " c#))
         (if ~e 

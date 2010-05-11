@@ -36,11 +36,15 @@
       (let [ [grp o] (meta-reduce2 gr display)]
         (println "result:")
         (print-node grp true))
-      ;(makeSyntaxFrame gr fname display {}))))
+        (makeSyntaxFrame gr fname display {})
       )))
 
 ; Grammar-language version of the kernel syntax, reduced to :structure lang.:
-(loadGrammar "meta/clojure/kernel2.mlj")
+; (loadGrammar "meta/clojure/kernel2.mlj")
+
+; Easier? Just a couple of simpler nodes:
+(loadGrammar "meta/core.mlj")
+(loadGrammar "meta/clojure/core.mlj")
 
 ; (print-node (first (load-nodes "meta/grammar.mlj")))
 

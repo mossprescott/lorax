@@ -121,6 +121,8 @@
   ; (str "x" (subs (str id) 1)))
   (subs (str id) 1))
 
+
+; see kernel2.mlj
 ; TODO: move these rules to a .mlj file, using the new pattern-matching reduction syntax...
 (def kernelPresRules {
   :clojure/kernel/bind

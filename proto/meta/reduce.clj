@@ -189,7 +189,8 @@
 
 (defn apply-until
   "Given a collection of functions, a function which applies each fxn to its 
-  argument in turn, returning the first non-nil result."
+  argument in turn, returning the first non-nil result. Might be useful for 
+  chaining reductions."
   [fxns]
   (fn [n]
     (loop [s (seq fxns)]

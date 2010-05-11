@@ -1,11 +1,7 @@
-; Definitions for the core (language-independent) syntax.
-
-; node-id and node-type get the mandatory attributes
-; all other attributes can be retrieved with node-attr, or listed with node-attrs
-
-; Node types:
-; :core/ref - represents a pointer to another node
-;   :core/ref/id -  
+; Definitions for the constructing and using nodes using a simple concrete
+; embedding. These functions encapaulate the encoding of nodes; all other 
+; code working with nodes should be based on them to get a measure of 
+; abstraction/implementation independence.
 
 (ns meta.core
   (:use (clojure set test))
@@ -17,9 +13,12 @@
 ;
 ; Some utilities for working with nodes:
 ;
-(defn- genid
-  [s]
-  (keyword (str (gensym s))))
+(defn genid
+  "A new, globally unique node id."
+  ([]
+    (genid "__"))
+  ([s]
+    (keyword (str (gensym s)))))
 
 (defn node
   "Build a new node with the given type and children, and a freshly generated 
@@ -32,23 +31,17 @@
                         (keyword (str (kwname t) "/" (kwname kw))))) ]
     (apply hash-map 
       :core/type t,
-      :core/id (genid "__"),
+      :core/id (genid),
       (apply concat 
         (for [ [k v] (partition 2 children) ]
           [ (childname t k) v ])))))
       
 
 (defn node? 
-  "true if x represents an AST node."
+  "True if x represents an AST node (including ref nodes)."
   [x]
   (and (map? x) 
         (contains? x :core/type)))
-
-(defn node-ref?
-  "true if x is a reference-node (that is, a node that represents a pointer to another node)"
-  [x]
-  (and (map? x) 
-        (= (x :core/type) :core/ref)))
 
 (defn node-type 
   "The type of the node (a keyword)."
@@ -65,6 +58,19 @@
     (assert (node? n))
     (n :core/id)))
     
+(defn ref-node?
+  "true if x is a reference-node (that is, a node that represents a pointer to another node)"
+  [x]
+  (and (map? x) 
+        (= (x :core/type) :core/ref)))
+
+(defn ref-node-id
+  "Id of the node pointed to by the given reference-node."
+  [n]
+  (do
+    (assert (ref-node? n))
+    (n :core/ref/id)))
+
 (defn node-attrs
 	"List of attribute/field names."
 	[n]
@@ -139,7 +145,47 @@
   [n]
   (assert false))  ; TODO
   
+(defn- debug
+  [x]
+  (do 
+    (prn "debug: " x)
+    x))
+
+(defn rename-nodes
+  "New AST with all nodes assigned new ids. Ref-nodes are updated accordingly,
+  with ref-nodes that refer to nodes outside the tree (i.e. free variables) 
+  left unchanged."
+  ; Would it be easier to build this as a reduction? That would require an 
+  ; awkward dep. on reduce.clj (or moving this function there)
+  [n]
+  (let [ old-to-new-id (reduce merge {} (for [ i (deep-node-ids n) ] { i (genid) })) ]
+    (letfn [(map-id [i] (get old-to-new-id i i))
+            (rename-node
+              [n]
+              (cond
+                (node? n) 
+                (apply node (node-type n) 
+                  :core/id
+                  (map-id (node-id n))
+                  
+                  (if (ref-node? n)
+                    [:core/ref/id (map-id (ref-node-id n))]
+                    (apply concat
+                      (for [a (node-attrs n)]
+                        [a (rename-node (node-attr n a))]))))
+                      
+                (vector? n)
+                (vec (for [c n] (rename-node c)))
+                
+                true
+                n))]
+     (rename-node n))))
   
+  
+  
+; Pretty-printing:
+; This is not so pretty, actually, but at least it makes the structure clear.
+
 (defn short-attr-name
   [n k]
   (let [nstr (str (node-type n))
@@ -188,6 +234,9 @@
               (println (str indent kstr " " v)))))))
     (println (str indent ")"))))
 
+
+; File I/O:
+
 (defn load-nodes
   "Read nodes from a '.mlj' file. Nodes can be in raw form (i.e. maps) or as 
   Clojure forms which evaluate to the actual nodes (i.e. '(node :foo ...)').
@@ -199,9 +248,12 @@
                   (if (= f :eof)
                     v
                     (cond 
-                      (node? f) (recur (conj v f))
-                      (and (list? f) (= (first f) 'node)) (recur (conj v (eval f)))
-                      true (recur v)))))]
+                      (node? f) 
+                        (recur (conj v f))
+                      (and (list? f) (= (first f) 'node)) 
+                        (recur (conj v (eval f)))
+                      true 
+                        (recur v)))))]
     (.close r)
     nodes))
 
@@ -270,3 +322,21 @@
                   (node :bar :core/id :2)
                   (node :baz :core/id :3)
                 ]))))))
+
+(deftest rename1
+  (let [ n (node :foo :core/id :1 
+            :bar 
+            (node :core/ref :id :1)
+            :baz 
+            (node :core/ref :id :2))
+          np (rename-nodes n) ]
+    (is (not= (node-id n)
+                (node-id np)))
+    (is (not= (node-id (node-attr n :foo/bar))
+                (node-id (node-attr np :foo/bar))))
+    (is (= (node-id np)
+          (ref-node-id (node-attr np :foo/bar)))
+        "Ref to bound id renamed with it.")
+    (is (= (ref-node-id (node-attr n :foo/baz))
+          (ref-node-id (node-attr np :foo/baz)))
+        "Ref to free id not changed")))

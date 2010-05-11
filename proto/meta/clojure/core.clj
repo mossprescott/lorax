@@ -7,7 +7,8 @@
 ; That last alternative is attractive, but maybe too complex?
 
 (ns meta.clojure.core
-  (:use (meta core kernel reduce)))
+  (:use (meta core reduce)
+        (meta.clojure kernel)))
   
 
 ; Rules for use with meta-reduce, given as ordinary Clojure fns

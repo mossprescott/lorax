@@ -40,13 +40,15 @@
         :items [
           (node :view/expr/flow
             :boxes [
-              (node :grammar/attr
-                :name
-                :grammar/rule/type
+              (node :view/expr/var
+                :str
+                (node :grammar/attr  ; TODO: something nicer with the name?
+                  :name
+                  :grammar/rule/type
               
-                :options [
-                  (node :structure/name)
-                ])
+                  :options [
+                    (node :structure/name)
+                  ]))
               (node :view/expr/keyword :str ":")
               (node :view/sequence
                 :items
@@ -55,8 +57,7 @@
                   :grammar/rule/supers
           
                   :options [
-                    (node :structure/node
-                      :type :structure/node)
+                    (node :structure/name)
                   ]
           
                   :min 0
@@ -67,15 +68,15 @@
           (node :view/sequence
             :items [
               (node :view/quad)
-              (node :grammar/attr
-                :name
-                :grammar/rule/display
-                
-                :options [
-                  ; ??? this will be a drawable, but maybe it should be quoted?
-                  (node :structure/node
-                    :type :view/drawable)
-                ])
+              ; (node :grammar/attr
+              ;   :name
+              ;   :grammar/rule/display
+              ;   
+              ;   :options [
+              ;     ; ??? this will be a drawable, but maybe it should be quoted?
+              ;     (node :structure/node
+              ;       :type :view/drawable)
+              ;   ])
             ])
         ]))
   ])

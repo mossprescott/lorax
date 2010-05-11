@@ -250,15 +250,22 @@
 (defn- reduceEmbedded
   [target]
   (fn [n] 
+    ; Note: at this point, we are reducing a portion of the display AST for 
+    ; some node. _target_ is the source node, and _n_ is the node being reduced,
+    ; which came from somewhere inside the display subtree.
+
     ; (println "reduceEmbedded:")
     ; (println "  " (node-type target))
     ; (print-node n true)
+    
     (condp = (node-type n)
       :grammar/attr
-      (let [v (with-attr-node target (node-attr n :grammar/attr/name))]
-        (if (integer? v) 
-          (str v)  ; HACK: automatically cast to string for now...
-          v))
+      ; (let [v (with-attr-node target (node-attr n :grammar/attr/name))]
+      ;     (str v))  ; HACK: automatically cast to string for now...
+      (with-attr-node target (node-attr n :grammar/attr/name) v
+          (if (not (node? v))
+            (str v)   ; HACK: automatically cast to string for now...
+            v))
     
       :grammar/sequence
       (with-attr-seq target (node-attr n :grammar/sequence/name) s
@@ -266,13 +273,17 @@
           (vec (interpose sep s))
           s))
     
+      ; TODO: additional grammar variable types for int, string, name, boolean, 
+      ; etc., with appropriate display options for each. Also, sequences of any
+      ; of them.
+      
       nil)))
 
 (defn grammar-to-display
   "Takes a :grammar/language node and returns a reduction function which
   performs the presentation reduction described in the grammar."
   ; TODO: need to _evaluate_ the display nodes, so that they end up getting
-  ; renamed. Currently, this reduction effectively copies the display ndoes
+  ; renamed. Currently, this reduction effectively copies the display nodes
   ; into multiple parts of the tree, which is a no-no.
   [grammar]
   (fn [n]
@@ -283,7 +294,8 @@
         (let [;_ (println "found rule:")
               ;_ (print-node rule true)
               display (node-attr rule :grammar/rule/display)
-              [np o] (meta-reduce2 display (reduceEmbedded n))]
+              displayp (rename-nodes display)
+              [np o] (meta-reduce2 displayp (reduceEmbedded n))]
           np)
         nil))))
 
@@ -423,6 +435,7 @@
   :structure/any
   (fn [n]
     (node :view/expr/symbol :str "*"))
+    
   })
 
 ;
