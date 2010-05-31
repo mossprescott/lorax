@@ -78,16 +78,38 @@
     (assert (node? n))
 	  (for [k (keys n) :when (not (#{ :core/type, :core/id } k))] k)))
 
+(defn- str-contains?
+  [str substr]
+  (not= -1 (.indexOf str substr)))
+
+(defn- name-to-str
+  [kw]
+  (subs (str kw) 1))
+
+(defn- fullName
+  [n attr]
+  (if (str-contains? (str attr) "/") 
+    attr 
+    (keyword (str (name-to-str (node-type n)) 
+                "/" 
+                (name-to-str attr)))))
+
+(defn has-attr?
+  [n attr]
+  (let [fa (fullName n attr)]
+    (contains? n fa)))
+
 (defn node-attr
-  [n attrName]
-  (do
-    (if (not (contains? n attrName))   ;; HACK: need a better assert
-      (println "no attribute" attrName "in node" (node-type n) ";" (node-attrs n)))
-    (assert (contains? n attrName))
-    (n attrName)))
+  [n attr]
+  (let [fa (fullName n attr)]
+    (do
+      (if (not (contains? n fa))   ;; HACK: need a better assert
+        (println "no attribute" fa "in node" (node-type n) ";" (node-attrs n)))
+      (assert (contains? n fa))
+      (n fa))))
 
 (defn node-children
-	"List of child nodes (non-node-values ignored), including nodes in list-valued atrributes."
+	"List of child nodes (non-node-values ignored), including nodes in list-valued attributes."
 	[n]
   (apply concat
 	  (for [a (node-attrs n)] 
@@ -292,6 +314,12 @@
 ;
 ; Tests:
 ;
+
+(deftest node-attr1
+  (is (= 1
+        (node-attr (node :a :b 1) :a/b)))
+  (is (= 1
+        (node-attr (node :a :b 1) :b))))
 
 (deftest node-attrs1
   (is (= #{:a/b :a/c}

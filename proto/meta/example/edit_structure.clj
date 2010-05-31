@@ -1,6 +1,6 @@
 (ns meta.example.edit-structure
   (:use (clojure stacktrace)
-        (meta.edit draw)
+        (meta.edit draw expr)
         (meta check core reduce)))
 
 (def RULES structurePresRules)
@@ -43,8 +43,8 @@
 ; (loadGrammar "meta/clojure/kernel2.mlj")
 
 ; Easier? Just a couple of simpler nodes:
-(loadGrammar "meta/core.mlj")
-(loadGrammar "meta/clojure/core.mlj")
+; (loadGrammar "meta/core.mlj")
+; (loadGrammar "meta/clojure/core.mlj")
 
 ; (print-node (first (load-nodes "meta/grammar.mlj")))
 
@@ -65,3 +65,92 @@
 ;                     :foo 1
 ;                     :bar 2
 ;                     :value [3])))
+
+(defn show-errors
+  [errors]
+  (doseq [ [id lst] errors ]
+    (println id)
+    (doseq [ e lst ] (println "  " e))))
+
+(defn showGrammar2
+  [title gr]
+  (let [;_ (do (print "source: ") (print-node gr true))
+        mainGram (first (load-nodes "meta/grammar.mlj"))
+        viewGram (first (load-nodes "meta/edit/view.mlj"))
+        exprGram (first (load-nodes "meta/edit/expr.mlj"))
+        gram (compose-grammars mainGram viewGram exprGram)
+        struc (grammar-to-structure gram)
+        check (make-structure-checker struc)
+        ; display (reduceOnce gr (reduceByType metaExprRules))
+        
+        ; this bit will eventually be replaced by the reduction defined in the grammar(s)
+        rules (merge grammarPresRules structurePresRules)
+        display (reduceByType rules)
+        
+        ; display (reduceByType structurePresRules)
+        ; display (fn [n] nil)
+        ; _ (println "displayfn:" display)
+        ; _ (println "once:" (display gr))
+        errors (check gr)
+        _ (show-errors errors)
+        ; _ (println "types:" (keys rules))
+        ; _ (println "s-n:" ((rules :structure/node) (node :structure/node :type :foo)))
+        ]
+    (makeSyntaxFrame gr title display errors)))
+
+(defn loadGrammar2
+  [fname]
+  (let [_ (println fname)
+        gr (first (load-nodes fname))]
+    (showGrammar2 fname gr)))
+    
+; (loadGrammar2 "meta/edit/view.mlj")
+; (loadGrammar2 "meta/edit/expr.mlj")
+; (loadGrammar2 "meta/clojure/kernel2.mlj")
+(loadGrammar2 "meta/grammar.mlj")
+
+; (showGrammar2 
+;   "dumb"
+;   (node :grammar/language
+;     :rules [
+;       (node :grammar/rule
+;         :type
+;         :foo/one
+;         
+;         :supers []
+;         
+;         :display
+;         (node :view/expr/flow
+;           :boxes [
+;             (node :view/expr/keyword :str "one")
+;             (node :view/expr/int :str "1")
+;           ]))
+;           
+;       (node :grammar/rule
+;         :type
+;         :foo/list
+;         
+;         :supers [ :foo/thing ]
+;         
+;         :display
+;         (node :view/parens
+;           :left "["
+;           :right "]"
+;           
+;           :content 
+;           (node :view/expr/relation
+;             :boxes
+;             (node :grammar/sequence
+;               :name
+;               :items
+;               
+;               :options [
+;                 (node :structure/node :type :foo/listitem)
+;               ]
+;               
+;               :min 0
+;               
+;               :separator
+;               (node :view/expr/keyword :str ", ")
+;               ))))
+;     ]))

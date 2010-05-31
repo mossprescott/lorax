@@ -218,7 +218,8 @@
                           nil])
                       nil))
         instances (invert-set-map supers)
-        _ (println instances)]
+        ;_ (println instances)
+        ]
     (node :structure/language
       :rules
       (vec (for [r (node-attr grammar :grammar/language/rules)]
@@ -281,10 +282,9 @@
 
 (defn grammar-to-display
   "Takes a :grammar/language node and returns a reduction function which
-  performs the presentation reduction described in the grammar."
-  ; TODO: need to _evaluate_ the display nodes, so that they end up getting
-  ; renamed. Currently, this reduction effectively copies the display nodes
-  ; into multiple parts of the tree, which is a no-no.
+  performs the presentation reduction described in the grammar.
+  Tricky: when reducing the display nodes, set the _continue_ flag to false
+  to avoid infinite recursion."
   [grammar]
   (fn [n]
     ; (println "type for display:" (node-type n))
@@ -295,11 +295,14 @@
               ;_ (print-node rule true)
               display (node-attr rule :grammar/rule/display)
               displayp (rename-nodes display)
-              [np o] (meta-reduce2 displayp (reduceEmbedded n))]
+              ; TODO: need a meta-reduction for the presentation language here
+              [np o] (meta-reduce2 displayp (reduceEmbedded n) false)]
           np)
         nil))))
 
 (defn compose-grammars
+  ; TODO: this should be a trivial operation on nodes -- make a new node with 
+  ; the concatenated children of some nodes. What language is provided for that?
   [& more]
   (node :grammar/language
     :rules
@@ -317,16 +320,32 @@
 ; Presentation for the structure specification language:
 ;
 
-(defn- simpleName
-  "For now, remove any prefix from every name, to make things easy to read.
-  The right thing might be something more like stripping off prefixes that 
-  are obvious only."
+(defn- baseName
+  "Remove any prefix from every name, to make things easy to read (but possibly 
+  ambiguous)."
   [kw]
   (let [#^String s (subs (str kw) 1)
         idx (.lastIndexOf s (int \/))]  ; a clean way to do this in Clojure?
     (if (= idx -1)
         s
         (subs s (inc idx)))))
+
+(defn- simpleName
+  "For now, remove any prefix from every name, to make things easy to read.
+  The right thing might be something more like stripping off prefixes that 
+  are obvious only.
+  [[Actually, now I'm leaving the prefixes in, for clarity, and just removing
+  the colon that makes it a keyword for Clojure...]]"
+  ([kw]
+    (subs (str kw) 1))
+  ([parent kw]
+    (simpleName kw)))
+    ; (let [pstr (str parent)
+    ;       kstr (str kw)]
+    ;   (if (.startsWith kstr pstr)
+    ;     (subs kstr (count pstr))
+    ;     (subs kstr 1)))))
+    
         
 (def structurePresRules {
   :structure/language
@@ -416,26 +435,138 @@
   (fn [n]
     (node :view/expr/keyword :str "int"))
   
+  :structure/float
+  (fn [n]
+    (node :view/expr/keyword :str "float"))
+  
   :structure/string
   (fn [n]
     (node :view/expr/keyword :str "string"))
   
   :structure/node
   (fn [n]
-    (node :view/expr/prod :str (simpleName (node-attr n :structure/node/type))))
+    (node :view/expr/prod :str (baseName (node-attr n :structure/node/type))))  ; TODO
   
   :structure/ref
   (fn [n]
     (node :view/expr/flow
       :boxes [
         (node :view/expr/keyword :str "ref")
-        (node :view/expr/prod :str (simpleName (node-attr n :structure/ref/type)))
+        (node :view/expr/prod :str (baseName (node-attr n :structure/ref/type)))  ; TODO
       ]))
 
   :structure/any
   (fn [n]
     (node :view/expr/symbol :str "*"))
     
+  })
+
+
+;
+; Presentation for the higher-level :grammar language. This is a temporary 
+; measure to get things working; eventually the grammar language should be 
+; self-describing.
+;
+
+(def grammarPresRules {
+  :grammar/language
+  (fn [n] 
+    (node :view/section
+      :items
+      (node-attr n :rules)))
+  
+  :grammar/rule
+  (fn [n]
+    (node :view/section
+      :items [
+        (node :view/expr/flow
+          :boxes [
+            (node :view/expr/prod :str (simpleName (node-attr n :type)))
+            (node :view/expr/symbol :str :to)
+            (node :view/expr/juxt 
+              :boxes 
+              (vec (interpose 
+                    (node :view/chars/str :str ", " :font :cmr10)
+                    (for [ kw (node-attr n :supers) ] 
+                      (node :view/expr/prod :str (simpleName kw)))))) ;; HACK?
+          ])
+        (node :view/sequence
+          :items [
+            (node :view/quad)
+            (node-attr n :display)
+          ])
+        (node :view/expr/keyword :str " ")
+      ]))
+      
+  ; Tricky: a single sequence node lives where a vector of nodes is expected,
+  ; so it has to be reduced to a vector of some kind or all hell breaks loose
+  :grammar/sequence
+  (fn [n]
+    ; (do (println n)
+    (let [name (baseName (node-attr n :name))  ; TODO: know the parent rule type, so it can be stripped?
+          v (node :view/border
+              :weight 1
+              :margin 1
+              :view/drawable/colors [
+                (node :view/rgb :red 0.9 :green 0.7 :blue 0.7)
+              ]
+              :item
+              (node :view/expr/relation
+                :boxes [
+                  (node :view/expr/mono :str name)
+                  (node :view/expr/keyword :str ":")
+                  (node :view/scripted
+                    :nucleus
+                    (node :view/expr/relation 
+                      :boxes
+                      (vec (interpose
+                            (node :view/expr/symbol :str "|")
+                            (with-attr-seq n :options))))
+                    
+                    :super
+                    (node :view/chars :str "*" :font :cmr10-script))  ; HACK
+                ]))
+          e (node :view/border
+              :weight 1
+              :margin 1
+              :view/drawable/colors [
+                (node :view/rgb :red 0.9 :green 0.7 :blue 0.7)
+              ]
+              :item
+              (node :view/expr/keyword :str "..."))
+          cs [ v e ] ]
+      (if (has-attr? n :separator)
+        (vec (interpose (node-attr n :separator) cs))
+        cs)))
+        
+    :grammar/attr
+    (fn [n]
+      (let [name (baseName (node-attr n :name))  ; TODO: know the parent rule type, so it can be stripped?
+            options (with-attr-seq n :options)
+            optNode (node :view/expr/relation 
+                :boxes
+                (vec (interpose
+                      (node :view/expr/symbol :str "|")
+                      options)))
+            onp (if (node-attr n :optional)
+                  (node :view/expr/juxt
+                    :boxes [
+                      optNode
+                      (node :view/expr/keyword :str "?")
+                    ])
+                    optNode)
+            a (node :view/expr/relation
+                :boxes [
+                  (node :view/expr/mono :str name)
+                  (node :view/expr/keyword :str ":")
+                  onp
+                  ])
+            b (node :view/border
+                :weight 1
+                :margin 1
+                :view/drawable/colors [ (node :view/rgb :red 0.9 :green 0.7 :blue 0.7) ]
+                :item a)]
+        b))
   })
 
 ;

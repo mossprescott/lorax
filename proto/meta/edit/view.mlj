@@ -1,0 +1,227 @@
+; Grammar for the low-level :view language. Note that the "display" reductions
+; here cannot be used in the normal way, because they reduce to nodes in the 
+; language being defined.
+
+(use 'meta.core)  ; ignored by load-nodes, but hopefully makes this legal Clojure
+
+(node :grammar/language
+  :rules [
+    (node :grammar/rule
+      :type 
+      :view/section
+      
+      :supers [ :view/drawable ]
+      
+      :display  ;; TODO: actual display?
+      (node :view/sequence
+        :items
+        (node :grammar/sequence
+          :name
+          :view/section/items
+        
+          :options [
+            (node :structure/node :type :view/drawable)
+          ]
+        
+          :min 0)))
+  
+    (node :grammar/rule
+      :type 
+      :view/sequence
+      
+      :supers [ :view/drawable ]
+      
+      :display  ;; TODO: actual display?
+      (node :view/sequence
+        :items
+        (node :grammar/sequence
+          :name
+          :view/sequence/items
+        
+          :options [
+            (node :structure/node :type :view/drawable)
+          ]
+        
+          :min 0)))
+  
+    (node :grammar/rule
+      :type
+      :view/chars
+      
+      :supers [ :view/drawable ]
+      
+      :display
+      (node :view/sequence
+        :items [
+          (node :grammar/attr
+            :name 
+            :view/chars/str
+        
+            :options [
+              (node :structure/string)
+            ]
+        
+            :optional
+            false)
+          (node :grammar/attr
+            :name 
+            :view/chars/font
+        
+            :options [
+              (node :structure/name)
+            ]
+        
+            :optional
+            :false)
+        ]))
+        
+    (node :grammar/rule
+      :type 
+      :view/parens
+      
+      :supers [ :view/drawable ]
+      
+      :display  ;; TODO: actual display?
+      (node :view/sequence
+        :items [
+          (node :grammar/attr
+            :name 
+            :view/parens/left
+            
+            :options [ (node :structure/string) ]
+            
+            :optional false)
+          (node :grammar/attr
+            :name 
+            :view/parens/content
+            
+            :options [ (node :structure/node :type :view/drawable) ]
+            
+            :optional false)
+          (node :grammar/attr
+            :name 
+            :view/parens/right
+            
+            :options [ (node :structure/string) ]
+            
+            :optional false)
+        ]))
+        
+    (node :grammar/rule
+      :type 
+      :view/quad
+      
+      :supers [ :view/drawable ]
+
+      :display  ; TODO: actual display?
+      (node :view/border
+        :weight 1
+        :margin 1
+        
+        :view/drawable/colors [ (node :view/rgb :red 0.9 :green 0.7 :blue 0.7) ]
+        
+        :item
+        (node :view/quad)))
+        
+    (node :grammar/rule
+      :type 
+      :view/thickspace
+      
+      :supers [ :view/drawable ]
+
+      :display  ; TODO: actual display?
+      (node :view/border
+        :weight 1
+        :margin 1
+        
+        :view/drawable/colors [ (node :view/rgb :red 0.9 :green 0.7 :blue 0.7) ]
+        
+        :item
+        (node :view/thickspace)))
+        
+    (node :grammar/rule
+      :type 
+      :view/thinspace
+      
+      :supers [ :view/drawable ]
+
+      :display  ; TODO: actual display?
+      (node :view/border
+        :weight 1
+        :margin 1
+        
+        :view/drawable/colors [ (node :view/rgb :red 0.9 :green 0.7 :blue 0.7) ]
+        
+        :item
+        (node :view/thinspace)))
+        
+    (node :grammar/rule
+      :type 
+      :view/border
+      
+      :supers [ :view/drawable ]
+
+      :display  ; TODO: actual display?
+      (node :view/sequence
+        :items [
+          (node :grammar/attr
+            :name :view/border/weight
+          
+            :options [ (node :structure/int) ]
+          
+            :optional false)
+          (node :grammar/attr
+            :name :view/border/margin
+          
+            :options [ (node :structure/int) ]
+          
+            :optional false)
+          (node :view/sequence
+            :items
+            (node :grammar/sequence
+              :name :view/drawable/colors
+          
+              :options [ (node :structure/node :type :view/color) ]
+          
+              :min 0
+            
+              :separator (node :view/expr/keyword :str ", ")))
+          (node :grammar/attr
+            :name :view/border/item
+          
+            :options [ (node :structure/node :type :view/drawable) ]
+          
+            :optional false)
+        ]))
+        
+    (node :grammar/rule
+      :type
+      :view/rgb
+      
+      :supers [ :view/color ]
+      
+      :display
+      (node :view/sequence
+        :items [
+          (node :grammar/attr
+            :name :view/rgb/red
+          
+            :options [ (node :structure/float) ]
+          
+            :optional false)
+          (node :view/expr/keyword :str ", ")
+          (node :grammar/attr
+            :name :view/rgb/green
+          
+            :options [ (node :structure/float) ]
+          
+            :optional false)
+          (node :view/expr/keyword :str ", ")
+          (node :grammar/attr
+            :name :view/rgb/blue
+          
+            :options [ (node :structure/float) ]
+          
+            :optional false)
+        ]))
+  ])

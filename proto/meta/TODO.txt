@@ -1,12 +1,16 @@
 fancier grammar language
   - presentation for the :grammar language itself (_in_ itself?)
 
+special handling of :bind
+  - a separate reduction, before the main grammar-based reduction?
+  - because bindings are common to many languages, and inherently non-local
+
 presentation reduction:
   DONE - white b/g (for constrast)
   - use b/g color for 'meta' levels (white, blue, red, green, ..., all unsaturated)
-  - use an outline for selection
+  DONE - use an outline for selection
   - better underline for errors (squiggle?)
-  - auto-font sizing for fractions/scripts
+  - auto-font sizing for fractions/scripts (requires inherited attributes in the reduction?)
 
 Pseudo-REPL
 	- start with core/program (not kernel/program, which should go away)

@@ -225,6 +225,6 @@
       [np o] (meta-reduce2 x5 display)]
   (makeSyntaxFrame struc "clojure/kernel example (grammar -> structure)" (reduceByType structurePresRules) {})
   ; (print-node np true)
-  (makeSyntaxFrame p3 "clojure/kernel example (grammar -. display)" display {}))
+  (makeSyntaxFrame p3 "clojure/kernel example (grammar -> display)" display {}))
   
   

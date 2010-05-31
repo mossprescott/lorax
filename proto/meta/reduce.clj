@@ -57,14 +57,17 @@
 (def meta-reduce-one2) ; forward-decl!
 
 (defn- meta-reduce-child2
-  [v f]
+  [v f continue]
   ;(println "v" v)
   (cond
     (node? v) 
-    (meta-reduce-one2 v f)
+    (meta-reduce-one2 v f continue)
     
     (vector? v) 
-    (let [ts (map #(meta-reduce-one2 % f) v)]
+    (let [;_ (println "v: " v)
+          ts (map #(meta-reduce-one2 % f continue) v)
+          ; _ (println "ts:" ts)
+          ]
       [(vec (map first ts))
         (reduce merge {} (map second ts))])
     
@@ -74,10 +77,10 @@
 (defn- meta-reduce-children2
   "Reduce the children of a node, returning a node with the same id and a map
   of descendant node ids to the original node id for each."
-  [n f]
+  [n f continue]
   ; (println "n" n)
   (let [ childrenAndMaps (for [ [ k v ] (seq n) ]
-                          (let [ [ rc o ] (meta-reduce-child2 v f)]
+                          (let [ [ rc o ] (meta-reduce-child2 v f continue)]
                             [ k rc o ]))
         ; forced (doall childrenAndMaps)
         ; foo (println "chAM" childrenAndMaps)
@@ -90,20 +93,26 @@
   "Reduce, producing a map from ids of nodes in the result to the ids of the nodes
   they were reduced from. Only the root of each reduced sub-tree is tracked. Non-reduced 
   nodes' ids are mapped to themselves.
+  If _continue_ is true, then the resulting node is repeatedly reduced until 
+  the reduction fxn returns nil. Otherwise each source program node is reduced 
+  exactly once if at all.
   This means that the smallest original-program node for any reduced node can be found 
   by looking up the node and its ancestors in order.
   The resulting map contains the ids of all resulting nodes, whether or not they appear
   in the 'original' program."
-  [n f]
+  [n f continue]
   (if (node? n)
-    (let [ _ (if PRINT (print-node n))
+    (let [ ;_ (if PRINT (println "f:" f))
+            _ (if PRINT (do (print "reduce-one: ")(print-node n true)))
             origId (node-id n)
             np (f n) ]
       ; (println "origId" origId)
       ; (println "np" np)
-      (let [ [ npp o ] (if (nil? np)
-                          (meta-reduce-children2 n f)  ; n is fully-reduced; recursively reduce its children
-                          (meta-reduce-one2 np f)) ; n may need additional reduction
+      (let [ [ npp o ] (cond 
+                          (nil? np) (meta-reduce-children2 n f continue)  ; n is fully-reduced; recursively reduce its children
+                          (not continue) (meta-reduce-children2 np f continue)  ; do not attempt to reduce new node
+                          (vector? np) (meta-reduce-child2 np f continue)  ; Tricky! if a node was reduced to a vector, its contents may need reduction
+                          true (meta-reduce-one2 np f continue)) ; n may need additional reduction
               op (if (node? npp)
                   (assoc o (node-id npp) origId) ; this includes all nodes in the result, mapping new nodes to themselves
                   o) ] ; if the result is not a node (e.g. it's a vector) then the id mapping is lost
@@ -141,10 +150,12 @@
   by looking up the node and its ancestors in order.
   Currently works by filtering the result of meta-reduce-one2 to include mappings for
   nodes in the original program only. This isn't particulary clever or efficient."
-  [n f]
-  (let [origIds (set (deep-node-ids n))
-        [np o] (meta-reduce-one2 n f)]
-    [np (valuesubmap o origIds)]))
+  ([n f]
+    (meta-reduce2 n f true))
+  ([n f continue]
+    (let [origIds (set (deep-node-ids n))
+          [np o] (meta-reduce-one2 n f continue)]
+      [np (valuesubmap o origIds)])))
     
 
 (defn reduceByType
@@ -161,9 +172,13 @@
   "Macro which binds _c_ to the value of an attribute, if present, and then 
   evaluates _body_ (which can refer to _c_). Otherwise, _missing_ is evaluated."
   [n attrName c body missing]
-  `(if-let [~c (~n ~attrName)]
-      ~body
+  `(if (has-attr? ~n ~attrName)  ; TODO: temps to avoid re-evaluating n and attrName?
+      (let [~c (node-attr ~n ~attrName)]
+        ~body)
       ~missing))
+  ; `(if-let [~c (~n ~attrName)]
+  ;     ~body
+  ;     ~missing))
 
 (defmacro with-attr-node
   "With 2 arguments, returns either the value of the attribute or a 'missing'
@@ -177,8 +192,8 @@
   
 (defmacro with-attr-seq
   "With 2 arguments, returns either the value of the attribute or a sequence
-  containing only a 'missing' node. With 4 arguments, evaluates _body_ if the 
-  attribute is found."
+  containing only a 'missing' node. With 4 arguments, binds _c_ to the value 
+  and evaluates _body_ if the attribute is found."
   ; TODO: some more validation of the child?
   ([n attrName]
     `(with-attr-seq ~n ~attrName c# c#))
@@ -246,6 +261,20 @@
     (is (= (meta-reduce2 n3 r)
             [n4 {:3 :3}])  ; TODO
       "A node is reduced to a vector (and the original id is lost in the process for now).")))
+      
+(deftest node-to-vec2
+  (let [n1 (node :foo :core/id :1)
+        n2 (node :bar :core/id :2)
+        n5 (node :quux :core/id :4)
+        n3 (node :baz :core/id :3 :children n1)
+        n4 (node :baz :core/id :3 :children [ n5 ])
+        r (fn [n] (condp = (node-type n)
+                    :foo [ n2 ]
+                    :bar n5 
+                    nil)) ]
+    (is (= (meta-reduce2 n3 r)
+            [n4 {:3 :3}])  ; TODO
+      "A node is reduced to a vector, and then an element of the vector is reduced.")))
       
 (deftest introduced
   (let [n1 (node :foo :core/id :1)

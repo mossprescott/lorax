@@ -2,6 +2,10 @@
 ; as well as a presentation reduction, and which can be reduced/compiled down 
 ; into both a regular 'structure' program and a presentation reduction.
 
+; This grammar also provides rules for several nodes from the :structure 
+; language, which are used by :grammar rules, because there is currently no
+; grammar in this language for :structure.
+
 ; Once again, this is painfuly circular.
 
 (use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
@@ -40,15 +44,17 @@
         :items [
           (node :view/expr/flow
             :boxes [
-              (node :view/expr/var
-                :str
+              ; (node :view/expr/var
+              ;   :str
                 (node :grammar/attr  ; TODO: something nicer with the name?
                   :name
                   :grammar/rule/type
               
                   :options [
                     (node :structure/name)
-                  ]))
+                  ]
+                  
+                  :optional false);)
               (node :view/expr/keyword :str ":")
               (node :view/sequence
                 :items
@@ -68,15 +74,181 @@
           (node :view/sequence
             :items [
               (node :view/quad)
-              ; (node :grammar/attr
-              ;   :name
-              ;   :grammar/rule/display
-              ;   
-              ;   :options [
-              ;     ; ??? this will be a drawable, but maybe it should be quoted?
-              ;     (node :structure/node
-              ;       :type :view/drawable)
-              ;   ])
+              (node :grammar/attr
+                :name
+                :grammar/rule/display
+                
+                :options [
+                  ; ??? this will be a drawable, but maybe it should be quoted?
+                  (node :structure/node
+                    :type :view/drawable)
+                ]
+                
+                :optional false)
             ])
         ]))
+
+    (node :grammar/rule
+      :type 
+      :grammar/attr
+      
+      :supers [ :view/drawable ]  ; being drawable makes an attr legal in the "display"
+      
+      :display  ;; TODO: actual display?
+      (node :view/expr/relation
+        :boxes [
+          (node :grammar/attr
+            :name
+            :grammar/attr/name
+        
+            :options [ (node :structure/name) ]
+        
+            :optional false)
+          (node :view/sequence
+            :items
+            (node :grammar/sequence
+              :name
+              :grammar/attr/options
+        
+              :options [ (node :structure/node :type :structure/type) ]
+        
+              :min 1
+            
+              :separator (node :view/expr/keyword :str ", ")))
+          (node :grammar/attr
+            :name
+            :grammar/attr/optional
+            
+            :options [ (node :structure/boolean) ]
+            
+            :optional false)
+        ]))
+        
+    (node :grammar/rule
+      :type 
+      :grammar/sequence
+      
+      :supers [ :view/drawable ]  ; being drawable makes an attr legal in the "display"
+      
+      :display  ;; TODO: actual display?
+      (node :view/expr/relation
+        :boxes [
+          (node :grammar/attr
+            :name
+            :grammar/sequence/name
+        
+            :options [ (node :structure/name) ]
+        
+            :optional false)
+          (node :view/sequence
+            :items
+            (node :grammar/sequence
+              :name
+              :grammar/sequence/options
+        
+              :options [ (node :structure/node :type :structure/type) ]
+        
+              :min 1
+            
+              :separator (node :view/expr/keyword :str ", ")))
+          (node :grammar/attr
+            :name
+            :grammar/sequence/min
+            
+            :options [ (node :structure/int) ]
+            
+            :optional false)
+          (node :grammar/attr
+            :name
+            :grammar/sequence/max
+            
+            :options [ (node :structure/int) ]
+            
+            :optional true)
+          (node :grammar/attr
+            :name
+            :grammar/sequence/separator
+            
+            :options [ (node :structure/node :type :view/drawable) ]
+            
+            :optional true)
+        ]))
+        
+    ;
+    ; Some rules for the :structure language, which probably belong in a different file:
+    ;
+    (node :grammar/rule
+      :type 
+      :structure/node
+      
+      :supers [ :structure/type ]
+      
+      :display  ;; TODO: actual display?
+      (node :grammar/attr
+        :name
+        :structure/node/type
+        
+        :options [ (node :structure/name) ]
+        
+        :optional false))
+        
+    (node :grammar/rule
+      :type 
+      :structure/ref
+      
+      :supers [ :structure/type ]
+      
+      :display  ;; TODO: actual display?
+      (node :grammar/attr
+        :name
+        :structure/ref/type
+        
+        :options [ (node :structure/name) ]
+        
+        :optional false))
+        
+    (node :grammar/rule
+      :type 
+      :structure/name
+      
+      :supers [ :structure/type ]
+      
+      :display
+      (node :view/expr/keyword :str "name"))
+        
+    (node :grammar/rule
+      :type 
+      :structure/string
+      
+      :supers [ :structure/type ]
+      
+      :display
+      (node :view/expr/keyword :str "string"))
+        
+    (node :grammar/rule
+      :type 
+      :structure/int
+      
+      :supers [ :structure/type ]
+      
+      :display
+      (node :view/expr/keyword :str "int"))
+        
+    (node :grammar/rule
+      :type 
+      :structure/float
+      
+      :supers [ :structure/type ]
+      
+      :display
+      (node :view/expr/keyword :str "float"))
+        
+    (node :grammar/rule
+      :type 
+      :structure/boolean
+      
+      :supers [ :structure/type ]
+      
+      :display
+      (node :view/expr/keyword :str "boolean"))
   ])

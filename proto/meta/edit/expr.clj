@@ -60,19 +60,19 @@
               :content n))
         reduceBinary
           (fn [n]
-              (let [kw (keyword (subs (str (node-type n) "/boxes") 1))
+              (let [;kw (keyword (subs (str (node-type n) "/boxes") 1))
                     ptype (node-type n)
                     wrappable (fn [n] (wrappableEmbeddings [ ptype (node-type n) ] ))
                     wrap (fn [n]
                           (if (wrappable n)
                             (parenNode n)
                             n))
-                    boxes (n kw)]
+                    boxes (node-attr n :boxes)]
                 ; (println "kw:" kw)
                 ; (println "n:") (print-node n)
                 ; Note: need to make sure some child needs wrapping and otherwise return nil
                 ; to avoid infinite loops:
-                (if (some wrappable boxes)
+                (if (and (vector? boxes) (some wrappable boxes))
                   (node (node-type n)
                     :boxes
                     (vec (map wrap boxes)))
@@ -134,27 +134,29 @@
 ; TODO: keep track of [displaymode (D(D'),T,S,SS), meta-level]
 ; TODO: select font based on mode
 ; TODO: reduce core/later and core/sooner using meta-level
+(defn- black-node [] (node :view/gray :brightness 0.0))
+
 (def exprRules {
   :view/expr/juxt
-  (fn relation [n]
+  (fn [n]
     (node :view/sequence
       :items
       (node-attr n :view/expr/juxt/boxes)))
 
   :view/expr/binary
-  (fn binary [n]
+  (fn [n]
     (node :view/sequence
       :items
       (vec (interpose (node :view/thinspace) (node-attr n :view/expr/binary/boxes)))))
   
   :view/expr/relation
-  (fn relation [n]
+  (fn [n]
     (node :view/sequence
       :items
       (vec (interpose (node :view/mediumspace) (node-attr n :view/expr/relation/boxes)))))
 
   :view/expr/flow
-  (fn relation [n]
+  (fn [n]
     (node :view/sequence
       :items
       (vec (interpose (node :view/thickspace) (node-attr n :view/expr/flow/boxes)))))
@@ -249,13 +251,85 @@
     (node :view/sequence
       :items [
         (node :view/chars
-          :str (node-attr n :view/parens/left)
+          :str (node-attr n :left)
           :font :cmr10
-          :view/drawable/color (node-attr n :view/drawable/color))
+          :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
         (n :view/parens/content)
         (node :view/chars
-          :str (node-attr n :view/parens/right)
+          :str (node-attr n :right)
           :font :cmr10
-          :view/drawable/color (node-attr n :view/drawable/color))
+          :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
       ]))
 })
+
+
+;
+; "Meta-reduction" for the view/expr language, used for rendering grammars, etc.
+; This is a bit tricky in that the result of the reduction is new nodes in the 
+; same grammar. A helper function takes of that.
+;
+
+; reduceOnce :: node -> (node -> Maybe node) -> (node -> Maybe node)
+(defn reduceOnce
+  "Given a node and reduction, return a new reduction which applies the given 
+  function only to nodes of the original program (that is, it does _not_ 
+  recursively reduce nodes that are the result of a reduction)."
+  [n r]
+  (let [ids (set (deep-node-ids n))
+        _ (println "source ids:" ids)]
+    (fn [np] 
+      (if (ids (node-id np))
+        (do (println "reduce!" (node-id np)) (r np))
+        (do (println "no reduction" (node-id np)) nil)))))
+
+(def metaExprRules
+  (letfn [ (borderize [b title]
+              (fn [n]
+                ; TODO: titled borders?
+                (node :view/border
+                  :weight 1
+                  :margin 1
+    
+                  :view/drawable/colors [
+                    (node :view/gray :brightness b)
+                  ]
+    
+                  :item
+                  (rename-nodes n)))) ]  ; Tricky! need to rename the node being embedded in the result, so it won't be recursively reduced
+  {  
+    :view/juxt
+    (borderize 0.7 "juxt")
+  
+    :view/expr/binary
+    (borderize 0.7 "binary")
+  
+    :view/expr/relation
+    (borderize 0.7 "relation")
+
+    :view/expr/flow
+    (borderize 0.7 "flow")
+
+    :view/expr/keyword
+    (borderize 0.7 "kw")
+
+    :view/expr/symbol
+    (borderize 0.7 "sym")
+
+    :view/expr/var
+    (borderize 0.7 "var")
+
+    :view/expr/int
+    (borderize 0.7 "int")
+      ; (node :view/chars
+      ;   :str (node-attr n :view/expr/int/str)
+      ;   :font :cmr10))
+
+    :view/expr/string
+    (borderize 0.7 "str")
+
+    :view/expr/mono
+    (borderize 0.7 "mono")
+  
+    :view/expr/prod
+    (borderize 0.7 "prod")
+  }))

@@ -154,31 +154,45 @@
 ; Multi-methods for layout and drawing:
 ;
 
+(defn- node-type-or-nil
+  [n]
+  (if (node? n) (node-type n)))  ; TODO: test if node-type is one of the ones handled here
+
 (defmulti size 
   "Multi-method calculating the size (in pixels) of a drawable.
   Takes [node g] and returns a vector of floats [width height baseline].
   If the node should not be positioned relative to the baseline, it is nil."
-  (fn [n gfx] (node-type n)))
+  (fn [n gfx] (node-type-or-nil n)))
 
 (defmulti layout
   "Returns a list of vectors [node x y w h] giving the bounds of each child
   (if any), relative to node's upper left corner."
-  (fn [n gfx] (node-type n)))
+  (fn [n gfx] (node-type-or-nil n)))
 
 (defmulti draw 
   "Multi-method drawing just the visible portions of a node (that is, 
   not the children), assuming the upper-left corner is located at the origin."
-  (fn [n gfx debug?] (node-type n)))
+  (fn [n gfx debug?] (node-type-or-nil n)))
 
 ;
 ; Chars:
 ;
 
+(defn- as-string
+  "Tricky: a temporary workaround to avoid errors when the :str attr
+  is a grammar/attr node, mostly."
+  [str-attr]
+  (cond 
+    (string? str-attr) str-attr 
+    (node? str-attr) (subs (str (node-type str-attr)) 1)
+    true (str str-attr)))
+
 (defmethod size :view/chars
   [n #^Graphics2D g]
-  (let [s (node-attr n :view/chars/str)
+  (let [s (as-string (node-attr n :view/chars/str))
         f (node-attr n :view/chars/font)
         fm (.getFontMetrics g (FONTS f))
+        ; _ (println "str:" (node-id n) s)
         bounds (.getStringBounds fm s g)]
       ; (println bounds)
       [(.getWidth bounds)
@@ -193,7 +207,7 @@
   [n #^Graphics2D g debug?]
   (let [ [w h b] (size n g)
           font (FONTS (n :view/chars/font))
-          s (node-attr n :view/chars/str)
+          s (as-string (node-attr n :view/chars/str))
           angle 0.0 ];(.getItalicAngle font) ]
     ; (println [s w h b angle])
     (if debug?
@@ -281,7 +295,7 @@
 (defmethod size :view/sequence
   ; height is the larger of max ascent + max descent, or max height
   [n #^Graphics2D g]
-  (let [items (n :view/sequence/items)]
+  (let [items (node-attr n :items)]
     (if (empty? items)
       [0 0 0]
       (let [szs (map #(size % g) items)
@@ -395,6 +409,15 @@
         (.setColor (nth colors 1))
         (.draw (Line2D$Float. x2 i x2 y2))
         (.draw (Line2D$Float. i y2 x2 y2))))))
+
+;
+; Handling of unrecognized nodes (or non-nodes), which allows the rest of the 
+; program to be rendered.
+;
+(defmethod size nil   [n & more] [0 0 nil])
+(defmethod layout nil [n & more] [])
+(defmethod draw nil   [n & more]
+  (println "Unrecognized:" n))
 
 
 ;

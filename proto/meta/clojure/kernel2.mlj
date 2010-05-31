@@ -53,7 +53,9 @@
             :options [
               (node :structure/node
                 :type :clojure/kernel/expr)
-            ])
+            ]
+            
+            :optional false)
         ]))
 
     (node :grammar/rule
@@ -74,7 +76,9 @@
             :options [
               (node :structure/node
                 :type :clojure/kernel/expr)
-            ])
+            ]
+            
+            :optional false)
 
           (node :view/expr/keyword :str "to")
             
@@ -114,7 +118,9 @@
                 :options [
                   (node :structure/node
                     :type :clojure/kernel/expr)
-                ])
+                ]
+            
+                :optional false)
             ])
           (node :view/sequence
             :items [
@@ -129,7 +135,9 @@
                     :options [
                       (node :structure/node
                         :type :clojure/kernel/expr)
-                    ])
+                    ]
+            
+                    :optional false)
                 ])
             ])
           (node :view/sequence
@@ -145,7 +153,9 @@
                     :options [
                       (node :structure/node
                         :type :clojure/kernel/expr)
-                    ])
+                    ]
+            
+                    :optional false)
                 ])
             ])
         ]))
@@ -169,7 +179,9 @@
                 :options [
                   (node :structure/node
                     :type :clojure/kernel/bind)
-                ])
+                ]
+            
+                :optional false)
               (node :view/expr/symbol :str "=")
                 (node :grammar/attr
                   :name 
@@ -178,7 +190,9 @@
                   :options [
                     (node :structure/node
                       :type :clojure/kernel/expr)
-                  ])
+                  ]
+            
+                  :optional false)
             ])
           (node :view/sequence
             :items [
@@ -193,7 +207,9 @@
                     :options [
                       (node :structure/node
                         :type :clojure/kernel/expr)
-                    ])
+                    ]
+            
+                    :optional false)
                 ])
             ])
         ]))
@@ -207,7 +223,6 @@
       :display
       (node :view/expr/juxt  ; HACK
         :boxes [
-          (node :view/expr/var :str "x")  ; HACK
           (node :grammar/attr  ; TODO: a special :grammar construct for refs?
             :name 
             :clojure/kernel/var/ref
@@ -217,7 +232,9 @@
                 :type :clojure/kernel/bind)
               (node :structure/ref
                 :type :clojure/kernel/lambda)
-            ])
+            ]
+            
+            :optional false)
         ]))
 
     (node :grammar/rule
@@ -238,7 +255,9 @@
           
               :options [
                 (node :structure/string)
-              ]))
+              ]
+            
+              :optional false))
           (node :view/expr/mono :str "\"")
         ]))
         
@@ -257,7 +276,9 @@
           
           :options [
             (node :structure/int)
-          ])))
+          ]
+            
+          :optional false)))
         
     (node :grammar/rule
       :type
@@ -274,7 +295,9 @@
           
           :options [
             (node :structure/string)
-          ])))
+          ]
+            
+          :optional false)))
         
     (node :grammar/rule
       :type

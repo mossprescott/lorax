@@ -1,0 +1,222 @@
+; Grammar for the higher-level :view/expr language. Note that the "display" reductions
+; here cannot be used in the normal way, because they reduce to nodes in the 
+; language being defined.
+
+(use 'meta.core)  ; ignored by load-nodes, but hopefully makes this legal Clojure
+
+(node :grammar/language
+  :rules [
+    (node :grammar/rule
+      :type 
+      :view/expr/flow
+      
+      :supers [ :view/drawable ]
+      
+      :display  ;; TODO: actual display?
+      (node :view/sequence
+        :items
+        (node :grammar/sequence
+          :name
+          :view/expr/flow/boxes
+        
+          :options [
+            (node :structure/node :type :view/drawable)
+          ]
+        
+          :min 0
+          
+          :separator (node :view/quad))))
+  
+    (node :grammar/rule
+      :type 
+      :view/expr/relation
+      
+      :supers [ :view/drawable ]
+      
+      :display  ;; TODO: actual display?
+      (node :view/sequence
+        :items
+        (node :grammar/sequence
+          :name
+          :view/expr/relation/boxes
+        
+          :options [
+            (node :structure/node :type :view/drawable)
+          ]
+        
+          :min 0
+          
+          :separator (node :view/thickspace))))
+  
+    (node :grammar/rule
+      :type 
+      :view/expr/binary
+      
+      :supers [ :view/drawable ]
+      
+      :display  ;; TODO: actual display?
+      (node :view/sequence
+        :items
+        (node :grammar/sequence
+          :name
+          :view/expr/binary/boxes
+        
+          :options [
+            (node :structure/node :type :view/drawable)
+          ]
+        
+          :min 0
+          
+          :separator (node :view/thinspace))))
+  
+    (node :grammar/rule
+      :type 
+      :view/expr/juxt
+      
+      :supers [ :view/drawable ]
+      
+      :display  ;; TODO: actual display?
+      (node :view/sequence
+        :items
+        (node :grammar/sequence
+          :name
+          :view/expr/juxt/boxes
+        
+          :options [
+            (node :structure/node :type :view/drawable)
+          ]
+        
+          :min 0)))
+  
+  
+    ;
+    ; Characters of various kinds:
+    ;
+    
+    (node :grammar/rule
+      :type
+      :view/expr/keyword
+      
+      :supers [ :view/drawable ]
+      
+      :display
+      (node :grammar/attr
+        :name 
+        :view/expr/keyword/str
+    
+        :options [
+          (node :structure/string)
+        ]
+    
+        :optional
+        false))
+    
+    (node :grammar/rule
+      :type
+      :view/expr/symbol
+      
+      :supers [ :view/drawable ]
+      
+      :display
+      (node :grammar/attr
+        :name 
+        :view/expr/symbol/str
+    
+        :options [
+          (node :structure/string)
+        ]
+    
+        :optional
+        false))
+  
+    
+    (node :grammar/rule
+      :type
+      :view/expr/string
+      
+      :supers [ :view/drawable ]
+      
+      :display
+      (node :grammar/attr
+        :name 
+        :view/expr/string/str
+    
+        :options [
+          (node :structure/string)
+        ]
+    
+        :optional
+        false))
+
+    (node :grammar/rule
+      :type
+      :view/expr/mono
+      
+      :supers [ :view/drawable ]
+      
+      :display
+      (node :grammar/attr
+        :name 
+        :view/expr/mono/str
+    
+        :options [
+          (node :structure/string)
+        ]
+    
+        :optional
+        false))
+  
+    (node :grammar/rule
+      :type
+      :view/expr/prod
+      
+      :supers [ :view/drawable ]
+      
+      :display
+      (node :grammar/attr
+        :name 
+        :view/expr/prod/str
+    
+        :options [
+          (node :structure/string)
+        ]
+    
+        :optional
+        false))
+  
+    (node :grammar/rule
+      :type
+      :view/expr/var
+      
+      :supers [ :view/drawable ]
+      
+      :display
+      (node :grammar/attr
+        :name 
+        :view/expr/var/str
+    
+        :options [
+          (node :structure/string)
+        ]
+    
+        :optional
+        false))
+  
+    (node :grammar/rule
+      :type
+      :view/expr/int
+      
+      :supers [ :view/drawable ]
+      
+      :display
+      (node :grammar/attr
+        :name 
+        :view/expr/int/str
+    
+        :options [
+          (node :structure/string)
+        ]
+    
+        :optional
+        false))
+  ])

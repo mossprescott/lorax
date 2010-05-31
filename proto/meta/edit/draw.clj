@@ -260,6 +260,8 @@
 
 (def PARENS_DEFAULT true)
 
+(def PRINT_ALL false)
+
 (defn makeSyntaxFrame 
   "primary: reduction to the 'expr' language
   errors: map of ids to seq of errors"
@@ -267,14 +269,16 @@
   (let [debugFlag (ref false)
         ; lastReduction (apply-until [reduceAny (reduceByType exprRules)])
         display (fn [n p] 
-                  (let [ ; baz (do (print "n: ") (print-node n true))  ; HACK
+                  (let [ _ (if PRINT_ALL (do (print "source: ") (print-node n true)) )
                         [np o] (meta-reduce2 n primary)
-                         ; foo (do (print "np: ") (print-node np))  ; HACK
-                        ; bar (println "o:" o)  ; HACK
+                        _ (if PRINT_ALL (do (print "expr: ") (print-node np true) 
+                                            (println "o:" o)) )
                         [npp op] (meta-reduce2 np reduceAny)
-                         ; baz (do (print "npp: ") (print-node npp))  ; HACK
+                        _ (if PRINT_ALL (do (print "general: ") (print-node npp true)) )
                         nppp (if p (parenthesize npp) npp)
-                        [npppp opp] (meta-reduce2 nppp (reduceByType exprRules)) ]
+                        _ (if PRINT_ALL (do (print "parens: ") (print-node nppp true)) )
+                        [npppp opp] (meta-reduce2 nppp (reduceByType exprRules))
+                        _ (if PRINT_ALL (do (print "view: ") (print-node npppp true)) ) ]
                     ; (print-node nppp true)  ; HACK
                     ; (println "foo")  ; HACK
                     [npppp [opp op o]]))
