@@ -151,4 +151,5 @@
 
 ; (print-node p)
 
-(makeSyntaxFrame p "view/..." (fn [n] nil) {})
+(makeSyntaxFrame p "view/..." #(meta-reduce2 % (fn [n] nil)) {})
+; (makeSyntaxFrame p "view/..." #(reduce-plus % (fn [n v] [nil v])) {})

@@ -75,17 +75,24 @@
 (defn showGrammar2
   [title gr]
   (let [;_ (do (print "source: ") (print-node gr true))
-        mainGram (first (load-nodes "meta/grammar.mlj"))
-        viewGram (first (load-nodes "meta/edit/view.mlj"))
-        exprGram (first (load-nodes "meta/edit/expr.mlj"))
+        mainGram (load-node "meta/grammar.mlj")
+        viewGram (load-node "meta/edit/view.mlj")
+        exprGram (load-node "meta/edit/expr.mlj")
         gram (compose-grammars mainGram viewGram exprGram)
         struc (grammar-to-structure gram)
         check (make-structure-checker struc)
         ; display (reduceOnce gr (reduceByType metaExprRules))
         
         ; this bit will eventually be replaced by the reduction defined in the grammar(s)
-        rules (merge grammarPresRules structurePresRules)
-        display (reduceByType rules)
+        grStDisplay (reduceByType (merge grammarPresRules structurePresRules))
+        dispFn (fn [n v]
+                  (if-let [f (metaExprRules (node-type n))]
+                    (f n v)
+                    [(grStDisplay n) v]))
+        display (fn [n] 
+                  (let [ v (set (deep-node-ids n))
+                        [np o vp] (reduce-plus n dispFn v)]
+                    [np o]))
         
         ; display (reduceByType structurePresRules)
         ; display (fn [n] nil)
@@ -104,10 +111,11 @@
         gr (first (load-nodes fname))]
     (showGrammar2 fname gr)))
     
-; (loadGrammar2 "meta/edit/view.mlj")
-; (loadGrammar2 "meta/edit/expr.mlj")
-; (loadGrammar2 "meta/clojure/kernel2.mlj")
-(loadGrammar2 "meta/grammar.mlj")
+(loadGrammar2 "meta/edit/view.mlj")
+(loadGrammar2 "meta/edit/expr.mlj")
+(loadGrammar2 "meta/clojure/kernel2.mlj")
+(loadGrammar2 "meta/clojure/core.mlj")
+;(loadGrammar2 "meta/grammar.mlj")
 
 ; (showGrammar2 
 ;   "dumb"

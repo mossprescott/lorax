@@ -76,7 +76,9 @@
             :options [
               (node :structure/node
                 :type :clojure/kernel/expr)
-            ])
+            ]
+            
+            :optional false)
           (node :view/expr/keyword :str "and")
           (node :grammar/attr
             :name 
@@ -85,7 +87,9 @@
             :options [
               (node :structure/node
                 :type :clojure/kernel/expr)
-            ])
+            ]
+            
+            :optional false)
         ])
         
         ; TODO: reduction to :clojure/kernel

@@ -1,6 +1,7 @@
 (ns meta.example.edit-expr
   (:use (meta.edit draw expr nodes)
-        (meta core reduce kernel)))
+        (meta core reduce)
+        (meta.clojure kernel)))
 
 ; (println "seqsize" (size (node :view/sequence :items []) nil nil))
 

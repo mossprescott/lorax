@@ -190,7 +190,7 @@
         ; display (fn [n p] n) ; HACK
         nref (ref (display n false))
         sref (ref #{})  ; HACK
-        panel #^JComponent (makePanel nref debugFlag, sref)
+        panel #^JComponent (makePanel nref debugFlag sref {} (ref {}))
         scroll (JScrollPane. panel)
         parens (JCheckBox. "Parenthesize")
         debug (JCheckBox. "Show box outlines")]
@@ -270,7 +270,7 @@
         ; lastReduction (apply-until [reduceAny (reduceByType exprRules)])
         display (fn [n p] 
                   (let [ _ (if PRINT_ALL (do (print "source: ") (print-node n true)) )
-                        [np o] (meta-reduce2 n primary)
+                        [np o] (primary n)
                         _ (if PRINT_ALL (do (print "expr: ") (print-node np true) 
                                             (println "o:" o)) )
                         [npp op] (meta-reduce2 np reduceAny)
@@ -364,4 +364,4 @@
 
 (defn makeKernelFrame 
   [n title errors]
-  (makeSyntaxFrame n title (reduceByType kernelPresRules) errors))
+  (makeSyntaxFrame n title #(meta-reduce2 % (reduceByType kernelPresRules)) errors))

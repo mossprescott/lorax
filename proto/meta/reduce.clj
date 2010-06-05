@@ -47,6 +47,7 @@
     ; ) ; HACK
   ; ) ; HACK
 
+
 ; ===========================================================================
 ; Fancier reduction, keeping track of what source node gave rise to each node
 ; of the result.
@@ -56,69 +57,69 @@
 
 (def meta-reduce-one2) ; forward-decl!
 
-(defn- meta-reduce-child2
-  [v f continue]
-  ;(println "v" v)
-  (cond
-    (node? v) 
-    (meta-reduce-one2 v f continue)
-    
-    (vector? v) 
-    (let [;_ (println "v: " v)
-          ts (map #(meta-reduce-one2 % f continue) v)
-          ; _ (println "ts:" ts)
-          ]
-      [(vec (map first ts))
-        (reduce merge {} (map second ts))])
-    
-    true 
-    [v {}]))
-
-(defn- meta-reduce-children2
-  "Reduce the children of a node, returning a node with the same id and a map
-  of descendant node ids to the original node id for each."
-  [n f continue]
-  ; (println "n" n)
-  (let [ childrenAndMaps (for [ [ k v ] (seq n) ]
-                          (let [ [ rc o ] (meta-reduce-child2 v f continue)]
-                            [ k rc o ]))
-        ; forced (doall childrenAndMaps)
-        ; foo (println "chAM" childrenAndMaps)
-        reducedNode (reduce #(assoc %1 (first %2) (second %2)) {} childrenAndMaps)
-        origins (reduce #(merge %1 (nth %2 2)) {} childrenAndMaps)]
-    [ reducedNode origins ]))
-
-
-(defn- meta-reduce-one2
-  "Reduce, producing a map from ids of nodes in the result to the ids of the nodes
-  they were reduced from. Only the root of each reduced sub-tree is tracked. Non-reduced 
-  nodes' ids are mapped to themselves.
-  If _continue_ is true, then the resulting node is repeatedly reduced until 
-  the reduction fxn returns nil. Otherwise each source program node is reduced 
-  exactly once if at all.
-  This means that the smallest original-program node for any reduced node can be found 
-  by looking up the node and its ancestors in order.
-  The resulting map contains the ids of all resulting nodes, whether or not they appear
-  in the 'original' program."
-  [n f continue]
-  (if (node? n)
-    (let [ ;_ (if PRINT (println "f:" f))
-            _ (if PRINT (do (print "reduce-one: ")(print-node n true)))
-            origId (node-id n)
-            np (f n) ]
-      ; (println "origId" origId)
-      ; (println "np" np)
-      (let [ [ npp o ] (cond 
-                          (nil? np) (meta-reduce-children2 n f continue)  ; n is fully-reduced; recursively reduce its children
-                          (not continue) (meta-reduce-children2 np f continue)  ; do not attempt to reduce new node
-                          (vector? np) (meta-reduce-child2 np f continue)  ; Tricky! if a node was reduced to a vector, its contents may need reduction
-                          true (meta-reduce-one2 np f continue)) ; n may need additional reduction
-              op (if (node? npp)
-                  (assoc o (node-id npp) origId) ; this includes all nodes in the result, mapping new nodes to themselves
-                  o) ] ; if the result is not a node (e.g. it's a vector) then the id mapping is lost
-              ; [;op (if (nil? np) o (assoc o (node-id npp) origId)) ]
-          [ npp op ]))
-    [ n {} ]))
+; (defn- meta-reduce-child2
+;   [v f continue]
+;   ;(println "v" v)
+;   (cond
+;     (node? v) 
+;     (meta-reduce-one2 v f continue)
+;     
+;     (vector? v) 
+;     (let [;_ (println "v: " v)
+;           ts (map #(meta-reduce-one2 % f continue) v)
+;           ; _ (println "ts:" ts)
+;           ]
+;       [(vec (map first ts))
+;         (reduce merge {} (map second ts))])
+;     
+;     true 
+;     [v {}]))
+; 
+; (defn- meta-reduce-children2
+;   "Reduce the children of a node, returning a node with the same id and a map
+;   of descendant node ids to the original node id for each."
+;   [n f continue]
+;   ; (println "n" n)
+;   (let [ childrenAndMaps (for [ [ k v ] (seq n) ]
+;                           (let [ [ rc o ] (meta-reduce-child2 v f continue)]
+;                             [ k rc o ]))
+;         ; forced (doall childrenAndMaps)
+;         ; foo (println "chAM" childrenAndMaps)
+;         reducedNode (reduce #(assoc %1 (first %2) (second %2)) {} childrenAndMaps)
+;         origins (reduce #(merge %1 (nth %2 2)) {} childrenAndMaps)]
+;     [ reducedNode origins ]))
+; 
+; 
+; (defn- meta-reduce-one2
+;   "Reduce, producing a map from ids of nodes in the result to the ids of the nodes
+;   they were reduced from. Only the root of each reduced sub-tree is tracked. Non-reduced 
+;   nodes' ids are mapped to themselves.
+;   If _continue_ is true, then the resulting node is repeatedly reduced until 
+;   the reduction fxn returns nil. Otherwise each source program node is reduced 
+;   exactly once if at all.
+;   This means that the smallest original-program node for any reduced node can be found 
+;   by looking up the node and its ancestors in order.
+;   The resulting map contains the ids of all resulting nodes, whether or not they appear
+;   in the 'original' program."
+;   [n f continue]
+;   (if (node? n)
+;     (let [ ;_ (if PRINT (println "f:" f))
+;             _ (if PRINT (do (print "reduce-one: ")(print-node n true)))
+;             origId (node-id n)
+;             np (f n) ]
+;       ; (println "origId" origId)
+;       ; (println "np" np)
+;       (let [ [ npp o ] (cond 
+;                           (nil? np) (meta-reduce-children2 n f continue)  ; n is fully-reduced; recursively reduce its children
+;                           (not continue) (meta-reduce-children2 np f continue)  ; do not attempt to reduce new node
+;                           (vector? np) (meta-reduce-child2 np f continue)  ; Tricky! if a node was reduced to a vector, its contents may need reduction
+;                           true (meta-reduce-one2 np f continue)) ; n may need additional reduction
+;               op (if (node? npp)
+;                   (assoc o (node-id npp) origId) ; this includes all nodes in the result, mapping new nodes to themselves
+;                   o) ] ; if the result is not a node (e.g. it's a vector) then the id mapping is lost
+;               ; [;op (if (nil? np) o (assoc o (node-id npp) origId)) ]
+;           [ npp op ]))
+;     [ n {} ]))
 
 (defn- submap
   "A new map containing mappings from m for only the keys in ks."
@@ -142,6 +143,9 @@
 (deftest valuesubmap-half
   (is (= {:a 1} (valuesubmap {:a 1, :b 2} #{1}))))
 
+
+(def reduce-plus)  ; forward decl.!
+
 (defn meta-reduce2
   "Reduce, producing a map from ids of nodes in the result to the ids of the nodes
   they were reduced from. Only the root of each reduced sub-tree is tracked. Non-reduced 
@@ -150,13 +154,14 @@
   by looking up the node and its ancestors in order.
   Currently works by filtering the result of meta-reduce-one2 to include mappings for
   nodes in the original program only. This isn't particulary clever or efficient."
-  ([n f]
-    (meta-reduce2 n f true))
-  ([n f continue]
-    (let [origIds (set (deep-node-ids n))
-          [np o] (meta-reduce-one2 n f continue)]
-      [np (valuesubmap o origIds)])))
-    
+  [n f]
+  (let [fp (fn [n v] [(f n) nil])
+        [np o vp] (reduce-plus n fp nil)]
+    [np o]))
+  ; (let [origIds (set (deep-node-ids n))
+  ;       [np o] (meta-reduce-one2 n f true)]
+  ;     [np (valuesubmap o origIds)]))
+
 
 (defn reduceByType
   "Reduction fxn built from a map of node types to fxns."
@@ -167,6 +172,102 @@
       (f n)
       nil)))
 
+
+;
+; Augmented reduction, which threads some kind of value through the reduction.
+; There is some relationship between this and an _attribute_grammar_, but it's
+; not entirely clear.
+;
+
+(def reduce-one-plus) ; forward-decl!
+
+(defn- reduce-child-plus
+  [c f v]
+  ;(println "c" c)
+  (cond
+    (node? c) 
+    (reduce-one-plus c f v)
+    
+    (vector? c) 
+    (let [;_ (println "v: " v)
+          ts (map #(reduce-one-plus % f v) c)  ; TODO: thread v through the reductions
+          ; _ (println "ts:" ts)
+          ]
+      [(vec (map first ts))
+        (reduce merge {} (map second ts))])
+    
+    true 
+    [c {} v]))  ; TODO: return last v
+
+(defn- reduce-children-plus
+  "Reduce the children of a node, returning a node with the same id and a map
+  of descendant node ids to the original node id for each."
+  [n f v]
+  ; (println "n" n)
+  (let [ childrenAndMaps (for [ [ a c ] (seq n) ]
+                          (let [ [ rc o vp ] (reduce-child-plus c f v)]  ; TODO: thread the value through
+                            [ a rc o vp ]))
+        ; _ (doall childrenAndMaps)
+        ;         _ (println "chAM" childrenAndMaps)
+        reducedNode (reduce (fn [ m [a c o vp] ] (assoc m a c)) 
+                            {} childrenAndMaps)
+        origins (reduce (fn [ m [a c o vp]] (merge m o))
+                        {} childrenAndMaps)]
+    [ reducedNode origins v ]))
+
+(defn- reduce-one-plus
+  "Reduce, producing a map from ids of nodes in the result to the ids of the nodes
+  they were reduced from. Only the root of each reduced sub-tree is tracked. Non-reduced 
+  nodes' ids are mapped to themselves.
+  This means that the smallest original-program node for any reduced node can be found 
+  by looking up the node and its ancestors in order.
+  The resulting map contains the ids of all resulting nodes, whether or not they appear
+  in the 'original' program."
+  [n f v]
+  (if (node? n)
+    (let [ ;_ (if PRINT (println "f:" f))
+            ; _ (if PRINT (do (print "reduce-one: ")(print-node n true)))
+            origId (node-id n)
+            [np vp] (f n v) ]
+      ; (println "origId" origId)
+      ; (println "np" np)
+      (let [ [ npp o vpp] (cond 
+                          (nil? np) (reduce-children-plus n f vp)  ; n is fully-reduced; recursively reduce its children
+                          (vector? np) (reduce-child-plus np f vp)  ; Tricky! if a node was reduced to a vector, its contents may need reduction
+                          true (reduce-one-plus np f vp)) ; n may need additional reduction
+              op (if (node? npp)
+                  (assoc o (node-id npp) origId) ; this includes all nodes in the result, mapping new nodes to themselves
+                  o) ] ; if the result is not a node (e.g. it's a vector) then the id mapping is lost
+              ; [;op (if (nil? np) o (assoc o (node-id npp) origId)) ]
+          [ npp op vpp ]))
+    [ n {} v ]))
+
+
+(defn reduce-plus
+  "Reduce, producing a possibly-reduced node, a map of ids as in meta-reduce-2,
+  and a value which has been threaded through the reduction.
+  The reduction function takes a node and value, and returns a vector of
+  a reduced node (or nil) and a new value."
+  [n f v]
+  (let [origIds (set (deep-node-ids n))
+        [np o vp] (reduce-one-plus n f v)]
+    [np (valuesubmap o origIds) vp]))
+
+
+(defn reduceByType-plus
+  "Reduction fxn built from a map of node types to fxns."
+  ; TODO: accept multiple maps (and merge them?)
+  [rules]
+  (fn [n v] 
+    (if-let [ f (rules (node-type n)) ]
+      (f n v)
+      [nil v])))
+
+
+;
+; Safe atribute accessors, which return some sort of default if the attribute 
+; doesn't match:
+;
 
 (defmacro with-attr
   "Macro which binds _c_ to the value of an attribute, if present, and then 
@@ -287,6 +388,12 @@
     (is (= np n5))
     (is (= o {:2 :1, :3 :3})
       "A node introduced by a reduction should not appear in the result map.")))
+
+
+(deftest ids-via-reduction
+  (let [f (fn [n v] [nil (conj v (node-id n))])]
+    (is (= (reduce-plus (node :foo :core/id :1) f #{})
+            [(node :foo :core/id :1) {:1 :1} #{:1}]))))
 
 (deftest apply-until1
   (let [n (fn [n] nil)

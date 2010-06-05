@@ -221,10 +221,13 @@
       clgr (first (load-nodes "meta/clojure/core.mlj"))
       gr (compose-grammars cgr kgr clgr)
       struc (grammar-to-structure gr)
-      display (grammar-to-display gr)
-      [np o] (meta-reduce2 x5 display)]
-  (makeSyntaxFrame struc "clojure/kernel example (grammar -> structure)" (reduceByType structurePresRules) {})
+      ;display (grammar-to-display gr)
+      display #(meta-reduce2 % (reduceByType structurePresRules))
+      ;[np o] (meta-reduce2 x5 display)
+      ]
+  (makeSyntaxFrame struc "clojure/kernel example (grammar -> structure)" display {})
   ; (print-node np true)
-  (makeSyntaxFrame p3 "clojure/kernel example (grammar -> display)" display {}))
+  ;(makeSyntaxFrame p3 "clojure/kernel example (grammar -> display)" display {})
+  )
   
   

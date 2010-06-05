@@ -279,6 +279,11 @@
     (.close r)
     nodes))
 
+(defn load-node
+  "Read a single node from a '.mlj' file."
+  [fname]
+  (first (load-nodes fname)))
+
 ;
 ; Grammar:
 ;

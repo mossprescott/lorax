@@ -113,6 +113,8 @@
   ;
   ; Other fonts, for special purposes:
   ;
+
+  :tiny (Font. "Lucida Grande" Font/PLAIN 9)  ; this is the most legible at small sizes?
   
   ; Times, a unicode font...
   ; Unfortunately the spacing is quite different than the jsMath fonts
@@ -156,7 +158,7 @@
 
 (defn- node-type-or-nil
   [n]
-  (if (node? n) (node-type n)))  ; TODO: test if node-type is one of the ones handled here
+  (if (node? n) (node-type n)))
 
 (defmulti size 
   "Multi-method calculating the size (in pixels) of a drawable.
@@ -414,9 +416,9 @@
 ; Handling of unrecognized nodes (or non-nodes), which allows the rest of the 
 ; program to be rendered.
 ;
-(defmethod size nil   [n & more] [0 0 nil])
-(defmethod layout nil [n & more] [])
-(defmethod draw nil   [n & more]
+(defmethod size :default   [n & more] [0 0 nil])
+(defmethod layout :default [n & more] [])
+(defmethod draw :default   [n & more]
   (println "Unrecognized:" n))
 
 

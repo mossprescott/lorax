@@ -282,7 +282,7 @@
         (do (println "reduce!" (node-id np)) (r np))
         (do (println "no reduction" (node-id np)) nil)))))
 
-(def metaExprRules
+(def metaExprRules-foo
   (letfn [ (borderize [b title]
               (fn [n]
                 ; TODO: titled borders?
@@ -296,6 +296,72 @@
     
                   :item
                   (rename-nodes n)))) ]  ; Tricky! need to rename the node being embedded in the result, so it won't be recursively reduced
+  {  
+    :view/juxt
+    (borderize 0.7 "juxt")
+  
+    :view/expr/binary
+    (borderize 0.7 "binary")
+  
+    :view/expr/relation
+    (borderize 0.7 "relation")
+
+    :view/expr/flow
+    (borderize 0.7 "flow")
+
+    :view/expr/keyword
+    (borderize 0.7 "kw")
+
+    :view/expr/symbol
+    (borderize 0.7 "sym")
+
+    :view/expr/var
+    (borderize 0.7 "var")
+
+    :view/expr/int
+    (borderize 0.7 "int")
+      ; (node :view/chars
+      ;   :str (node-attr n :view/expr/int/str)
+      ;   :font :cmr10))
+
+    :view/expr/string
+    (borderize 0.7 "str")
+
+    :view/expr/mono
+    (borderize 0.7 "mono")
+  
+    :view/expr/prod
+    (borderize 0.7 "prod")
+  }))
+
+
+;
+; Reduction of :view/expr nodes. Each node is reduced only once, and only if 
+; its id appears in the set which is provided as the reduction's aux. value.
+;
+(def metaExprRules
+  (letfn [ (borderize [b title]
+              (fn [n v]
+                ; TODO: titled borders?
+                (let [id (node-id n)]
+                  (if (contains? v id)
+                    (let [ np (node :view/scripted
+                                :nucleus
+                                (node :view/border
+                                  :weight 1
+                                  :margin 1
+    
+                                  :view/drawable/colors [
+                                    (node :view/gray :brightness b)
+                                  ]
+    
+                                  :item
+                                  n)
+                                  
+                                :super
+                                (node :view/chars :str title :font :tiny)) ]
+                      [ np (disj v id) ])
+                    [ nil v ]))))]
   {  
     :view/juxt
     (borderize 0.7 "juxt")
