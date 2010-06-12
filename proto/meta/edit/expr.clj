@@ -133,206 +133,279 @@
 ; Reduction to the lower-level language:
 ; TODO: keep track of [displaymode (D(D'),T,S,SS), meta-level]
 ; TODO: select font based on mode
-; TODO: reduce core/later and core/sooner using meta-level
+; TODO: reduce expr/embed and expr/unbed using meta-level
 (defn- black-node [] (node :view/gray :brightness 0.0))
 
-(def exprRules {
-  :view/expr/juxt
-  (fn [n]
-    (node :view/sequence
-      :items
-      (node-attr n :view/expr/juxt/boxes)))
+; The value is a vector containing:
+; - the display mode: one of #{ :D :d :T :t :S :s :SS :ss }, where the 
+;   lowercase version of each is Knuth's "cramped", so my :d is his D'
+; - the meta-level, an integer beginning at 0, incremented each time an :embed
+;   node is encountered, and decremented on :unbed 
 
-  :view/expr/binary
-  (fn [n]
-    (node :view/sequence
-      :items
-      (vec (interpose (node :view/thinspace) (node-attr n :view/expr/binary/boxes)))))
+; HACK: for now, the value is just the meta-level int
+
+(def EMBED_COLORS (cycle [
+  (node :view/rgb :red 1.0 :green 1.0 :blue 1.0)  ; white
+  (node :view/rgb :red 0.8 :green 1.0 :blue 0.8)  ; green
+  (node :view/rgb :red 0.8 :green 0.8 :blue 1.0)  ; blue
+  (node :view/rgb :red 1.0 :green 1.0 :blue 0.8)  ; yellow
+  (node :view/rgb :red 1.0 :green 0.8 :blue 1.0)  ; magenta
+  (node :view/rgb :red 0.8 :green 1.0 :blue 1.0)  ; cyan
+  ]))
+
+(def EMBED_BORDER_COLORS (cycle [
+  (node :view/rgb :red 1.0 :green 1.0 :blue 1.0)  ; white
+  (node :view/rgb :red 0.3 :green 0.6 :blue 0.3)  ; green
+  (node :view/rgb :red 0.3 :green 0.3 :blue 0.6)  ; blue
+  (node :view/rgb :red 0.6 :green 0.6 :blue 0.3)  ; yellow
+  (node :view/rgb :red 0.6 :green 0.3 :blue 0.6)  ; magenta
+  (node :view/rgb :red 0.3 :green 0.6 :blue 0.6)  ; cyan
+  ]))
+
+
+(defn exprToView 
+  [n]
+  (let [rules {
+          :view/expr/juxt
+          (fn [n]
+            (node :view/sequence
+              :items
+              (node-attr n :view/expr/juxt/boxes)))
+
+          :view/expr/binary
+          (fn [n]
+            (node :view/sequence
+              :items
+              (vec (interpose (node :view/thinspace) (node-attr n :view/expr/binary/boxes)))))
   
-  :view/expr/relation
-  (fn [n]
-    (node :view/sequence
-      :items
-      (vec (interpose (node :view/mediumspace) (node-attr n :view/expr/relation/boxes)))))
+          :view/expr/relation
+          (fn [n]
+            (node :view/sequence
+              :items
+              (vec (interpose (node :view/mediumspace) (node-attr n :view/expr/relation/boxes)))))
 
-  :view/expr/flow
-  (fn [n]
-    (node :view/sequence
-      :items
-      (vec (interpose (node :view/thickspace) (node-attr n :view/expr/flow/boxes)))))
+          :view/expr/flow
+          (fn [n]
+            (node :view/sequence
+              :items
+              (vec (interpose (node :view/thickspace) (node-attr n :view/expr/flow/boxes)))))
 
-  :view/expr/keyword
-  (fn keyword [n]
-    (node :view/chars
-      :str (node-attr n :view/expr/keyword/str)
-      :font :cmbx10))
+          :view/expr/keyword
+          (fn keyword [n]
+            (node :view/chars
+              :str (node-attr n :view/expr/keyword/str)
+              :font :cmbx10))
 
-  :view/expr/symbol
-  (fn [n]
-    (assert (contains? SYMBOLS (node-attr n :view/expr/symbol/str)))  ; not great, you really want to know the symbol that wasn't found...
-    (let [ [c f] (SYMBOLS (node-attr n :view/expr/symbol/str)) ]
-      (node :view/chars
-        :str c
-        :font f)))
+          :view/expr/symbol
+          (fn [n]
+            (assert (contains? SYMBOLS (node-attr n :view/expr/symbol/str)))  ; not great, you really want to know the symbol that wasn't found...
+            (let [ [c f] (SYMBOLS (node-attr n :view/expr/symbol/str)) ]
+              (node :view/chars
+                :str c
+                :font f)))
 
-  ; TODO: handle primes and subscripts somehow?
-  :view/expr/var
-  (fn [n]
-    (node :view/chars
-      :str (node-attr n :view/expr/var/str)
-      :font :cmmi10))
-      ; :font :timesItalic))  ;; HACK
+          ; TODO: handle primes and subscripts somehow?
+          :view/expr/var
+          (fn [n]
+            (node :view/chars
+              :str (node-attr n :view/expr/var/str)
+              :font :cmmi10))
+              ; :font :timesItalic))  ;; HACK
 
-  :view/expr/int
-  (fn [n]
-    (node :view/chars
-      :str (node-attr n :view/expr/int/str)
-      :font :cmr10))
+          :view/expr/int
+          (fn [n]
+            (node :view/chars
+              :str (node-attr n :view/expr/int/str)
+              :font :cmr10))
 
-  :view/expr/string
-  (fn [n]
-    (node :view/chars
-      :str (str \u005c (node-attr n :view/expr/string/str) "\"")
-      :font :cmr10
-      :view/drawable/color (node :view/rgb :red 0 :green 0.5 :blue 0)))
+          :view/expr/string
+          (fn [n]
+            (node :view/chars
+              :str (str \u005c (node-attr n :view/expr/string/str) "\"")
+              :font :cmr10
+              :view/drawable/color (node :view/rgb :red 0 :green 0.5 :blue 0)))
 
-  :view/expr/mono
-  (fn [n]
-    (node :view/chars
-      :str (node-attr n :view/expr/mono/str)
-      :font :courier))
+          :view/expr/mono
+          (fn [n]
+            (node :view/chars
+              :str (node-attr n :view/expr/mono/str)
+              :font :courier))
   
-  :view/expr/prod
-  (fn [n]
-    (node :view/chars
-      :str (node-attr n :view/expr/prod/str)
-      :font :courierItalic))
+          :view/expr/prod
+          (fn [n]
+            (node :view/chars
+              :str (node-attr n :view/expr/prod/str)
+              :font :courierItalic))
   
-  :view/expr/missing
-  (fn [n]
-    (node :view/chars
-      :str "?"
-      :font :cmr10
-      :view/drawable/color (synthetic-color-node)))
+          :view/expr/missing
+          (fn [n]
+            (node :view/chars
+              :str "?"
+              :font :cmr10
+              :view/drawable/color (synthetic-color-node)))
 
-  ; TODO: use bg instead of border (requires an inherited attr.)
-  :view/expr/later
-  (fn [n]
-    (node :view/border
-      :weight 1
-      :margin 2
-      :view/drawable/colors [
-        (node :view/gray :brightness 0.5)
-        (node :view/gray :brightness 0.9)
-      ]
-      
-      :item 
-      (with-attr-node n :view/expr/later/node)))
+          ; ; TODO: use bg instead of border (requires an inherited attr.)
+          ;          :view/expr/later
+          ;          (fn [n]
+          ;            (node :view/border
+          ;              :weight 1
+          ;              :margin 2
+          ;              :view/drawable/colors [
+          ;                (node :view/gray :brightness 0.5)
+          ;                (node :view/gray :brightness 0.9)
+          ;              ]
+          ;      
+          ;              :item 
+          ;              (with-attr-node n :view/expr/later/node)))
 
-  ; TODO: use bg instead of border (requires an inherited attr.)
-  :view/expr/sooner
-  (fn [n]
-    (node :view/border
-      :weight 1
-      :margin 2
-      :view/drawable/colors [
-        (node :view/gray :brightness 0.9)
-        (node :view/gray :brightness 0.5)
-      ]
-      
-      :item 
-      (with-attr-node n :view/expr/later/node)))
+          ; ; TODO: use bg instead of border (requires an inherited attr.)
+          ;          :view/expr/sooner
+          ;          (fn [n]
+          ;            (node :view/border
+          ;              :weight 1
+          ;              :margin 2
+          ;              :view/drawable/colors [
+          ;                (node :view/gray :brightness 0.9)
+          ;                (node :view/gray :brightness 0.5)
+          ;              ]
+          ;      
+          ;              :item 
+          ;              (with-attr-node n :view/expr/later/node)))
 
 
-  ; HACK: this is easier than actually implementing growable parens for now, but this
-  ; node should really be handled in nodes.clj with custom rendering
-  :view/parens
-  (fn [n]
-    (node :view/sequence
-      :items [
-        (node :view/chars
-          :str (node-attr n :left)
-          :font :cmr10
-          :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
-        (n :view/parens/content)
-        (node :view/chars
-          :str (node-attr n :right)
-          :font :cmr10
-          :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
-      ]))
-})
+          ; HACK: this is easier than actually implementing growable parens for now, but this
+          ; node should really be handled in nodes.clj with custom rendering
+          :view/parens
+          (fn [n]
+            (node :view/sequence
+              :items [
+                (node :view/chars
+                  :str (node-attr n :left)
+                  :font :cmr10
+                  :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
+                (n :view/parens/content)
+                (node :view/chars
+                  :str (node-attr n :right)
+                  :font :cmr10
+                  :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
+              ]))
+        }
+      f (fn [n level]
+          (let [typ (node-type n)]
+            (cond
+              (= typ :view/expr/embed)
+              [(node :view/border
+                :weight 1
+                :margin 3
+              
+                :view/drawable/colors [ (nth EMBED_BORDER_COLORS (inc level)) ]
+              
+                :fill
+                (nth EMBED_COLORS (inc level))
+                
+                :item
+                (node-attr n :content))
+                (inc level)]
+            
+              (= typ :view/expr/unbed)
+              (let [level (if (< level 1) 
+                            (do (println "warning: embedding error at node " (node-id n)) 1) 
+                            level)]
+                [(node :view/border
+                  :weight 1
+                  :margin 3
+              
+                  :view/drawable/colors [ (nth EMBED_BORDER_COLORS level) ]
+              
+                  :fill
+                  (nth EMBED_COLORS (dec level))
+                
+                  :item
+                  (node-attr n :content))
+                  (dec level)])
+              
+                (contains? rules typ)
+                [((rules typ) n) level]
+            
+              true
+              [nil level])))
+      [np o v] (reduce-plus n f 0)]
+    [np o]))
 
 
 ;
 ; "Meta-reduction" for the view/expr language, used for rendering grammars, etc.
 ; This is a bit tricky in that the result of the reduction is new nodes in the 
-; same grammar. A helper function takes of that.
+; same grammar. To avoid infinite recursion, a set of ids of nodes to reduce is 
+; threaded through the reduction. Each time a node is expanded, its id is removed
+; from the set, so that when the descendants of the new node are reduced, the
+; original node is not reduced again.
 ;
 
-; reduceOnce :: node -> (node -> Maybe node) -> (node -> Maybe node)
-(defn reduceOnce
-  "Given a node and reduction, return a new reduction which applies the given 
-  function only to nodes of the original program (that is, it does _not_ 
-  recursively reduce nodes that are the result of a reduction)."
-  [n r]
-  (let [ids (set (deep-node-ids n))
-        _ (println "source ids:" ids)]
-    (fn [np] 
-      (if (ids (node-id np))
-        (do (println "reduce!" (node-id np)) (r np))
-        (do (println "no reduction" (node-id np)) nil)))))
+; ; reduceOnce :: node -> (node -> Maybe node) -> (node -> Maybe node)
+; (defn reduceOnce
+;   "Given a node and reduction, return a new reduction which applies the given 
+;   function only to nodes of the original program (that is, it does _not_ 
+;   recursively reduce nodes that are the result of a reduction)."
+;   [n r]
+;   (let [ids (set (deep-node-ids n))
+;         _ (println "source ids:" ids)]
+;     (fn [np] 
+;       (if (ids (node-id np))
+;         (do (println "reduce!" (node-id np)) (r np))
+;         (do (println "no reduction" (node-id np)) nil)))))
 
-(def metaExprRules-foo
-  (letfn [ (borderize [b title]
-              (fn [n]
-                ; TODO: titled borders?
-                (node :view/border
-                  :weight 1
-                  :margin 1
-    
-                  :view/drawable/colors [
-                    (node :view/gray :brightness b)
-                  ]
-    
-                  :item
-                  (rename-nodes n)))) ]  ; Tricky! need to rename the node being embedded in the result, so it won't be recursively reduced
-  {  
-    :view/juxt
-    (borderize 0.7 "juxt")
-  
-    :view/expr/binary
-    (borderize 0.7 "binary")
-  
-    :view/expr/relation
-    (borderize 0.7 "relation")
-
-    :view/expr/flow
-    (borderize 0.7 "flow")
-
-    :view/expr/keyword
-    (borderize 0.7 "kw")
-
-    :view/expr/symbol
-    (borderize 0.7 "sym")
-
-    :view/expr/var
-    (borderize 0.7 "var")
-
-    :view/expr/int
-    (borderize 0.7 "int")
-      ; (node :view/chars
-      ;   :str (node-attr n :view/expr/int/str)
-      ;   :font :cmr10))
-
-    :view/expr/string
-    (borderize 0.7 "str")
-
-    :view/expr/mono
-    (borderize 0.7 "mono")
-  
-    :view/expr/prod
-    (borderize 0.7 "prod")
-  }))
+; (def metaExprRules
+;   (letfn [ (borderize [b title]
+;               (fn [n]
+;                 ; TODO: titled borders?
+;                 (node :view/border
+;                   :weight 1
+;                   :margin 1
+;     
+;                   :view/drawable/colors [
+;                     (node :view/gray :brightness b)
+;                   ]
+;     
+;                   :item
+;                   (rename-nodes n)))) ]  ; Tricky! need to rename the node being embedded in the result, so it won't be recursively reduced
+;   {  
+;     :view/juxt
+;     (borderize 0.7 "juxt")
+;   
+;     :view/expr/binary
+;     (borderize 0.7 "binary")
+;   
+;     :view/expr/relation
+;     (borderize 0.7 "relation")
+; 
+;     :view/expr/flow
+;     (borderize 0.7 "flow")
+; 
+;     :view/expr/keyword
+;     (borderize 0.7 "kw")
+; 
+;     :view/expr/symbol
+;     (borderize 0.7 "sym")
+; 
+;     :view/expr/var
+;     (borderize 0.7 "var")
+; 
+;     :view/expr/int
+;     (borderize 0.7 "int")
+;       ; (node :view/chars
+;       ;   :str (node-attr n :view/expr/int/str)
+;       ;   :font :cmr10))
+; 
+;     :view/expr/string
+;     (borderize 0.7 "str")
+; 
+;     :view/expr/mono
+;     (borderize 0.7 "mono")
+;   
+;     :view/expr/prod
+;     (borderize 0.7 "prod")
+;   }))
 
 
 ;

@@ -398,19 +398,30 @@
           colors (for [c (node-attr n :view/drawable/colors)] (color c))
           ; foo (println colors)
           ]
-    (if (= 1 (count colors))
-      (doto g
-        (.setStroke (BasicStroke. weight))
-        (.setColor (nth colors 0))
-        (.draw (Rectangle2D$Float. i i (int w) (int h))))
-      (doto g
-        (.setStroke (BasicStroke. weight))
-        (.setColor (nth colors 0))
-        (.draw (Line2D$Float. i i x2 i))
-        (.draw (Line2D$Float. i i i y2))
-        (.setColor (nth colors 1))
-        (.draw (Line2D$Float. x2 i x2 y2))
-        (.draw (Line2D$Float. i y2 x2 y2))))))
+    (do
+      (if (has-attr? n :fill)
+        (doto g 
+          (.setColor (color (node-attr n :fill)))
+          (.fill (Rectangle2D$Float. i i (int w) (int h)))))
+      (condp = (count colors)
+        0
+        nil
+        
+        1
+        (doto g
+          (.setStroke (BasicStroke. weight))
+          (.setColor (nth colors 0))
+          (.draw (Rectangle2D$Float. i i (int w) (int h))))
+        
+        2
+        (doto g
+          (.setStroke (BasicStroke. weight))
+          (.setColor (nth colors 0))
+          (.draw (Line2D$Float. i i x2 i))
+          (.draw (Line2D$Float. i i i y2))
+          (.setColor (nth colors 1))
+          (.draw (Line2D$Float. x2 i x2 y2))
+          (.draw (Line2D$Float. i y2 x2 y2)))))))
 
 ;
 ; Handling of unrecognized nodes (or non-nodes), which allows the rest of the 

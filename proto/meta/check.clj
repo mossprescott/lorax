@@ -282,9 +282,7 @@
 
 (defn grammar-to-display
   "Takes a :grammar/language node and returns a reduction function which
-  performs the presentation reduction described in the grammar.
-  Tricky: when reducing the display nodes, set the _continue_ flag to false
-  to avoid infinite recursion."
+  performs the presentation reduction described in the grammar."
   [grammar]
   (fn [n]
     ; (println "type for display:" (node-type n))
@@ -295,8 +293,7 @@
               ;_ (print-node rule true)
               display (node-attr rule :grammar/rule/display)
               displayp (rename-nodes display)
-              ; TODO: need a meta-reduction for the presentation language here
-              [np o] (meta-reduce2 displayp (reduceEmbedded n) false)]
+              [np o] (meta-reduce2 displayp (reduceEmbedded n))]
           np)
         nil))))
 
@@ -493,7 +490,9 @@
         (node :view/sequence
           :items [
             (node :view/quad)
-            (node-attr n :display)
+            (node :view/expr/embed
+              :content
+              (node-attr n :display))
           ])
         (node :view/expr/keyword :str " ")
       ]))
@@ -504,13 +503,15 @@
   (fn [n]
     ; (do (println n)
     (let [name (baseName (node-attr n :name))  ; TODO: know the parent rule type, so it can be stripped?
-          v (node :view/border
-              :weight 1
-              :margin 1
-              :view/drawable/colors [
-                (node :view/rgb :red 0.9 :green 0.7 :blue 0.7)
-              ]
-              :item
+          v ;(node :view/border
+              ; :weight 1
+              ; :margin 1
+              ; :view/drawable/colors [
+              ;   (node :view/rgb :red 0.9 :green 0.7 :blue 0.7)
+              ; ]
+              ; :item
+            (node :view/expr/unbed
+              :content
               (node :view/expr/relation
                 :boxes [
                   (node :view/expr/mono :str name)
@@ -526,14 +527,14 @@
                     :super
                     (node :view/chars :str "*" :font :cmr10-script))  ; HACK
                 ]))
-          e (node :view/border
-              :weight 1
-              :margin 1
-              :view/drawable/colors [
-                (node :view/rgb :red 0.9 :green 0.7 :blue 0.7)
-              ]
-              :item
-              (node :view/expr/keyword :str "..."))
+          e ; (node :view/border
+           ;              :weight 1
+           ;              :margin 1
+           ;              :view/drawable/colors [
+           ;                (node :view/rgb :red 0.9 :green 0.7 :blue 0.7)
+           ;              ]
+           ;              :item
+              (node :view/expr/keyword :str "...") ;)
           cs [ v e ] ]
       (if (has-attr? n :separator)
         (vec (interpose (node-attr n :separator) cs))
@@ -561,11 +562,13 @@
                   (node :view/expr/keyword :str ":")
                   onp
                   ])
-            b (node :view/border
-                :weight 1
-                :margin 1
-                :view/drawable/colors [ (node :view/rgb :red 0.9 :green 0.7 :blue 0.7) ]
-                :item a)]
+            b (node :view/expr/unbed
+                :content a)] 
+            ; (node :view/border
+            ;                 :weight 1
+            ;                 :margin 1
+            ;                 :view/drawable/colors [ (node :view/rgb :red 0.9 :green 0.7 :blue 0.7) ]
+            ;                 :item a)]
         b))
   })
 

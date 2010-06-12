@@ -5,6 +5,10 @@
 (use 'meta.core)  ; ignored by load-nodes, but hopefully makes this legal Clojure
 
 (node :grammar/language
+  ;
+  ; Horizontal layout:
+  ;
+  
   :rules [
     (node :grammar/rule
       :type 
@@ -88,6 +92,52 @@
         
           :min 0)))
   
+    ;
+    ; Embedding (quotation):
+    ;
+    
+    ; embed: identifies a region of "embedded" program nodes, which are 
+    ; to be evaluated later, for example.
+    (node :grammar/rule
+      :type
+      :view/expr/embed
+      
+      :supers [ :view/drawable ]
+      
+      :display
+      (node :grammar/attr
+        :name 
+        :view/expr/embed/content
+    
+        :options [
+          (node :structure/node
+            :type :view/drawable)
+        ]
+    
+        :optional
+        false))
+  
+    ; unbed: identifies a region of program nodes, within an "embed", which are
+    ; logically part of the outer program, and might be evaluated sooner, for
+    ; example
+    (node :grammar/rule
+      :type
+      :view/expr/unbed
+      
+      :supers [ :view/drawable ]
+      
+      :display
+      (node :grammar/attr
+        :name 
+        :view/expr/unbed/content
+    
+        :options [
+          (node :structure/node
+            :type :view/drawable)
+        ]
+    
+        :optional
+        false))
   
     ;
     ; Characters of various kinds:
@@ -99,7 +149,7 @@
       
       :supers [ :view/drawable ]
       
-      :display
+      :display ; TODO: actual display?
       (node :grammar/attr
         :name 
         :view/expr/keyword/str

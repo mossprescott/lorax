@@ -111,10 +111,11 @@
         gr (first (load-nodes fname))]
     (showGrammar2 fname gr)))
     
-(loadGrammar2 "meta/edit/view.mlj")
-(loadGrammar2 "meta/edit/expr.mlj")
-(loadGrammar2 "meta/clojure/kernel2.mlj")
-(loadGrammar2 "meta/clojure/core.mlj")
+; (loadGrammar2 "meta/edit/view.mlj")  ; this one looks funny because the display reductions are bogus
+; (loadGrammar2 "meta/edit/expr.mlj")  ; this one has slightly less bogus display reductions
+(loadGrammar2 "meta/clojure/kernel2.mlj")  ; this one's for real
+; (loadGrammar2 "meta/clojure/core.mlj")  ; this one is real too
+
 ;(loadGrammar2 "meta/grammar.mlj")
 
 ; (showGrammar2 

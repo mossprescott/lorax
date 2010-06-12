@@ -8,7 +8,74 @@
 
 (node :grammar/language
   :rules [
-  
+    (node :grammar/rule
+      :type
+      :clojure/kernel/nil
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/keyword
+        :str "nil"))
+            
+    (node :grammar/rule
+      :type
+      :clojure/kernel/true
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/keyword
+        :str "true"))
+          
+    (node :grammar/rule
+      :type
+      :clojure/kernel/false
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/keyword
+        :str "false"))
+          
+    (node :grammar/rule
+      :type
+      :clojure/kernel/int
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/int
+        :str
+        (node :grammar/attr
+          :name 
+          :clojure/kernel/int/value
+          
+          :options [
+            (node :structure/int)
+          ]
+            
+          :optional false)))
+        
+    (node :grammar/rule
+      :type
+      :clojure/kernel/string
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/string
+        :str
+        (node :grammar/attr
+          :name 
+          :clojure/kernel/string/value
+          
+          :options [
+            (node :structure/string)
+          ]
+            
+          :optional false)))
+        
     (node :grammar/rule
          :type 
          :clojure/kernel/bind
@@ -239,6 +306,50 @@
         
     ; TODO: loop
     ; TODO: recur
+    
+    (node :grammar/rule
+      :type
+      :clojure/kernel/quote
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/embed
+        :content
+        (node :grammar/attr
+          :name 
+          :clojure/kernel/quote/body
+          
+          :options [
+            (node :structure/node
+              :type :clojure/kernel/expr)
+          ]
+          
+          :optional 
+          false))
+      )
+
+    (node :grammar/rule
+      :type
+      :clojure/kernel/unquote
+      
+      :supers [ :clojure/kernel/expr ]  ; This isn't really quite right. When is an unquote legal?
+      
+      :display
+      (node :view/expr/unbed
+        :content
+        (node :grammar/attr
+          :name 
+          :clojure/kernel/unquote/body
+          
+          :options [
+            (node :structure/node
+              :type :clojure/kernel/expr)
+          ]
+          
+          :optional 
+          false))
+      )
 
     (node :grammar/rule
       :type
@@ -264,72 +375,4 @@
           (node :view/expr/mono :str "\"")
         ]))
         
-    (node :grammar/rule
-      :type
-      :clojure/kernel/int
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/int
-        :str
-        (node :grammar/attr
-          :name 
-          :clojure/kernel/int/value
-          
-          :options [
-            (node :structure/int)
-          ]
-            
-          :optional false)))
-        
-    (node :grammar/rule
-      :type
-      :clojure/kernel/string
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/string
-        :str
-        (node :grammar/attr
-          :name 
-          :clojure/kernel/string/value
-          
-          :options [
-            (node :structure/string)
-          ]
-            
-          :optional false)))
-        
-    (node :grammar/rule
-      :type
-      :clojure/kernel/true
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/keyword
-        :str "true"))
-          
-    (node :grammar/rule
-      :type
-      :clojure/kernel/false
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/keyword
-        :str "false"))
-          
-    (node :grammar/rule
-      :type
-      :clojure/kernel/nil
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/keyword
-        :str "nil"))
-          
   ])

@@ -177,8 +177,8 @@
     (node :clojure/kernel/int :value 42)
     
     :body
-    (node :core/later
-      :node
+    (node :clojure/kernel/quote
+      :body
       (node :clojure/kernel/app
         :expr
         (node :clojure/kernel/extern
@@ -186,8 +186,8 @@
         
         :args [
           (node :clojure/kernel/int :value 24)
-          (node :core/sooner
-            :node
+          (node  :clojure/kernel/unquote
+            :body
             (node :clojure/kernel/var
               :ref (node :core/ref :id :a)))
         ]))))
@@ -212,22 +212,27 @@
 (def checker (make-structure-checker struc))
 (def errors (checker p3))
 
-(doseq [[k v] errors] (println k "->" (apply str (interpose "; " v))))
+; (doseq [[k v] errors] (println k "->" (apply str (interpose "; " v))))
 
-(makeKernelFrame p3 "clojure/kernel" errors)
+; (makeKernelFrame p3 "clojure/kernel" errors)
 
-(let [cgr (first (load-nodes "meta/core.mlj"))
-      kgr (first (load-nodes "meta/clojure/kernel2.mlj"))
-      clgr (first (load-nodes "meta/clojure/core.mlj"))
+(let [cgr (load-node "meta/core.mlj")
+      kgr (load-node "meta/clojure/kernel2.mlj")
+      clgr (load-node "meta/clojure/core.mlj")
       gr (compose-grammars cgr kgr clgr)
       struc (grammar-to-structure gr)
-      ;display (grammar-to-display gr)
-      display #(meta-reduce2 % (reduceByType structurePresRules))
+
+      checker (make-structure-checker struc)
+      errors (checker p3)
+      _ (println errors)
+
+      displayStruc #(meta-reduce2 % (reduceByType structurePresRules))
+      displayClojure #(meta-reduce2 % (grammar-to-display gr))
       ;[np o] (meta-reduce2 x5 display)
       ]
-  (makeSyntaxFrame struc "clojure/kernel example (grammar -> structure)" display {})
+  ; (makeSyntaxFrame struc "clojure/kernel example (grammar -> structure)" displayStruc {})
   ; (print-node np true)
-  ;(makeSyntaxFrame p3 "clojure/kernel example (grammar -> display)" display {})
+  (makeSyntaxFrame p3 "clojure/kernel example (grammar -> display)" displayClojure {})
   )
   
   

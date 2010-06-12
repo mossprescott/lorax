@@ -186,7 +186,7 @@
   [n title]
   (let [frame (JFrame. (str "Meta - " title))
         debugFlag (ref false)
-        display (fn [n p] (meta-reduce (if p (parenthesize n) n) (reduceByType exprRules)))
+        display (fn [n p] (exprToView (if p (parenthesize n) n)))
         ; display (fn [n p] n) ; HACK
         nref (ref (display n false))
         sref (ref #{})  ; HACK
@@ -277,7 +277,7 @@
                         _ (if PRINT_ALL (do (print "general: ") (print-node npp true)) )
                         nppp (if p (parenthesize npp) npp)
                         _ (if PRINT_ALL (do (print "parens: ") (print-node nppp true)) )
-                        [npppp opp] (meta-reduce2 nppp (reduceByType exprRules))
+                        [npppp opp] (exprToView nppp)
                         _ (if PRINT_ALL (do (print "view: ") (print-node npppp true)) ) ]
                     ; (print-node nppp true)  ; HACK
                     ; (println "foo")  ; HACK

@@ -189,30 +189,36 @@
     (reduce-one-plus c f v)
     
     (vector? c) 
-    (let [;_ (println "v: " v)
+    (let [; _ (println "c: " c)
           ts (map #(reduce-one-plus % f v) c)  ; TODO: thread v through the reductions
           ; _ (println "ts:" ts)
           ]
       [(vec (map first ts))
-        (reduce merge {} (map second ts))])
+        (reduce merge {} (map second ts))
+        v])  ; TODO: return last v
     
     true 
-    [c {} v]))  ; TODO: return last v
+    [c {} v]))
 
 (defn- reduce-children-plus
-  "Reduce the children of a node, returning a node with the same id and a map
-  of descendant node ids to the original node id for each."
+  "Reduce the children of a node, returning a node (with the same id and set 
+  of attributes) and a map of descendant node ids to the original node id for 
+  each."
   [n f v]
-  ; (println "n" n)
+  ; (println "n:" n)
   (let [ childrenAndMaps (for [ [ a c ] (seq n) ]
-                          (let [ [ rc o vp ] (reduce-child-plus c f v)]  ; TODO: thread the value through
+                          (let [ [ rc o vp ] (reduce-child-plus c f v)]  ; TODO: thread the value through?
                             [ a rc o vp ]))
+                            ; (do (println "b:" [ a rc o vp ]) [ a rc o vp ])))
         ; _ (doall childrenAndMaps)
-        ;         _ (println "chAM" childrenAndMaps)
+        ; _ (println "n:" n)
+        ; _ (println "start:" (take 3 childrenAndMaps))
+        ; _ (count childrenAndMaps)
+        ; _ (println "chAM:" (count childrenAndMaps))
         reducedNode (reduce (fn [ m [a c o vp] ] (assoc m a c)) 
-                            {} childrenAndMaps)
+                              {} childrenAndMaps)
         origins (reduce (fn [ m [a c o vp]] (merge m o))
-                        {} childrenAndMaps)]
+                          {} childrenAndMaps)]
     [ reducedNode origins v ]))
 
 (defn- reduce-one-plus
@@ -225,7 +231,9 @@
   in the 'original' program."
   [n f v]
   (if (node? n)
-    (let [ ;_ (if PRINT (println "f:" f))
+    (let [ ; _ (print-node n true)
+            ; _ (println "keys:" (keys n))
+            ;_ (if PRINT (println "f:" f))
             ; _ (if PRINT (do (print "reduce-one: ")(print-node n true)))
             origId (node-id n)
             [np vp] (f n v) ]
