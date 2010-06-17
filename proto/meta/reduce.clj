@@ -54,6 +54,8 @@
 ; ===========================================================================
 
 (def PRINT false)
+(def PRINT_UNREDUCED_TYPES false)
+(def PRINT_REDUCED_TYPES false)
 
 (def meta-reduce-one2) ; forward-decl!
 
@@ -182,15 +184,15 @@
 (def reduce-one-plus) ; forward-decl!
 
 (defn- reduce-child-plus
-  [c f v]
+  [c f v depth]
   ;(println "c" c)
   (cond
     (node? c) 
-    (reduce-one-plus c f v)
+    (reduce-one-plus c f v depth)
     
     (vector? c) 
     (let [; _ (println "c: " c)
-          ts (map #(reduce-one-plus % f v) c)  ; TODO: thread v through the reductions
+          ts (map #(reduce-one-plus % f v depth) c)  ; TODO: thread v through the reductions
           ; _ (println "ts:" ts)
           ]
       [(vec (map first ts))
@@ -204,10 +206,10 @@
   "Reduce the children of a node, returning a node (with the same id and set 
   of attributes) and a map of descendant node ids to the original node id for 
   each."
-  [n f v]
+  [n f v depth]
   ; (println "n:" n)
   (let [ childrenAndMaps (for [ [ a c ] (seq n) ]
-                          (let [ [ rc o vp ] (reduce-child-plus c f v)]  ; TODO: thread the value through?
+                          (let [ [ rc o vp ] (reduce-child-plus c f v depth)]  ; TODO: thread the value through?
                             [ a rc o vp ]))
                             ; (do (println "b:" [ a rc o vp ]) [ a rc o vp ])))
         ; _ (doall childrenAndMaps)
@@ -221,6 +223,10 @@
                           {} childrenAndMaps)]
     [ reducedNode origins v ]))
 
+(defn- indent
+  [depth] 
+  (apply str (repeat depth "  ")))  ; an easier, more efficient way?
+
 (defn- reduce-one-plus
   "Reduce, producing a map from ids of nodes in the result to the ids of the nodes
   they were reduced from. Only the root of each reduced sub-tree is tracked. Non-reduced 
@@ -229,7 +235,7 @@
   by looking up the node and its ancestors in order.
   The resulting map contains the ids of all resulting nodes, whether or not they appear
   in the 'original' program."
-  [n f v]
+  [n f v depth]
   (if (node? n)
     (let [ ; _ (print-node n true)
             ; _ (println "keys:" (keys n))
@@ -239,10 +245,17 @@
             [np vp] (f n v) ]
       ; (println "origId" origId)
       ; (println "np" np)
+      (if (nil? np)
+        (if PRINT_UNREDUCED_TYPES
+          (println (indent depth) (node-type n)))
+        (if PRINT_REDUCED_TYPES
+          (println (indent depth) (node-type n) (if (vector? np) 
+                                                  "-> []" 
+                                                  (str "-> " (node-type np))))))
       (let [ [ npp o vpp] (cond 
-                          (nil? np) (reduce-children-plus n f vp)  ; n is fully-reduced; recursively reduce its children
-                          (vector? np) (reduce-child-plus np f vp)  ; Tricky! if a node was reduced to a vector, its contents may need reduction
-                          true (reduce-one-plus np f vp)) ; n may need additional reduction
+                          (nil? np) (reduce-children-plus n f vp (inc depth))  ; n is fully-reduced; recursively reduce its children
+                          (vector? np) (reduce-child-plus np f vp (inc depth))  ; Tricky! if a node was reduced to a vector, its contents may need reduction
+                          true (reduce-one-plus np f vp (inc depth))) ; n may need additional reduction
               op (if (node? npp)
                   (assoc o (node-id npp) origId) ; this includes all nodes in the result, mapping new nodes to themselves
                   o) ] ; if the result is not a node (e.g. it's a vector) then the id mapping is lost
@@ -257,9 +270,12 @@
   The reduction function takes a node and value, and returns a vector of
   a reduced node (or nil) and a new value."
   [n f v]
-  (let [origIds (set (deep-node-ids n))
-        [np o vp] (reduce-one-plus n f v)]
-    [np (valuesubmap o origIds) vp]))
+  (do
+    (if PRINT_REDUCED_TYPES
+      (println "\nreduce-plus:" (node-type n)))
+    (let [origIds (set (deep-node-ids n))
+          [np o vp] (reduce-one-plus n f v 0)]
+      [np (valuesubmap o origIds) vp])))
 
 
 (defn reduceByType-plus
@@ -315,7 +331,7 @@
   "Given a collection of functions, a function which applies each fxn to its 
   argument in turn, returning the first non-nil result. Might be useful for 
   chaining reductions."
-  [fxns]
+  [& fxns]
   (fn [n]
     (loop [s (seq fxns)]
       (if-let [f (first s)]
@@ -406,25 +422,25 @@
 (deftest apply-until1
   (let [n (fn [n] nil)
         i (fn [n] n)]
-    (is (= ((apply-until []) 1)
+    (is (= ((apply-until) 1)
           nil)
         "none")
-    (is (= ((apply-until [n]) 1)
+    (is (= ((apply-until n) 1)
           nil)
         "just nil")
-    (is (= ((apply-until [i]) 1)
+    (is (= ((apply-until i) 1)
           1)
         "just id")
-    (is (= ((apply-until [n i]) 1)
+    (is (= ((apply-until n i) 1)
           1)
         "nil first")
-    (is (= ((apply-until [i n]) 1)
+    (is (= ((apply-until i n) 1)
           1)
         "id first")
-    (is (= ((apply-until [n n n n n n n n]) 1)
+    (is (= ((apply-until n n n n n n n n) 1)
           nil)
         "lotta nil")
-    (is (= ((apply-until [n n n n n n n n i]) 1)
+    (is (= ((apply-until n n n n n n n n i) 1)
           1)
         "eventually id")))
         

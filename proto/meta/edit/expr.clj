@@ -127,6 +127,8 @@
   "*" [ "*" :cmr10 ]  ; cmsy has a centered asterix at 0x03
   
   :mapsto [ "\u0037\u0021" :cmsy10 ]  ; \mapstochar + \rightarrow
+  
+  :neg [ "\u003a" :cmsy10 ]
 })
 
 

@@ -290,6 +290,7 @@
       :display
       (node :view/expr/juxt  ; HACK
         :boxes [
+          (node :view/expr/var :str "x") ; HACK
           (node :grammar/attr  ; TODO: a special :grammar construct for refs?
             :name 
             :clojure/kernel/var/ref

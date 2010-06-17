@@ -62,14 +62,52 @@
 
     (node :grammar/rule
       :type
-      :clojure/core/and
+      :clojure/core/not
       
       :supers [ :clojure/kernel/expr ]
       
       :display
+      (node :view/expr/juxt
+        :boxes [
+          (node :view/expr/symbol :str :neg)
+          (node :grammar/attr :core/id :e
+            :name
+            :clojure/core/not/expr
+            
+            :options [
+              (node :structure/node 
+                :type :clojure/kernel/expr)
+            ]
+            
+            :optional
+            false)
+        ])
+        
+      :expand
+      (node :clojure/kernel/quote
+        :body
+        (node :clojure/kernel/app
+          :expr
+          (node :clojure/kernel/extern
+            :name "not")
+          
+          :args [
+            (node :clojure/kernel/unquote
+              :body
+              (node :clojure/kernel/var
+                :ref (ref-node :e)))
+          ])))
+
+    (node :grammar/rule
+      :type
+      :clojure/core/and
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display  ; TODO: quote it?
       (node :view/expr/relation
         :boxes [
-          (node :grammar/attr
+          (node :grammar/attr :core/id :left
             :name 
             :clojure/core/and/left
             
@@ -80,7 +118,7 @@
             
             :optional false)
           (node :view/expr/keyword :str "and")
-          (node :grammar/attr
+          (node :grammar/attr :core/id :right
             :name 
             :clojure/core/and/right
             
@@ -92,6 +130,35 @@
             :optional false)
         ])
         
-        ; TODO: reduction to :clojure/kernel
+        :expand
+        (node :clojure/kernel/quote
+          :body
+          (node :clojure/kernel/let
+            :bind 
+            (node :clojure/kernel/bind :core/id :l)
+            
+            :expr
+            (node :clojure/kernel/unquote
+              :body
+              (node :clojure/kernel/var 
+                :ref (ref-node :left)))
+            
+            :body
+            (node :clojure/kernel/if
+              :test
+              (node :clojure/core/not 
+                :expr
+                (node :clojure/kernel/var 
+                  :ref (ref-node :l)))
+              
+              :then
+              (node :clojure/kernel/var 
+                :ref (ref-node :l))
+              
+              :else
+              (node :clojure/kernel/unquote
+                :body
+                (node :clojure/kernel/var 
+                  :ref (ref-node :right))))))
         )
   ])

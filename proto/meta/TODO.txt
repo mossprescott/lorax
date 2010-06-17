@@ -1,9 +1,9 @@
 Make it real:
-- Add a "reduce" reduction to :grammar, so new syntax can be reduced to
+- add a "expand" reduction to :grammar, so new syntax can be reduced to
 previously-defined nodes.
 - Make string, int, float, bool values a form of node, so their ids can be 
 tracked for editing purposes.
-- nice display of later/sooner (quote/unquote)
+- make display also a quoted expression, so you can write arbitrary code...
 
 special handling of :bind
   - a separate reduction, before the main grammar-based reduction?

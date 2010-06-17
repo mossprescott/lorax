@@ -86,6 +86,21 @@
                 
                 :optional false)
             ])
+          (node :view/sequence
+            :items [
+              (node :view/quad)
+              (node :grammar/attr
+                :name
+                :grammar/rule/expand
+                
+                :options [
+                  ; ??? this will be a drawable, but maybe it should be quoted?
+                  (node :structure/node
+                    :type :clojure/kernel/expr)
+                ]
+                
+                :optional false)
+            ])
         ]))
 
     (node :grammar/rule

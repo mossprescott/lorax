@@ -36,7 +36,6 @@
         (for [ [k v] (partition 2 children) ]
           [ (childname t k) v ])))))
       
-
 (defn node? 
   "True if x represents an AST node (including ref nodes)."
   [x]
@@ -57,6 +56,11 @@
   (do
     (assert (node? n))
     (n :core/id)))
+
+(defn ref-node
+  "Make a new ref node which points to the node with the given id."
+  [id]
+  (node :core/ref :id id))
     
 (defn ref-node?
   "true if x is a reference-node (that is, a node that represents a pointer to another node)"
@@ -224,37 +228,44 @@
   ([n allIds]
     (print-node n allIds ""))
   ([n allIds indent]
-    (println (str indent "(node " (node-type n))) 
-    (let [ indent (str "  " indent) ]
-      (if (or allIds (not (.startsWith (str (node-id n)) ":_")))
-        (println (str indent ":core/id " (node-id n))))
-      (doseq [ k (keys n) :when (not (#{:core/type :core/id} k)) ]
-        ; (println)
-        (let [ kstr (short-attr-name n k)
-                v (node-attr n k)]
-          (do
-            (cond
-              (node? v)
+    (cond 
+      (vector? n)
+      (do
+        (println (str "[ (" (count n) ")"))
+        (doseq [c n] (print-node c allIds (str indent "  "))))
+        
+      (node? n)
+      (do
+        (println (str indent "(node " (node-type n))) 
+        (let [ indent (str "  " indent) ]
+          (if (or allIds (not (.startsWith (str (node-id n)) ":_")))
+            (println (str indent ":core/id " (node-id n))))
+          (doseq [ k (keys n) :when (not (#{:core/type :core/id} k)) ]
+            (let [ kstr (short-attr-name n k)
+                    v (node-attr n k)]
               (do
-                (println (str indent kstr))
-                (print-node v allIds indent))
+                (cond
+                  (node? v)
+                  (do
+                    (println (str indent kstr))
+                    (print-node v allIds indent))
           
-              (vector? v)
-              (do
-                (println (str indent kstr " ["))
-                (dorun
-                  (map #(if (node? %) 
-                          (print-node % allIds (str indent "  ")) 
-                          (println (str indent "  " %))) 
-                      v))
-                (println (str indent "]")))
+                  (vector? v)
+                  (do
+                    (println (str indent kstr " ["))
+                    (dorun
+                      (map #(if (node? %) 
+                              (print-node % allIds (str indent "  ")) 
+                              (println (str indent "  " %))) 
+                          v))
+                    (println (str indent "]")))
           
-              (string? v)
-              (println (str indent kstr " \"" v "\""))
+                  (string? v)
+                  (println (str indent kstr " \"" v "\""))
               
-              true
-              (println (str indent kstr " " v)))))))
-    (println (str indent ")"))))
+                  true
+                  (println (str indent kstr " " v)))))))
+        (println (str indent ")"))))))
 
 
 ; File I/O:

@@ -297,6 +297,26 @@
           np)
         nil))))
 
+; (defn grammar-to-display1
+;   "Takes a :grammar/language node and returns a reduction function which
+;   performs a single step of the presentation reduction described in the 
+;   grammar."
+;   [grammar]
+;   (fn [n]
+;     ; (println "type for display:" (node-type n))
+;     ; (print-node n true)
+;     (let [typ (node-type n)]
+;       (if-let [rule (getGrammarRule grammar typ)]
+;         (let [;_ (println "found rule:")
+;               ;_ (print-node rule true)
+;               display (node-attr rule :grammar/rule/display)
+;               displayp (rename-nodes display)
+;               [np o] (meta-reduce2 displayp (reduceEmbedded n))]
+;           np)
+;         nil))))
+
+
+
 (defn compose-grammars
   ; TODO: this should be a trivial operation on nodes -- make a new node with 
   ; the concatenated children of some nodes. What language is provided for that?
@@ -304,14 +324,6 @@
   (node :grammar/language
     :rules
     (vec (mapcat #(node-attr % :grammar/language/rules) more))))
-  ; ([g1 g2]
-  ;   (node :grammar/language
-  ;     :rules
-  ;     (vec (concat (node-attr g1 :grammar)))))
-  ; ([g1 g2 g3 & more]
-  ;   ; this seems awkward... there must be a simpler way
-  ;   (apply compose-grammars (compose-grammars g1 g2) g3 more)
-  ; )
 
 ;
 ; Presentation for the structure specification language:
@@ -494,6 +506,13 @@
               :content
               (node-attr n :display))
           ])
+        (with-attr n :expand e
+          (node :view/sequence
+            :items [
+              (node :view/quad)
+              e
+            ])
+          (node :view/sequence :items [])) ; HACK: empty node
         (node :view/expr/keyword :str " ")
       ]))
       
