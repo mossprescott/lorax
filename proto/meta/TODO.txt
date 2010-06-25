@@ -1,25 +1,23 @@
+- handle multiple attrs in expansion!!!
+
 Make it real:
-- add a "expand" reduction to :grammar, so new syntax can be reduced to
-previously-defined nodes.
 - Make string, int, float, bool values a form of node, so their ids can be 
 tracked for editing purposes.
 - make display also a quoted expression, so you can write arbitrary code...
 
-special handling of :bind
-  - a separate reduction, before the main grammar-based reduction?
-  - because bindings are common to many languages, and inherently non-local
-
 
 presentation reduction:
   DONE - white b/g (for contrast)
-  - use b/g color for 'meta' levels (white, blue, red, green, ..., all unsaturated)
+  DONE - use b/g color for 'meta' levels (white, blue, red, green, ..., all unsaturated)
   DONE - use an outline for selection
   - better underline for errors (squiggle?)
-  - auto-font sizing for fractions/scripts (requires inherited attributes in the reduction?)
+  - auto-font sizing for fractions/scripts 
+    - need inherited attributes in the reduction
+    - and a way to be sensitive to the path (e.g. super/subscript)
 
 Pseudo-REPL
-	- start with core/program (not kernel/program, which should go away)
-	- evaluate each expression and render result
+	DONE! - start with core/program (not kernel/program, which should go away)
+	DONE! - evaluate each expression and render result
 	- un-read: convert clojure data structures to syntax
 	- a way to introduce new syntax!
 

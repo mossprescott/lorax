@@ -10,29 +10,29 @@
 (node :grammar/language
   :rules [
   
-    ; HACK: ":kernel"-language program node (was using this in my example)
-    (node :grammar/rule
-      :type 
-      :clojure/kernel/program
-      
-      :supers []
-      
-      :display
-      (node :view/section
-        :items
-        (node :grammar/sequence
-          :name
-          :clojure/kernel/program/exprs
-        
-          :options [
-            (node :structure/node
-              :type :clojure/kernel/expr)
-          ]
-          
-          :min 0
-          
-          :separator
-          (node :view/expr/keyword :str " "))))
+    ; ; HACK: ":kernel"-language program node (was using this in my example)
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :clojure/kernel/program
+    ;   
+    ;   :supers []
+    ;   
+    ;   :display
+    ;   (node :view/section
+    ;     :items
+    ;     (node :grammar/sequence
+    ;       :name
+    ;       :clojure/kernel/program/exprs
+    ;     
+    ;       :options [
+    ;         (node :structure/node
+    ;           :type :clojure/kernel/expr)
+    ;       ]
+    ;       
+    ;       :min 0
+    ;       
+    ;       :separator
+    ;       (node :view/expr/keyword :str " "))))
 
     (node :grammar/rule
       :type 
@@ -59,6 +59,89 @@
       
       ; TODO: reduction to :clojure/kernel
       ))
+
+    (node :grammar/rule
+      :type
+      :clojure/core/session
+      
+      :supers []
+      
+      :display
+      (node :view/section
+        :items
+        (node :grammar/sequence
+          :name 
+          :clojure/core/session/exchanges
+          
+          :options [
+            (node :structure/node
+              :type :clojure/core/exchange)
+          ]
+          
+          :min 0
+          
+          :separator
+          (node :view/expr/keyword :str " "))))
+    
+    (node :grammar/rule
+      :type
+      :clojure/core/exchange
+      
+      :supers []
+      
+      :display
+      (node :view/section
+        :items [
+          (node :view/expr/keyword :str "Expr:") ; TODO: subscript?
+          (node :view/sequence
+            :items [
+              (node :view/quad)
+              (node :grammar/attr
+                :name
+                :clojure/core/exchange/expr
+                
+                :options [
+                  (node :structure/node
+                    :type :clojure/kernel/expr)
+                ]
+                
+                :optional
+                false)
+            ])
+          (node :view/expr/keyword :str "Kernel:") ; TODO: subscript?
+          (node :view/sequence
+            :items [
+              (node :view/quad)
+              (node :grammar/attr
+                :name
+                :clojure/core/exchange/kernel
+                
+                :options [
+                  (node :structure/node
+                    :type :clojure/kernel/expr)
+                ]
+                
+                :optional
+                false)
+            ])
+          (node :view/expr/keyword :str "Value:") ; TODO: subscript?
+          (node :view/sequence
+            :items [
+              (node :view/quad)
+              (node :grammar/attr
+                :name
+                :clojure/core/exchange/value
+                
+                :options [
+                  (node :structure/node
+                    :type :clojure/kernel/expr)
+                  (node :structure/string)  ; for errors?
+                ]
+                
+                :optional
+                false)
+            ])
+        ]))
 
     (node :grammar/rule
       :type
@@ -96,6 +179,44 @@
               :body
               (node :clojure/kernel/var
                 :ref (ref-node :e)))
+          ])))
+
+    ; _unary_ minus
+    (node :grammar/rule
+      :type
+      :clojure/core/unaryminus
+      
+      :supers [ :clojure/kernel/expr ]
+      
+      :display
+      (node :view/expr/juxt
+        :boxes [
+          (node :view/expr/symbol :str "-")
+          (node :grammar/attr :core/id :e2
+            :name
+            :clojure/core/unaryminus/expr
+          
+            :options [
+              (node :structure/node
+                :type :clojure/kernel/expr)
+            ]
+          
+            :optional false)
+        ])
+        
+      :expand
+      (node :clojure/kernel/quote
+        :body
+        (node :clojure/kernel/app
+          :expr
+          (node :clojure/kernel/extern
+            :name "-")
+          
+          :args [
+            (node :clojure/kernel/unquote
+              :body
+              (node :clojure/kernel/var
+                :ref (ref-node :e2)))
           ])))
 
     (node :grammar/rule
@@ -141,7 +262,8 @@
             (node :clojure/kernel/unquote
               :body
               (node :clojure/kernel/var 
-                :ref (ref-node :left)))
+                ; :ref (ref-node :left)))
+                :ref (ref-node :right)))  ; HACK
             
             :body
             (node :clojure/kernel/if

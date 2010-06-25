@@ -7,100 +7,115 @@
 ; That last alternative is attractive, but maybe too complex?
 
 (ns meta.clojure.core
-  (:use (meta core reduce)
+  (:use (meta core reduce check)
         (meta.clojure kernel)))
-  
 
-; Rules for use with meta-reduce, given as ordinary Clojure fns
-(def ccrules {
-  ; logical "and" with 2 args, "left" and "right"
-  ; this version is wrong: it doesn't generate a new id for the bound var
-  :clojure/core/and2-wrong
-  (fn [n]
-    (node :clojure/kernel/let
-      :bind 
-      (node :core/bind :core/id :and)
-      
-      :expr
-      (n :clojure/core/and2-wrong/left)
-    
-      :body
-      (node :clojure/kernel/if
-        :test 
-        (node :clojure/kernel/var
-          :ref
-          (node :core/ref
-            :id :and))
+(def core-grammar
+  (compose-grammars
+    (load-node "meta/clojure/kernel2.mlj")
+    (load-node "meta/clojure/core.mlj")))
 
-        :then
-        (n :clojure/core/and2-wrong/right)
-      
-        :else
-        (node :clojure/kernel/var
-          :ref
-          (node :core/ref
-            :id :and)))))
-  
-  ; logical "and" with 2 args, "left" and "right"
-  :clojure/core/and2
-  (fn [n]
-    (let [ newLeft (genid "and") ]  ; generate a new, unique id
-      (node :clojure/kernel/let
-        :bind 
-        (node :core/bind :core/id newLeft)  ; use the new id for this binding
-        
-        :expr
-        (n :clojure/core/and2/left)
-      
-        :body
-        (node :clojure/kernel/if
-          :test 
-          (node :clojure/kernel/var
-            :ref
-            (node :core/ref
-              :id newLeft))
+; (print-node core-grammar)
+; (print-node (grammar-to-structure core-grammar))
 
-          :then
-          (n :clojure/core/and2/right)
-        
-          :else
-          (node :clojure/kernel/var
-            :ref
-            (node :core/ref
-              :id newLeft))))))
-              
-  ; :clojure/core/and2-meta
-  ; (eval (meta-compile
-  ;   (node :clojure/kernel/lambda
-  ;     :params [
-  ;     (node :clojure/bind :core/id :n)
-  ;     ]
-  ;     
-  ;     :body
-  ;     (node :core/later
-  ;       :expr
-  ;       (node :clojure/kernel/let
-  ;         :bind 
-  ;         (node :core/bind :core/id :left)
-  ;         
-  ;         :expr
-  ;         (node :core/sooner
-  ;           :expr
-  ;           (node :clojure/kernel/var
-  ;             :ref
-  ;             (node :core/ref :id :n)))
-  ;         
-  ;         :body
-  ;         (node :clojure/kernel/if
-  ;           :test
-  ;           (node :clojure/kernel/var
-  ;             :ref
-  ;             (node :core/ref :id :left))
-  ;           
-  ;           :then
-  ;           (node :core/sooner
-  ;             :expr
-  ;             (node :clojure/kernel/var
-  ;               :ref
-})
+(def core-checker
+  (make-structure-checker (grammar-to-structure core-grammar)))
 
+(def core-display
+  (grammar-to-display core-grammar))
+
+
+; 
+; ; Rules for use with meta-reduce, given as ordinary Clojure fns
+; (def ccrules {
+;   ; logical "and" with 2 args, "left" and "right"
+;   ; this version is wrong: it doesn't generate a new id for the bound var
+;   :clojure/core/and2-wrong
+;   (fn [n]
+;     (node :clojure/kernel/let
+;       :bind 
+;       (node :core/bind :core/id :and)
+;       
+;       :expr
+;       (n :clojure/core/and2-wrong/left)
+;     
+;       :body
+;       (node :clojure/kernel/if
+;         :test 
+;         (node :clojure/kernel/var
+;           :ref
+;           (node :core/ref
+;             :id :and))
+; 
+;         :then
+;         (n :clojure/core/and2-wrong/right)
+;       
+;         :else
+;         (node :clojure/kernel/var
+;           :ref
+;           (node :core/ref
+;             :id :and)))))
+;   
+;   ; logical "and" with 2 args, "left" and "right"
+;   :clojure/core/and2
+;   (fn [n]
+;     (let [ newLeft (genid "and") ]  ; generate a new, unique id
+;       (node :clojure/kernel/let
+;         :bind 
+;         (node :core/bind :core/id newLeft)  ; use the new id for this binding
+;         
+;         :expr
+;         (n :clojure/core/and2/left)
+;       
+;         :body
+;         (node :clojure/kernel/if
+;           :test 
+;           (node :clojure/kernel/var
+;             :ref
+;             (node :core/ref
+;               :id newLeft))
+; 
+;           :then
+;           (n :clojure/core/and2/right)
+;         
+;           :else
+;           (node :clojure/kernel/var
+;             :ref
+;             (node :core/ref
+;               :id newLeft))))))
+;               
+;   ; :clojure/core/and2-meta
+;   ; (eval (meta-compile
+;   ;   (node :clojure/kernel/lambda
+;   ;     :params [
+;   ;     (node :clojure/bind :core/id :n)
+;   ;     ]
+;   ;     
+;   ;     :body
+;   ;     (node :core/later
+;   ;       :expr
+;   ;       (node :clojure/kernel/let
+;   ;         :bind 
+;   ;         (node :core/bind :core/id :left)
+;   ;         
+;   ;         :expr
+;   ;         (node :core/sooner
+;   ;           :expr
+;   ;           (node :clojure/kernel/var
+;   ;             :ref
+;   ;             (node :core/ref :id :n)))
+;   ;         
+;   ;         :body
+;   ;         (node :clojure/kernel/if
+;   ;           :test
+;   ;           (node :clojure/kernel/var
+;   ;             :ref
+;   ;             (node :core/ref :id :left))
+;   ;           
+;   ;           :then
+;   ;           (node :core/sooner
+;   ;             :expr
+;   ;             (node :clojure/kernel/var
+;   ;               :ref
+; })
+; 

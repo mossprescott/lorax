@@ -168,7 +168,7 @@
         [ opt ])))))
 
 
-(defn- findAttrs
+(defn findAttrs
   "Given a the node which is the :display attribute of some rule and a map of 
   instances of each abstract node type, produces a sequence of :structure/attr
   nodes defining all attributes present in the sub-tree."
@@ -510,6 +510,8 @@
           (node :view/sequence
             :items [
               (node :view/quad)
+              (node :view/expr/symbol :str :to)
+              (node :view/thickspace)
               e
             ])
           (node :view/sequence :items [])) ; HACK: empty node

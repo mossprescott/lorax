@@ -54,6 +54,7 @@
   "The id of the node (a keyword)."
   [n]
   (do
+    (if (not (node? n)) (println "not a node:" n))  ;; HACK: need a better assert
     (assert (node? n))
     (n :core/id)))
 

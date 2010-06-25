@@ -1,0 +1,27 @@
+(foo)
+
+(node :clojure/core/program
+  :exprs [
+    (node :clojure/kernel/nil)
+    (node :clojure/kernel/true)
+    (node :clojure/kernel/false)
+    (node :clojure/kernel/int 
+      :value 1)
+    (node :clojure/kernel/string
+      :value "abc")
+    (node :clojure/core/not
+      :expr
+      (node :clojure/kernel/true))
+    (node :clojure/kernel/let
+      :bind 
+      (node :clojure/kernel/bind :core/id :y)
+      
+      :expr
+      (node :clojure/kernel/int :value 10)
+      
+      :body
+      (node :clojure/core/unaryminus
+        :expr
+        (node :clojure/kernel/var
+          :ref (ref-node :y))))
+  ])

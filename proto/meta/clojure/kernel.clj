@@ -2,7 +2,8 @@
 ; perhaps the translation from the kernel language to ordinary Clojure forms.
 
 (ns meta.clojure.kernel
-  (:use (meta core reduce)))
+  (:use (clojure test)
+        (meta core reduce)))
   
 
 
@@ -17,65 +18,73 @@
   "Given a node satisfying the grammar for Clojure kernel programs, return
   the forms of the equivalent ordinary Clojure program."
   [n]
-  (let [ symbolFromId #(symbol (str "_" (subs (str %) 1))) 
-          t (node-type n) ]
-    (cond 
-      (= t :clojure/kernel/bind)
-        (symbolFromId (node-id n))
+  (let [ symbolFromId #(symbol (str "_" (subs (str %) 1))) ]
+    (condp = (node-type n)
+      :clojure/kernel/bind
+      (symbolFromId (node-id n))
         
-      (= t :clojure/kernel/lambda)
-        `(fn ~(symbolFromId (node-id n))
-            [ ~@(map meta-compile (node-attr n :clojure/kernel/lambda/params)) ]
-            ~(meta-compile (node-attr n :clojure/kernel/lambda/body)))
+      :clojure/kernel/lambda
+      `(fn ~(symbolFromId (node-id n))
+          [ ~@(map meta-compile (node-attr n :clojure/kernel/lambda/params)) ]
+          ~(meta-compile (node-attr n :clojure/kernel/lambda/body)))
         
-      (= t :clojure/kernel/app)
-        `(~(meta-compile (node-attr n :clojure/kernel/app/expr)) 
-          ~@(map meta-compile (node-attr n :clojure/kernel/app/args)))
+      :clojure/kernel/app
+      `(~(meta-compile (node-attr n :clojure/kernel/app/expr)) 
+        ~@(map meta-compile (node-attr n :clojure/kernel/app/args)))
           
-      (= t :clojure/kernel/if) 
-        `(if ~(meta-compile (node-attr n :clojure/kernel/if/test))
-          ~(meta-compile (node-attr n :clojure/kernel/if/then))
-          ~(meta-compile (node-attr n :clojure/kernel/if/else)))
+      :clojure/kernel/if
+      `(if ~(meta-compile (node-attr n :clojure/kernel/if/test))
+        ~(meta-compile (node-attr n :clojure/kernel/if/then))
+        ~(meta-compile (node-attr n :clojure/kernel/if/else)))
 
-      (= t :clojure/kernel/let) 
-         `(let [ ~(symbolFromId (-> n (node-attr :clojure/kernel/let/bind) node-id))
-                    ~(meta-compile (node-attr n :clojure/kernel/let/expr)) ]
-            ~(meta-compile (node-attr n :clojure/kernel/let/body)))
+      :clojure/kernel/let
+      `(let [ ~(symbolFromId (-> n (node-attr :clojure/kernel/let/bind) node-id))
+                ~(meta-compile (node-attr n :clojure/kernel/let/expr)) ]
+        ~(meta-compile (node-attr n :clojure/kernel/let/body)))
          
-      (= t :clojure/kernel/var) 
-        (symbolFromId (-> n (node-attr :clojure/kernel/var/ref) (node-attr :core/ref/id)))
+      :clojure/kernel/var
+      (symbolFromId (-> n (node-attr :clojure/kernel/var/ref) (node-attr :core/ref/id)))
         
-      (= t :clojure/kernel/true) true
-      
-      (= t :clojure/kernel/false) false
+      :clojure/kernel/true true
+      :clojure/kernel/false false
+      :clojure/kernel/nil nil
         
-      (= t :clojure/kernel/int) 
-        (node-attr n :clojure/kernel/int/value)
+      :clojure/kernel/int
+      (node-attr n :value)
         
-      (= t :clojure/kernel/extern) 
-        (node-attr n :clojure/kernel/extern/name)
+      :clojure/kernel/string
+      (node-attr n :value)
+        
+      :clojure/kernel/extern
+      (symbol (node-attr n :name))
 
-      (= t :core/later) 
-        ; Note: nodes are represented as maps, and therefore implicitly quoted
-        ; at the Clojure level.
-        ; TODO: need syntax quoting here, so embedded unquotes will be evaluated
-        (meta-compile-later (node-attr n :core/later/node))
+      ; t :core/later
+      ;        ; Note: nodes are represented as maps, and therefore implicitly quoted
+      ;        ; at the Clojure level.
+      ;        ; TODO: need syntax quoting here, so embedded unquotes will be evaluated
+      ;        (meta-compile-later (node-attr n :core/later/node))
+
+      :clojure/kernel/quote
+      ; Note: nodes are represented as maps, and therefore implicitly quoted
+      ; at the Clojure level.
+      ; TODO: need syntax quoting here, so embedded unquotes will be evaluated
+      (meta-compile-later (node-attr n :clojure/kernel/quote/body))
       
 ;      (= t :core/sooner) ; should never be encountered here?
       
-      true
-        (do 
-          (println "unrecognized node type:" t)
-          (assert false)))))
+      (do 
+        (println "unrecognized node type:" (node-type n))
+        (assert false)))))
 
 
 (defn- meta-compile-later
   [n]
   (cond
     (node? n)
-    (if (= (node-type n) :core/sooner)
+    (if (= (node-type n) :clojure/kernel/unquote)
       ; handle "sooner" node now:
-      (meta-eval (node-attr n :core/sooner/node))
+      (meta-compile (node-attr n :body))  ; what if the result is a raw value? 
+                                          ; how does it get wrapped in nodes?
     
       ; recursively visit the children:
       (zipmap 
@@ -93,20 +102,29 @@
   "Given a program in Clojure kernel syntax, compile it to raw Clojure forms,
   evaluate them, and wrap the result in syntax."
   [n]
-  (let [ c (meta-compile n)
+  (let [ ; _ (print-node n true)
+        c (meta-compile n)
+        ; _ (println c)
         r (eval c) ]
     (cond
       (node? r)
       r
       
+      (nil? r)
+      (node :clojure/kernel/nil)
+      
       (= true r)
-      (node :/clojure/kernel/true)
+      (node :clojure/kernel/true)
       
       (= false r)
-      (node :/clojure/kernel/false)
+      (node :clojure/kernel/false)
       
       (integer? r)
       (node :clojure/kernel/int 
+        :value r)
+        
+      (string? r)
+      (node :clojure/kernel/string
         :value r))))
 
 
@@ -122,8 +140,8 @@
   (subs (str id) 1))
 
 
-; see kernel2.mlj
-; TODO: move these rules to a .mlj file, using the new pattern-matching reduction syntax...
+; Hand-written reduction for the :clojure/kernel language; supplanted by the
+; grammar in kernel2.mlj
 (def kernelPresRules {
   :clojure/kernel/bind
   (fn [n] 
@@ -396,3 +414,76 @@
         (node :view/chars :str " " :font :cmr10)  ; HACK: a blank line, effectively
         (with-attr-seq n :clojure/kernel/program/exprs)))))
 })
+
+
+;
+; Tests:
+;
+
+(deftest compile1
+  (is (= 1
+        (meta-compile 
+          (node :clojure/kernel/int 
+            :value 1))))
+  (is (= true
+        (meta-compile 
+          (node :clojure/kernel/true))))
+  (is (= "abc"
+        (meta-compile 
+          (node :clojure/kernel/string
+            :value "abc")))))
+
+(deftest eval1
+  (is (= 3
+        (eval (meta-compile
+          ; (println (meta-compile
+          (node :clojure/kernel/app
+            :expr
+            (node :clojure/kernel/extern :name "+")
+            
+            :args [
+              (node :clojure/kernel/int :value 1)
+              (node :clojure/kernel/int :value 2)
+            ])))))
+  (is (= 1
+        (eval (meta-compile
+          (node :clojure/kernel/let
+            :bind
+            (node :clojure/kernel/bind :core/id :x)
+            
+            :expr
+            (node :clojure/kernel/int :value 1)
+            
+            :body
+            (node :clojure/kernel/var
+              :ref (ref-node :x))))))))
+                
+; (deftest quote1
+;   (let [n (node :clojure/kernel/let
+;             :bind
+;             (node :clojure/kernel/bind :core/id :x)
+;             
+;             :expr
+;             (node :clojure/kernel/int :value 1)
+;             
+;             :body
+;             (node :clojure/kernel/quote
+;               :body
+;               (node :clojure/kernel/app
+;                 :expr
+;                 (node :clojure/kernel/extern
+;                   :name "+")
+;                   
+;                 :args [
+;                   (node :clojure/kernel/unquote
+;                     :body
+;                     (node :clojure/kernel/var
+;                       :ref (ref-node :x)))
+;                   (node :clojure/kernel/int
+;                     :value 2)
+;                 ])))
+;           _ (println (meta-compile n))
+;           _ (print-node (meta-eval n) true)]
+;     (is (= 1
+;           (meta-compile (meta-eval n))))))
+                
