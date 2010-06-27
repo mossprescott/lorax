@@ -98,6 +98,39 @@
     true
     n))
 
+(defn unread
+  [r]
+  (cond
+    (node? r)
+    r
+    
+    (nil? r)
+    (node :clojure/kernel/nil)
+    
+    (= true r)
+    (node :clojure/kernel/true)
+    
+    (= false r)
+    (node :clojure/kernel/false)
+    
+    (integer? r)
+    (node :clojure/kernel/int 
+      :value r)
+      
+    (string? r)
+    (node :clojure/kernel/string
+      :value r)
+      
+    (seq? r)
+    (node :clojure/core/sequence
+      :items
+      (vec (for [x r] (unread x))))
+      
+    true
+    (node :view/chars 
+      :str (str "???: " r) 
+      :font :times)))
+
 (defn meta-eval
   "Given a program in Clojure kernel syntax, compile it to raw Clojure forms,
   evaluate them, and wrap the result in syntax."
@@ -106,26 +139,7 @@
         c (meta-compile n)
         ; _ (println c)
         r (eval c) ]
-    (cond
-      (node? r)
-      r
-      
-      (nil? r)
-      (node :clojure/kernel/nil)
-      
-      (= true r)
-      (node :clojure/kernel/true)
-      
-      (= false r)
-      (node :clojure/kernel/false)
-      
-      (integer? r)
-      (node :clojure/kernel/int 
-        :value r)
-        
-      (string? r)
-      (node :clojure/kernel/string
-        :value r))))
+    (unread r)))
 
 
 ;

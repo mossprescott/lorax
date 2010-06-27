@@ -1,4 +1,12 @@
-- handle multiple attrs in expansion!!!
+:clojure/core
+- map
+- essential operators
+- list comprehensions
+- several lambda forms (lightweight to heavyweight)
+
+Better name reduction
+
+
 
 Make it real:
 - Make string, int, float, bool values a form of node, so their ids can be 
@@ -27,13 +35,6 @@ integrated grammar/reduction language
 		- allow bindings in the patterns
 	
 
-clojure/core
-	- constructors: list, map
-	- essential operators
-	- list comprehensions
-	- several lambda forms (lightweight to heavyweight)
-
-
 editing:
 	- selection actions: next/previous sibling, parent, first child
     - paths?
@@ -41,16 +42,13 @@ editing:
 	- bug in selection hilite: paren in :app in some cases, lambda in let, 
 	- show selected node in separate view, with info on each child
 
-
-- quote/unquote
-  - better rendering
-
 	
 rendering:
 	- :view/scripted - /sub
 	- :view/over - /lineweight
 	- :view/radical (later)
 	- :view/array - layout, alignment?
+	- :view/parens
 	
 infrastructure:
 	- some way to declare what language is in force in each file?

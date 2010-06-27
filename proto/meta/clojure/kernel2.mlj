@@ -163,7 +163,11 @@
               :min 0
             
               :separator
-              (node :view/chars :str ", " :font :cmr10)))
+              (node :view/sequence
+                :items [
+                  (node :view/chars :str "," :font :cmr10)
+                  (node :view/thickspace)
+                ])))
         ]))
         
     (node :grammar/rule

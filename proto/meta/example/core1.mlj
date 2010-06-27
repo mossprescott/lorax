@@ -1,3 +1,5 @@
+; Simple examples using the :clojure/core language
+
 (foo)
 
 (node :clojure/core/program
@@ -24,4 +26,10 @@
         :expr
         (node :clojure/kernel/var
           :ref (ref-node :y))))
+    (node :clojure/core/and
+      :left
+      (node :clojure/kernel/true)
+      
+      :right
+      (node :clojure/kernel/false))
   ])

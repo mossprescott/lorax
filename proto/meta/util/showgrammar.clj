@@ -113,6 +113,7 @@
 (defn show
   [f]
   (let [gr (load-node f)
+        _ (print-node gr true)
         errors (grammar-checker gr)
         _ (show-errors errors)]
     (makeSyntaxFrame gr f grammar-display errors)))

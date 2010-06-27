@@ -1,0 +1,31 @@
+; More examples using the :clojure/core language
+
+(foo)
+
+(node :clojure/core/program
+  :exprs [
+    (node :clojure/core/greater
+      :left
+      (node :clojure/core/times
+        :left 
+        (node :clojure/kernel/int :value 11)
+        
+        :right
+        (node :clojure/kernel/int :value 4))
+      
+      :right
+      (node :clojure/kernel/int :value 42))
+
+    (node :clojure/core/factorial
+      :expr
+      (node :clojure/kernel/int :value 4))
+
+    (node :clojure/core/factorial
+      :expr
+      (node :clojure/core/times
+        :left
+        (node :clojure/kernel/int :value 2)
+        
+        :right
+        (node :clojure/kernel/int :value 10)))
+  ])

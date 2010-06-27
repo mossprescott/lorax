@@ -524,14 +524,7 @@
   (fn [n]
     ; (do (println n)
     (let [name (baseName (node-attr n :name))  ; TODO: know the parent rule type, so it can be stripped?
-          v ;(node :view/border
-              ; :weight 1
-              ; :margin 1
-              ; :view/drawable/colors [
-              ;   (node :view/rgb :red 0.9 :green 0.7 :blue 0.7)
-              ; ]
-              ; :item
-            (node :view/expr/unbed
+          v (node :view/expr/unbed
               :content
               (node :view/expr/relation
                 :boxes [
@@ -548,14 +541,7 @@
                     :super
                     (node :view/chars :str "*" :font :cmr10-script))  ; HACK
                 ]))
-          e ; (node :view/border
-           ;              :weight 1
-           ;              :margin 1
-           ;              :view/drawable/colors [
-           ;                (node :view/rgb :red 0.9 :green 0.7 :blue 0.7)
-           ;              ]
-           ;              :item
-              (node :view/expr/keyword :str "...") ;)
+          e (node :view/expr/keyword :str "...")
           cs [ v e ] ]
       (if (has-attr? n :separator)
         (vec (interpose (node-attr n :separator) cs))
@@ -565,7 +551,7 @@
     (fn [n]
       (let [name (baseName (node-attr n :name))  ; TODO: know the parent rule type, so it can be stripped?
             options (with-attr-seq n :options)
-            optNode (node :view/expr/relation 
+            optNode (node :view/expr/binary 
                 :boxes
                 (vec (interpose
                       (node :view/expr/symbol :str "|")

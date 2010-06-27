@@ -72,28 +72,31 @@
 (defn drawNode
   "Recursively draw nodes, using nodes/draw and nodes/layout."
   [n #^Graphics2D g debug? selected errors o]
-  ; selection hilite (behind the content):
-  (if (selected (resolveOne (node-id n) o))
-    (let [ [w h b] (size n g) ]
-      (doto g
-        (.setColor SELECTED_COLOR)
-        (.setStroke (BasicStroke. 2))
-        (.draw (Rectangle2D$Float. -2 -2 (+ w 4) (+ h 4)))))) ; TODO: align to pixels?
-  ; the node's content:
-  (draw n g debug?)
-  ; the node's children:
-  (doseq [ [child x y w h] (layout n g) ]
-    (let [ gp (doto (.create g) (.translate x y)) ]
-      (drawNode child gp debug? selected errors o))) ; no clipping for now  
-      ; (drawNode child (.create g x y w h) debug? selected)))  ; clipping
-  ; error indicator: 
-  (if (errors (resolveOne (node-id n) o))
-    (let [ [w h b] (size n g)
-            y (if b (+ b 4) h) ]
-      (doto g
-        (.setColor Color/RED)
-        (.setStroke (BasicStroke. 1))
-        (.draw (Line2D$Float. 0.5 (+ y 0.5) w (+ y 0.5)))))))
+  (if (not (node? n))
+    (println "not a node: " n)
+    (do
+      ; selection hilite (behind the content):
+      (if (selected (resolveOne (node-id n) o))
+        (let [ [w h b] (size n g) ]
+          (doto g
+            (.setColor SELECTED_COLOR)
+            (.setStroke (BasicStroke. 2))
+            (.draw (Rectangle2D$Float. -2 -2 (+ w 4) (+ h 4)))))) ; TODO: align to pixels?
+      ; the node's content:
+      (draw n g debug?)
+      ; the node's children:
+      (doseq [ [child x y w h] (layout n g) ]
+        (let [ gp (doto (.create g) (.translate x y)) ]
+          (drawNode child gp debug? selected errors o))) ; no clipping for now  
+          ; (drawNode child (.create g x y w h) debug? selected)))  ; clipping
+      ; error indicator: 
+      (if (errors (resolveOne (node-id n) o))
+        (let [ [w h b] (size n g)
+                y (if b (+ b 4) h) ]
+          (doto g
+            (.setColor Color/RED)
+            (.setStroke (BasicStroke. 1))
+            (.draw (Line2D$Float. 0.5 (+ y 0.5) w (+ y 0.5)))))))))
 
 ; This is way out of hand. basically, it's a recursive search of the tree, building
 ; a list of containing nodes 

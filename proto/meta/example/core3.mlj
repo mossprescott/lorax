@@ -1,0 +1,95 @@
+; More examples using the :clojure/core language
+
+(foo)
+
+(node :clojure/core/program
+  :exprs [
+    ; a couple of cons's:
+    (node :clojure/core/cons
+      :first
+      (node :clojure/kernel/int :value 1)
+      
+      :rest
+      (node :clojure/core/cons
+        :first
+        (node :clojure/kernel/int :value 2)
+      
+        :rest
+        (node :clojure/kernel/nil)))
+    
+    ; a comma-sep. list:
+    (node :clojure/core/sequence
+      :items [
+        (node :clojure/kernel/int :value 1)
+        (node :clojure/kernel/int :value 2)
+        (node :clojure/kernel/int :value 3)
+      ])
+    
+    ; first, rest:
+    (node :clojure/kernel/let
+      :bind
+      (node :clojure/kernel/bind :core/id :lst)
+      
+      :expr
+      (node :clojure/core/sequence
+        :items [
+          (node :clojure/kernel/string :value "a")
+          (node :clojure/kernel/string :value "b")
+          (node :clojure/kernel/string :value "c")
+        ])
+      
+      :body
+      (node :clojure/core/sequence
+        :items [
+          (node :clojure/core/first
+            :coll
+            (node :clojure/kernel/var
+              :ref (ref-node :lst)))
+          (node :clojure/core/first
+            :coll
+            (node :clojure/core/rest
+              :coll
+              (node :clojure/core/rest
+                :coll
+                (node :clojure/kernel/var
+                  :ref (ref-node :lst)))))
+        ]))
+    
+    ; range:
+    (node :clojure/core/range
+      :start
+      (node :clojure/kernel/int :value 1)
+      
+      :end
+      (node :clojure/kernel/int :value 10))
+      
+    ; range + subscript:
+    (node :clojure/core/nth
+      :coll
+      (node :clojure/core/range
+        :start
+        (node :clojure/core/unaryminus
+          :expr
+          (node :clojure/kernel/int :value 100))
+      
+        :end
+        (node :clojure/kernel/int :value 100))
+        
+      :index
+      (node :clojure/kernel/int :value 150))
+      
+    ; set:
+    (node :clojure/core/in
+      :item
+      (node :clojure/kernel/int :value 137)
+      
+      :set
+      (node :clojure/core/set
+        :coll
+        (node :clojure/core/range
+          :start 
+          (node :clojure/kernel/int :value 0)
+          
+          :end
+          (node :clojure/kernel/int :value 99))))
+  ])

@@ -83,7 +83,7 @@
 ; jsMath's Computer Modern fonts:
 ;
 
-(def DISPLAY_SIZE 18)
+(def DISPLAY_SIZE 14);18)
 (def SCRIPT_SIZE (* DISPLAY_SIZE 0.7))
 (def SCRIPT_SCRIPT_SIZE (* DISPLAY_SIZE 0.5))
 
@@ -118,7 +118,7 @@
   
   ; Times, a unicode font...
   ; Unfortunately the spacing is quite different than the jsMath fonts
-  :times (Font. "Times New Roman" Font/PLAIN 14)
+  :times (Font. "Times New Roman" Font/PLAIN DISPLAY_SIZE)
   :timesItalic (Font. "Times New Roman" Font/ITALIC DISPLAY_SIZE)
   
   ; used for monospace in a few places

@@ -46,52 +46,63 @@
         (let [ t (node-attr r :type)
                 as (attrs-by-id (node-attr r :display))
                 ; _ (println as)
-                exp (node-attr r :expand)
+                exp (node-attr r :expand)  ; TODO: rename, to avoid id collisions!
                 
                 ; HACK: assuming one child for now
-                [cid cname] (first as)
+                ; [cid cname] (first as)
+
+                ; new id for the arg of the expansion fn:
+                nid (genid "n")
+
+                bindChildren (fn bindChildren [idAndNamePairs]
+                                (let [s (seq idAndNamePairs)]
+                                  (if s
+                                    (let [ [cid cname] (first s) ]
+                                      (node :clojure/kernel/let
+                                        :bind
+                                        (node :clojure/kernel/bind :core/id cid)
+                      
+                                        :expr
+                                        (node :clojure/kernel/app
+                                          :expr
+                                          (node :clojure/kernel/extern
+                                            :name "node-attr")
+                          
+                                          :args [
+                                            (node :clojure/kernel/var
+                                              :ref (ref-node nid))
+                            
+                                            (node :clojure/kernel/app
+                                              :expr
+                                              (node :clojure/kernel/extern
+                                                :name "keyword")
+                            
+                                              :args [
+                                                (node :clojure/kernel/string
+                                                  :value (subs (str cname) 1))  ;; TODO???
+                                              ])
+                                          ])
+                        
+                                        :body
+                                        (bindChildren (rest idAndNamePairs))))
+                                      exp)))
 
                 qf (node :clojure/kernel/lambda
                     :params [
-                      (node :clojure/kernel/bind :core/id :n)                    
+                      (node :clojure/kernel/bind :core/id nid)
                     ]
                     
                     :body
-                    (node :clojure/kernel/let
-                      :bind
-                      (node :clojure/kernel/bind :core/id cid)
-                      
-                      :expr
-                      (node :clojure/kernel/app
-                        :expr
-                        (node :clojure/kernel/extern
-                          :name "node-attr")
-                          
-                        :args [
-                          (node :clojure/kernel/var
-                            :ref (ref-node :n))
-                            
-                          (node :clojure/kernel/app
-                            :expr
-                            (node :clojure/kernel/extern
-                              :name "keyword")
-                            
-                            :args [
-                              (node :clojure/kernel/string
-                                :value (subs (str cname) 1))  ;; TODO???
-                            ])
-                        ])
-                        
-                      :body
-                      exp))
-                  ; _ (println "qf:")
-                  ; _ (print-node qf true)
-                  ; _ (println (doall (kernel-checker qf)))
-                  cf (meta-compile qf)
-                  ; _ (println cf)
-                  f (eval cf)
-                  ;_ (println f)
-                  ]
+                    (bindChildren as))
+                
+                ; _ (println "qf:")
+                ; _ (print-node qf true)
+                ; _ (println (doall (kernel-checker qf)))
+                cf (meta-compile qf)
+                ; _ (println cf)
+                f (eval cf)
+                ;_ (println f)
+                ]
           { t 
             ; (fn [n] exp)
             f })  ; HACK
@@ -122,16 +133,26 @@
   (node :clojure/core/session
     :exchanges
     (vec (for [x (node-attr n :exprs)]
-            (let [ [xp o] (meta-reduce2 x #(expand % exp))]
+            (let [ [xp o] (try (meta-reduce2 x #(expand % exp))
+                               (catch Throwable x
+                                      (println x)
+                                      (node :clojure/kernel/nil))) ; HACK
+                  r (try (meta-eval xp) 
+                         (catch Throwable x 
+                                (println x)
+                                (node :clojure/kernel/nil))) ; HACK
+                  ; _ (println r)
+                  ]
               (node :clojure/core/exchange
                 :expr
                 x
-                
-                :kernel
-                xp
+
+                ; Disabled for now:
+                ; :kernel
+                ; xp
                 
                 :value
-                (meta-eval xp)))))))
+                r))))))
 
 ; (def x1
 ;   (node :clojure/core/program

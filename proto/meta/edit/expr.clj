@@ -12,7 +12,7 @@
 ; :view/expr/juxt - adjacent items with no extra space
 ; :view/expr/binary - adjacent with thinspace (expected to be expressions alternating with ordinary operators)
 ; :view/expr/relation - adjacent with mediumspace (expected to be expressions alternating with "relational" operators)
-; :view/expr/flow - adjacent with quad
+; :view/expr/flow - adjacent with quad (for expressions alternating with keywords, mostly)
 
 ; Different kinds of characters, using different fonts, etc.; each has a str attr.
 ; :view/expr/keyword
@@ -32,23 +32,27 @@
   "Reduction that adds parens around nested expressions where spacing isn't
   sufficient to make the meaning clear, including:
   - binary or relation inside binary, relation, flow, or juxt
-  - any compund expression which is the nucleus of a :scripted
+  - any compound expression which is the nucleus of a :scripted
   Note: this results in a mixed-language program, with both expr- and view-
   language nodes, since it introduces :view/parens nodes but does not reduce
   anything."
   [n]
   (let [ wrappableEmbeddings #{ 
           ; pairs of [ parent-type, child-type ] for which the child requires parens:
+          
           [ :view/expr/juxt     :view/expr/juxt ]
           [ :view/expr/juxt     :view/expr/binary ]
           [ :view/expr/juxt     :view/expr/relation ]
           [ :view/expr/juxt     :view/expr/flow ]
+          
           [ :view/expr/binary   :view/expr/binary ]
           [ :view/expr/binary   :view/expr/relation ]
           [ :view/expr/binary   :view/expr/flow ]
-          [ :view/expr/relation :view/expr/binary ]
+          
+          ; [ :view/expr/relation :view/expr/binary ]
           [ :view/expr/relation :view/expr/relation ]
           [ :view/expr/relation :view/expr/flow ]
+          
           [ :view/expr/flow     :view/expr/flow ]
         }
         parenNode 
@@ -62,7 +66,10 @@
           (fn [n]
               (let [;kw (keyword (subs (str (node-type n) "/boxes") 1))
                     ptype (node-type n)
-                    wrappable (fn [n] (wrappableEmbeddings [ ptype (node-type n) ] ))
+                    wrappable (fn [c] (and
+                                        (node? c)
+                                        (contains? wrappableEmbeddings [ ptype (node-type c) ] )
+                                        (< 1 (count (node-attr c :boxes)))))
                     wrap (fn [n]
                           (if (wrappable n)
                             (parenNode n)
@@ -82,7 +89,9 @@
             (let [compound #{ :view/expr/juxt :view/expr/binary :view/expr/relation :view/expr/flow}
                   nucl (node-attr n :view/scripted/nucleus)
                   sup (node-attr n :view/scripted/super)]
-              (if (contains? compound (node-type nucl))
+              (if (and (node? nucl)
+                        (contains? compound (node-type nucl))
+                        (< 1 (count (node-attr nucl :boxes))))
                 (node :view/scripted
                   :nucleus
                   (parenNode nucl)
@@ -129,6 +138,12 @@
   :mapsto [ "\u0037\u0021" :cmsy10 ]  ; \mapstochar + \rightarrow
   
   :neg [ "\u003a" :cmsy10 ]
+  
+  ">" [ ">" :cmmi10 ]
+  
+  "." [ "." :cmr10 ]
+  
+  :in [ "2" :cmsy10 ]
 })
 
 
@@ -283,12 +298,12 @@
               :items [
                 (node :view/chars
                   :str (node-attr n :left)
-                  :font :cmr10
+                  :font :times; :cmr10
                   :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
                 (n :view/parens/content)
                 (node :view/chars
                   :str (node-attr n :right)
-                  :font :cmr10
+                  :font :times; :cmr10
                   :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
               ]))
         }
