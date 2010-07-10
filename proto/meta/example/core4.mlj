@@ -1,0 +1,77 @@
+; Examples for regular expressions
+
+(use 'meta.core)
+
+(node :clojure/core/program
+  :exprs [
+    (node :clojure/regex/pattern
+      :term
+      (node :clojure/regex/sequence
+        :terms [
+          (node :clojure/regex/chars 
+            :str
+            (node :clojure/regex/literal :str "a"))
+          (node :clojure/regex/repeat
+            :term
+            (node :clojure/regex/chars 
+              :str
+              (node :clojure/regex/literal :str "b"))
+            
+            :min
+            (node :clojure/kernel/int :value 1)
+    
+            :max
+            (node :clojure/kernel/int :value 10))
+          (node :clojure/regex/option
+            :term
+            (node :clojure/regex/chars 
+              :str
+              (node :clojure/regex/literal :str "c")))
+          (node :clojure/regex/alt
+            :terms [
+              (node :clojure/regex/chars 
+                :str
+                (node :clojure/regex/literal :str "1"))
+              (node :clojure/regex/chars 
+                :str
+                (node :clojure/regex/literal :str "2"))
+              (node :clojure/regex/chars 
+                :str
+                (node :clojure/regex/literal :str "3"))
+              (node :clojure/regex/chars 
+                :str
+                (node :clojure/regex/literal :str "?"))
+              (node :clojure/regex/chars 
+                :str
+                (node :clojure/regex/literal :str "("))
+              (node :clojure/regex/chars 
+                :str
+                (node :clojure/regex/literal :str ")"))
+            ])
+        ]))
+        
+    (node :clojure/kernel/let
+      :bind
+      (node :clojure/kernel/bind :core/id :c)
+      
+      :expr
+      (node :clojure/kernel/string :value "cat")
+      
+      :body
+      (node :clojure/kernel/quote
+        :body
+        (node :clojure/regex/pattern
+          :term
+          (node :clojure/regex/sequence
+            :terms [
+              (node :clojure/regex/chars
+                :str 
+                (node :clojure/regex/literal :str "It's a "))
+              (node :clojure/regex/chars
+                :str 
+                (node :clojure/kernel/unquote
+                  :body
+                  (node :clojure/kernel/var
+                    :ref (ref-node :c))))
+              ]))))
+  ])

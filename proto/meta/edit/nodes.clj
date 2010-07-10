@@ -334,7 +334,7 @@
 ;
 ; Section (vertical list):
 ;
-(def LINE_SPACING 5)  ;; TODO: remove
+(def LINE_SPACING 5)  ;; TODO: remove? make any spacing explicit?
 
 (defmethod size :view/section
   [ n #^Graphics2D g]

@@ -147,9 +147,9 @@
                 :expr
                 x
 
-                ; Disabled for now:
-                ; :kernel
-                ; xp
+                ; Comment to disable:
+                :kernel
+                xp
                 
                 :value
                 r))))))

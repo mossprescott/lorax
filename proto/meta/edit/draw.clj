@@ -3,7 +3,7 @@
 
 (ns meta.edit.draw
   (:use (clojure test)
-        (meta core reduce)
+        (meta core reduce path)
         (meta.clojure kernel)
         (meta.edit nodes expr))
   (:import 
@@ -20,6 +20,8 @@
       JToolBar)
     (java.awt.event 
       ActionListener
+      KeyAdapter
+      KeyEvent
       MouseAdapter
       MouseEvent)
     (java.awt 
@@ -265,9 +267,86 @@
 
 (def PRINT_ALL false)
 
+;
+; Selection...
+;
+
+; From somebody's article on Clojure:
+(defn indexed 
+  "Sequence of pairs [index, element] of the collection."
+  [coll] 
+  (map vector (iterate inc 0) coll))  
+(defn index-filter 
+  "Sequence of indexes for which the predicate is true for the corresponding element."
+  [pred coll]
+  (when pred 
+    (for [[idx elt] (indexed coll) :when (pred elt)] idx)))
+
+
+(defn- idToPath
+  [id root]
+  (first (filter 
+    #(let [n (node-at-path root %)]
+        (and (node? n)  ; TODO: deal with sequences
+             (= id (node-id n))))
+    (node-paths root))))
+
+(defn- sortAs
+  "Sequence of the elements of _coll_, in the order that they appear in 
+  _sorted_."
+  [coll sorted]
+  (let [scoll (set coll)]
+    (filter #(contains? scoll %) sorted)))
+    
+(deftest sortAsTest
+  (is (= [1 2 3]
+        (sortAs [3 1 2] (range 20))))
+  (is (= [1 2 3]
+        (sortAs [-1 1 100 3 50 2] (range 20)))))
+
+(defn- siblings
+  [sourceId root sourceIdsInViewOrder]
+  (if-let [p (idToPath sourceId root)]
+    (let [paths (sibling-paths root p)
+          ids (for [p paths] (node-id (node-at-path root p)))]
+      (sortAs ids sourceIdsInViewOrder))))
+  
+(defn- leftIdOrNil
+  [sourceId root sourceIdsInViewOrder]
+  (if-let [ids (siblings sourceId root sourceIdsInViewOrder)]
+    (let [i (first (index-filter #(= sourceId %) ids))]
+      (if (and i (> i 0))
+        (nth ids (dec i))))))
+
+(defn- rightIdOrNil
+  [sourceId root sourceIdsInViewOrder]
+  (if-let [ids (siblings sourceId root sourceIdsInViewOrder)]
+    (let [i (first (index-filter #(= sourceId %) ids))
+          n (count ids)]
+      (if (and i (< i (dec n)))
+        (nth ids (inc i))))))
+
+(defn- parentIdOrNil
+  [sourceId root sourceIdsInViewOrder]
+  (let [p (idToPath sourceId root)]
+    (if (not (root-path? p))
+      (let [pn (node-at-path root (parent-path p))]
+        (if (node? pn)  ; TODO: deal with sequences
+            (node-id pn))))))
+
+(defn- firstChildIdOrNil
+  [sourceId root sourceIdsInViewOrder]
+  (let [p (idToPath sourceId root)
+        cs (child-paths root p)]
+    (if cs
+      (let [c (first cs)  ; TODO: order by position in the reduced program
+            cn (node-at-path root c)]
+        (if (node? cn)
+          (node-id cn))))))
+
 (defn makeSyntaxFrame 
   "primary: reduction to the 'expr' language
-  errors: map of ids to seq of errors"
+  errors: map of (source program) ids to seq of errors"
   [n title primary errors]
   (let [debugFlag (ref false)
         ; lastReduction (apply-until [reduceAny (reduceByType exprRules)])
@@ -292,52 +371,59 @@
         snref (ref nil) ; the actual selected node
         panel #^JComponent (makePanel nref debugFlag sref (set (keys errors)) oref)
         scroll (JScrollPane. panel)
-        left (JButton. (ImageIcon. "meta/edit/Back24.gif"))
-        right (JButton. (ImageIcon. "meta/edit/Forward24.gif"))
-        parens (doto (JCheckBox. "Parens") 
-                  (.setSelected PARENS_DEFAULT))
-        debug (JCheckBox. "Outlines")
-        header (doto (JToolBar.)
-                (.setFloatable false)
-                (.add left)
-                (.add right)
-                (.add parens)
-                (.add debug))
+        
         [#^JComponent inspector inspectorUpdate] (makeInspectorPanel snref)
-        frame (doto (JFrame. (str "Meta - " title))
-                ; (.setDefaultCloseOperation JFrame/EXIT_ON_CLOSE)
-                (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
-                (.add scroll)
-                (.add header "North")
-                (.add inspector "South")
-                (.setSize 500 750)
-                (.setVisible true))
+
         updateSelection (fn [sourceId]
                           (dosync 
                             (ref-set sref #{sourceId})
                             (ref-set snref (find-node n sourceId))
                           (.repaint panel)
-                          (inspectorUpdate)))]
+                          (inspectorUpdate)))
                           
-    ; move selection left and right:
-    ; TODO: put the nodes into the order that their reductions appear
-    (.addActionListener left
-      (proxy [ActionListener] []
-        (actionPerformed [evt]
-          (if-not (seq @sref)
-            (updateSelection (node-id n))
-            (let [allIds (deep-node-ids n)
-                  cur (indexOf (first @sref) allIds)]
-              (updateSelection (nth allIds (dec cur))))))))
-    (.addActionListener right
-      (proxy [ActionListener] []
-        (actionPerformed [evt]
-          (if-not (seq @sref)
-            (updateSelection (node-id n))
-            (let [allIds (deep-node-ids n)
-                  cur (indexOf (first @sref) allIds)]
-              (updateSelection (nth allIds (inc cur))))))))
-              
+        selectionButton (fn [f #^String iconPath]
+                          (doto (JButton. (ImageIcon. iconPath))
+                            (.addActionListener
+                              (proxy [ActionListener] []
+                                (actionPerformed [evt]
+                                  (if (seq @sref)
+                                    (let [sourceIdsInViewOrder (map #(resolveOne % @oref) (deep-node-ids @nref))
+                                          id (f (first @sref) n sourceIdsInViewOrder)]
+                                      (if id
+                                        (updateSelection id)))))))))
+
+        #^JButton left (selectionButton leftIdOrNil "meta/edit/image/Back16.gif")
+        #^JButton right (selectionButton rightIdOrNil "meta/edit/image/Forward16.gif")
+        #^JButton up (selectionButton parentIdOrNil "meta/edit/image/Up16.gif")
+        #^JButton down (selectionButton firstChildIdOrNil "meta/edit/image/Down16.gif")
+        selectionToolBar (doto (JToolBar.)
+                          (.add (JLabel. "Selection:"))
+                          (.add left)
+                          (.add right)
+                          (.add up)
+                          (.add down))
+        
+        parens (doto (JCheckBox. "Parens") 
+                  (.setSelected PARENS_DEFAULT))
+        debug (JCheckBox. "Outlines")
+        optionsToolBar (doto (JToolBar.)
+                        (.add (JLabel. "Options:"))
+                        (.add parens)
+                        (.add debug))
+
+        header (doto (JPanel.)
+                (.setLayout (GridLayout. 0 1))
+                (.add selectionToolBar)
+                (.add optionsToolBar))
+                        
+        frame (doto (JFrame. (str "Meta - " title))
+                (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
+                (.add scroll)
+                (.add header "North")
+                (.add inspector "South")
+                (.setSize 500 750)
+                (.setVisible true))]
+
     (.addActionListener parens 
       (proxy [ActionListener] []
         (actionPerformed [evt]
@@ -351,6 +437,7 @@
         (actionPerformed [evt]
           (dosync (ref-set debugFlag (.isSelected debug)))
           (.repaint panel))))
+
     (.addMouseListener panel 
       (proxy [ MouseAdapter ] []
         (mouseClicked [#^MouseEvent evt]
@@ -363,7 +450,21 @@
                                             [nil nil] (first hitSourcePath)) ]
             ; (println "o:" @oref)
             ; (println "hit:" hitPath hitSourcePath firstSourceId)
-            (updateSelection firstSourceId)))))
+            (updateSelection firstSourceId)
+            (.requestFocus panel)  ; ???
+            ))))
+
+    (.addKeyListener panel
+      (proxy [ KeyAdapter ] []
+        (keyPressed [#^KeyEvent evt]
+          ; (let [k (.getKeyCode evt)]
+          ;   (println "pressed:" evt)
+            (condp = (.getKeyCode evt)
+              KeyEvent/VK_LEFT (.doClick left)
+              KeyEvent/VK_RIGHT (.doClick right)
+              KeyEvent/VK_UP (.doClick up)
+              KeyEvent/VK_DOWN (.doClick down)
+              nil))))
     nil))
 
 (defn makeKernelFrame 

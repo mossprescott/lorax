@@ -1,6 +1,6 @@
 ; More examples using the :clojure/core language
 
-(foo)
+(use 'meta.core)
 
 (node :clojure/core/program
   :exprs [
@@ -73,7 +73,12 @@
           (node :clojure/kernel/int :value 100))
       
         :end
-        (node :clojure/kernel/int :value 100))
+        (node :clojure/core/times
+          :left
+          (node :clojure/kernel/int :value 1000)
+
+          :right
+          (node :clojure/kernel/int :value 1000)))
         
       :index
       (node :clojure/kernel/int :value 150))

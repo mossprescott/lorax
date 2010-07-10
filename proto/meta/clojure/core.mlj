@@ -108,23 +108,25 @@
                 :optional
                 false)
             ])
+
           ; Disabled for now:
-          ; (node :view/sequence
-          ;   :items [
-          ;     (node :view/expr/keyword :str "K:")
-          ;     (node :view/quad)
-          ;     (node :grammar/attr
-          ;       :name
-          ;       :clojure/core/exchange/kernel
-          ;       
-          ;       :options [
-          ;         (node :structure/node
-          ;           :type :clojure/kernel/expr)
-          ;       ]
-          ;       
-          ;       :optional
-          ;       false)
-          ;   ])
+          (node :view/sequence
+            :items [
+              (node :view/expr/keyword :str "K:")
+              (node :view/quad)
+              (node :grammar/attr
+                :name
+                :clojure/core/exchange/kernel
+                
+                :options [
+                  (node :structure/node
+                    :type :clojure/kernel/expr)
+                ]
+                
+                :optional
+                false)
+            ])
+
           (node :view/sequence
             :items [
               (node :view/expr/keyword :str "V:")

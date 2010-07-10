@@ -45,6 +45,38 @@
           :min 0)))
   
     (node :grammar/rule
+      :type 
+      :view/scripted
+      
+      :supers [ :view/drawable ]
+      
+      :display  ;; TODO: actual display?
+      (node :view/scripted
+        :nucleus
+        (node :grammar/attr
+          :name
+          :view/scripted/nucleus
+        
+          :options [
+            (node :structure/node 
+              :type :view/drawable)
+          ]
+        
+          :optional false)
+        
+        :super
+        (node :grammar/attr
+          :name
+          :view/scripted/super
+        
+          :options [
+            (node :structure/node 
+              :type :view/drawable)
+          ]
+        
+          :optional true)))
+  
+    (node :grammar/rule
       :type
       :view/chars
       

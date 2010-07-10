@@ -1,3 +1,13 @@
+selection:
+- selection of sequences
+- selection of string, int
+- disable the buttons
+- select :missing nodes
+- ordering of :view/scripted attributes (the only one so far that isn't implicitly ordered)
+
+regex
+- reduction to compiled pattern? compile-time vs. run-time?
+
 :clojure/core
 - map
 - essential operators

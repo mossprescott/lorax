@@ -102,7 +102,9 @@
   [r]
   (cond
     (node? r)
-    r
+    (node :clojure/kernel/quote
+      :body
+      r)
     
     (nil? r)
     (node :clojure/kernel/nil)
