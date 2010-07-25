@@ -25,38 +25,38 @@
         
       :clojure/kernel/lambda
       `(fn ~(symbolFromId (node-id n))
-          [ ~@(map meta-compile (node-attr n :clojure/kernel/lambda/params)) ]
-          ~(meta-compile (node-attr n :clojure/kernel/lambda/body)))
+          [ ~@(map meta-compile (node-children (node-attr n :params))) ]
+          ~(meta-compile (node-attr n :body)))
         
       :clojure/kernel/app
-      `(~(meta-compile (node-attr n :clojure/kernel/app/expr)) 
-        ~@(map meta-compile (node-attr n :clojure/kernel/app/args)))
+      `(~(meta-compile (node-attr n :expr)) 
+        ~@(map meta-compile (node-children (node-attr n :args))))
           
       :clojure/kernel/if
-      `(if ~(meta-compile (node-attr n :clojure/kernel/if/test))
-        ~(meta-compile (node-attr n :clojure/kernel/if/then))
-        ~(meta-compile (node-attr n :clojure/kernel/if/else)))
+      `(if ~(meta-compile (node-attr n :test))
+        ~(meta-compile (node-attr n :then))
+        ~(meta-compile (node-attr n :else)))
 
       :clojure/kernel/let
-      `(let [ ~(symbolFromId (-> n (node-attr :clojure/kernel/let/bind) node-id))
-                ~(meta-compile (node-attr n :clojure/kernel/let/expr)) ]
-        ~(meta-compile (node-attr n :clojure/kernel/let/body)))
+      `(let [ ~(symbolFromId (-> n (node-attr :bind) node-id))
+                ~(meta-compile (node-attr n :expr)) ]
+        ~(meta-compile (node-attr n :body)))
          
       :clojure/kernel/var
-      (symbolFromId (-> n (node-attr :clojure/kernel/var/ref) (node-attr :core/ref/id)))
+      (symbolFromId (-> n (node-attr :ref) ref-node-id))
         
       :clojure/kernel/true true
       :clojure/kernel/false false
       :clojure/kernel/nil nil
         
       :clojure/kernel/int
-      (node-attr n :value)
+      (node-value n)
         
       :clojure/kernel/string
-      (node-attr n :value)
+      (node-value n)
         
       :clojure/kernel/extern
-      (symbol (node-attr n :name))
+      (symbol (node-value n))
 
       ; t :core/later
       ;        ; Note: nodes are represented as maps, and therefore implicitly quoted
@@ -68,7 +68,7 @@
       ; Note: nodes are represented as maps, and therefore implicitly quoted
       ; at the Clojure level.
       ; TODO: need syntax quoting here, so embedded unquotes will be evaluated
-      (meta-compile-later (node-attr n :clojure/kernel/quote/body))
+      (meta-compile-later (node-attr n :body))
       
 ;      (= t :core/sooner) ; should never be encountered here?
       
@@ -102,30 +102,28 @@
   [r]
   (cond
     (node? r)
-    (node :clojure/kernel/quote
-      :body
-      r)
+    (make-node :clojure/kernel/quote {
+        :body
+        r
+      })
     
     (nil? r)
-    (node :clojure/kernel/nil)
+    (make-node :clojure/kernel/nil {})
     
     (= true r)
-    (node :clojure/kernel/true)
+    (make-node :clojure/kernel/true {})
     
     (= false r)
-    (node :clojure/kernel/false)
+    (make-node :clojure/kernel/false {})
     
     (integer? r)
-    (node :clojure/kernel/int 
-      :value r)
+    (make-node :clojure/kernel/int r)
       
     (string? r)
-    (node :clojure/kernel/string
-      :value r)
+    (make-node :clojure/kernel/string r)
       
     (seq? r)
-    (node :clojure/core/sequence
-      :items
+    (make-node :clojure/core/sequence
       (vec (for [x r] (unread x))))
       
     true
@@ -439,28 +437,27 @@
 (deftest compile1
   (is (= 1
         (meta-compile 
-          (node :clojure/kernel/int 
-            :value 1))))
+          (make-node :clojure/kernel/int 1))))
   (is (= true
         (meta-compile 
-          (node :clojure/kernel/true))))
+          (make-node :clojure/kernel/true {}))))
   (is (= "abc"
         (meta-compile 
-          (node :clojure/kernel/string
-            :value "abc")))))
+          (make-node :clojure/kernel/string "abc")))))
 
 (deftest eval1
   (is (= 3
         (eval (meta-compile
-          ; (println (meta-compile
-          (node :clojure/kernel/app
+          (make-node :clojure/kernel/app {
             :expr
-            (node :clojure/kernel/extern :name "+")
+            (make-node :clojure/kernel/extern "+")
             
-            :args [
-              (node :clojure/kernel/int :value 1)
-              (node :clojure/kernel/int :value 2)
-            ])))))
+            :args 
+            (make-node :clojure/kernel/exprs [
+              (make-node :clojure/kernel/int 1)
+              (make-node :clojure/kernel/int 2)
+            ])
+          })))))
   (is (= 1
         (eval (meta-compile
           (node :clojure/kernel/let
@@ -468,11 +465,33 @@
             (node :clojure/kernel/bind :core/id :x)
             
             :expr
-            (node :clojure/kernel/int :value 1)
+            (make-node :clojure/kernel/int 1)
             
             :body
             (node :clojure/kernel/var
-              :ref (ref-node :x))))))))
+              :ref (ref-node :x)))))))
+  (is (= 42
+        (eval (meta-compile
+          (make-node :clojure/kernel/app {
+              :expr
+              (make-node :clojure/kernel/lambda {
+                  :params
+                  (make-node :clojure/kernel/params [
+                      (make-node :clojure/kernel/bind :x {})
+                    ])
+              
+                  :body
+                  (make-node :clojure/kernel/var {
+                      :ref
+                      (ref-node :x)
+                    })
+                })
+              
+              :args
+              (make-node :clojure/kernel/exprs [
+                  (make-node :clojure/kernel/int 42)
+                ])
+            }))))))
                 
 ; (deftest quote1
 ;   (let [n (node :clojure/kernel/let

@@ -53,9 +53,9 @@
 ; of the result.
 ; ===========================================================================
 
-(def PRINT false)
-(def PRINT_UNREDUCED_TYPES false)
-(def PRINT_REDUCED_TYPES false)
+(def PRINT true)
+(def PRINT_UNREDUCED_TYPES true)
+(def PRINT_REDUCED_TYPES true)
 
 (def meta-reduce-one2) ; forward-decl!
 
@@ -208,20 +208,41 @@
   each."
   [n f v depth]
   ; (println "n:" n)
-  (let [ childrenAndMaps (for [ [ a c ] (seq n) ]
-                          (let [ [ rc o vp ] (reduce-child-plus c f v depth)]  ; TODO: thread the value through?
-                            [ a rc o vp ]))
-                            ; (do (println "b:" [ a rc o vp ]) [ a rc o vp ])))
-        ; _ (doall childrenAndMaps)
-        ; _ (println "n:" n)
-        ; _ (println "start:" (take 3 childrenAndMaps))
-        ; _ (count childrenAndMaps)
-        ; _ (println "chAM:" (count childrenAndMaps))
-        reducedNode (reduce (fn [ m [a c o vp] ] (assoc m a c)) 
-                              {} childrenAndMaps)
-        origins (reduce (fn [ m [a c o vp]] (merge m o))
-                          {} childrenAndMaps)]
-    [ reducedNode origins v ]))
+  (cond 
+    (map-node? n)
+    (let [ childrenAndMaps (for [ a (node-attrs n) ]
+                            (let [ c (node-attr n a)
+                                   [ rc o vp ] (reduce-child-plus c f v depth)]  ; TODO: thread the value through?
+                              [ a rc o vp ]))
+                              ; (do (println "b:" [ a rc o vp ]) [ a rc o vp ])))
+          val (reduce (fn [ m [a c o vp] ] (assoc m a c)) 
+                      {} childrenAndMaps)
+          ; _ (doall childrenAndMaps)
+          ; _ (println "n:" n)
+          ; _ (println "start:" (take 3 childrenAndMaps))
+          ; _ (count childrenAndMaps)
+          ; _ (println "chAM:" (count childrenAndMaps))
+          reducedNode (make-node (node-type n)
+                                 (node-id n)
+                                 val)
+          origins (reduce (fn [ m [a c o vp]] (merge m o))
+                            {} childrenAndMaps)]
+      [ reducedNode origins v ])
+    
+    (seq-node? n)
+    (let [childrenAndMaps (for [c (node-children n)]
+                            (reduce-child-plus c f v depth))
+          val (vec (for [ [c o vp] childrenAndMaps ] c))
+          
+          reducedNode (make-node (node-type n)
+                                 (node-id n)
+                                 val)
+          origins (reduce (fn [ m [c o vp]] (merge m o))
+                            {} childrenAndMaps)]
+      [ reducedNode origins v ])
+    
+    true
+    n))
 
 (defn- indent
   [depth] 
@@ -239,8 +260,8 @@
   (if (node? n)
     (let [ ; _ (print-node n true)
             ; _ (println "keys:" (keys n))
-            ;_ (if PRINT (println "f:" f))
-            ; _ (if PRINT (do (print "reduce-one: ")(print-node n true)))
+            ; _ (if PRINT (println "f:" f))
+            _ (if PRINT (do (print "reduce-one: ")(print-node n true)))
             origId (node-id n)
             [np vp] (f n v) ]
       ; (println "origId" origId)
@@ -249,12 +270,12 @@
         (if PRINT_UNREDUCED_TYPES
           (println (indent depth) (node-type n)))
         (if PRINT_REDUCED_TYPES
-          (println (indent depth) (node-type n) (if (vector? np) 
-                                                  "-> []" 
-                                                  (str "-> " (node-type np))))))
+          (println (indent depth) (node-type n) ;(if (vector? np) 
+                                                 ; "-> []" 
+                                                  (str "-> " (node-type np)))))
       (let [ [ npp o vpp] (cond 
                           (nil? np) (reduce-children-plus n f vp (inc depth))  ; n is fully-reduced; recursively reduce its children
-                          (vector? np) (reduce-child-plus np f vp (inc depth))  ; Tricky! if a node was reduced to a vector, its contents may need reduction
+                          ; (vector? np) (reduce-child-plus np f vp (inc depth))  ; Tricky! if a node was reduced to a vector, its contents may need reduction
                           true (reduce-one-plus np f vp (inc depth))) ; n may need additional reduction
               op (if (node? npp)
                   (assoc o (node-id npp) origId) ; this includes all nodes in the result, mapping new nodes to themselves
@@ -271,8 +292,7 @@
   a reduced node (or nil) and a new value."
   [n f v]
   (do
-    (if PRINT_REDUCED_TYPES
-      (println "\nreduce-plus:" (node-type n)))
+    (if PRINT_REDUCED_TYPES (println "\nreduce-plus:" (node-type n)))
     (let [origIds (set (deep-node-ids n))
           [np o vp] (reduce-one-plus n f v 0)]
       [np (valuesubmap o origIds) vp])))
@@ -289,7 +309,7 @@
 
 
 ;
-; Safe atribute accessors, which return some sort of default if the attribute 
+; Safe attribute accessors, which return some sort of default if the attribute 
 ; doesn't match:
 ;
 
@@ -345,60 +365,87 @@
 ;
 
 (deftest unreduced
-  (let [n1 (node :foo :core/id :1)]
+  (let [n1 (make-node :foo :1 {})]
     (is (= (meta-reduce2 n1 (fn [n] nil))
             [n1 {:1 :1}]))))
       
 (deftest reduced
-  (let [n1 (node :foo :core/id :1)
-        n2 (node :bar :core/id :2)
+  (let [n1 (make-node :foo :1 {})
+        n2 (make-node :bar :2 {})
         r (fn [n] (if (= (node-type n) :foo) n2 nil)) ]
     (is (= (meta-reduce2 n1 r)
             [n2 {:2 :1}])
       "A single reduced node's id should appear in the result")))
       
 (deftest semi-reduced
-  (let [n1 (node :foo :core/id :1)
-        n2 (node :bar :core/id :2)
-        n3 (node :baz :core/id :3 :child n1)
-        n4 (node :baz :core/id :3 :child n2)
+  (let [n2 (make-node :bar :2 {})
+        n3 (make-node :baz :3 { 
+                :child 
+                (make-node :foo :1 {}) 
+              })
+        n4 (make-node :baz :3 { 
+                :child 
+                n2
+              })
         r (fn [n] (if (= (node-type n) :foo) n2 nil)) ]
     (is (= (meta-reduce2 n3 r)
             [n4 {:2 :1, :3 :3}])
       "One reduced and one not.")))
       
 (deftest semi-vec
-  (let [n1 (node :foo :core/id :1)
-        n2 (node :bar :core/id :2)
-        n3 (node :baz :core/id :3 :children [ n1 ])
-        n4 (node :baz :core/id :3 :children [ n2 ])
+  (let [n1 (make-node :foo :1 {})
+        n2 (make-node :bar :2 {})
+        n3 (make-node :baz :3 {
+              :children 
+              (make-node :quux :4 [ n1 ])
+            })
+        n4 (make-node :baz :3 {
+              :children 
+              (make-node :quux :4 [ n2 ])
+            })
         r (fn [n] (if (= (node-type n) :foo) n2 nil)) ]
     (is (= (meta-reduce2 n3 r)
-            [n4 {:2 :1, :3 :3}])
+            [n4 {:2 :1, :3 :3, :4, :4}])
       "One reduced and one not, in a vector.")))
       
 (deftest node-to-vec
-  (let [n1 (node :foo :core/id :1)
-        n2 (node :bar :core/id :2)
-        n3 (node :baz :core/id :3 :children n1)
-        n4 (node :baz :core/id :3 :children [ n2 ])
-        r (fn [n] (if (= (node-type n) :foo) [ n2 ] nil)) ]
+  (let [n1 (make-node :foo :1 {})
+        n2 (make-node :quux :4 [ (make-node :bar :2 {}) ])
+        n3 (make-node :baz :3 {
+              :children
+              n1
+            })
+        n4 (make-node :baz :3 {
+              :children 
+              n2
+            })
+        r (fn [n] (if (= (node-type n) :foo) n2 nil)) 
+        ]
     (is (= (meta-reduce2 n3 r)
-            [n4 {:3 :3}])  ; TODO
+            [n4 {:3 :3, :4 :1}])
       "A node is reduced to a vector (and the original id is lost in the process for now).")))
       
 (deftest node-to-vec2
-  (let [n1 (node :foo :core/id :1)
-        n2 (node :bar :core/id :2)
-        n5 (node :quux :core/id :4)
-        n3 (node :baz :core/id :3 :children n1)
-        n4 (node :baz :core/id :3 :children [ n5 ])
+  (let [n2 (make-node :quuux :5 [
+                (make-node :bar :2 {})
+              ])
+        n5 (make-node :quux :4 {})
+        n3 (make-node :baz :3 {
+              :children 
+              (make-node :foo :1 {})
+            })
+        n4 (make-node :baz :3 {
+              :children 
+              (make-node :quuux :5 [
+                n5
+                ])
+            })
         r (fn [n] (condp = (node-type n)
-                    :foo [ n2 ]
+                    :foo n2
                     :bar n5 
                     nil)) ]
     (is (= (meta-reduce2 n3 r)
-            [n4 {:3 :3}])  ; TODO
+            [n4 {:3 :3, :5 :1}])  ; TODO: what?
       "A node is reduced to a vector, and then an element of the vector is reduced.")))
       
 (deftest introduced
@@ -448,6 +495,6 @@
   (is (= (with-attr (node :foo) :foo/bar bar (node :baz :quux bar) 1)
           1)
           "missing")
-  (is (= (with-attr (node :foo :bar 2) :foo/bar bar (node :baz :core/id :1 :quux bar) 1)
-          (node :baz :core/id :1 :quux 2))
+  (is (= (with-attr (node :foo :bar (make-node :bar :2 2)) :foo/bar bar (node :baz :core/id :1 :quux bar) 1)
+          (node :baz :core/id :1 :quux (make-node :bar :2 2)))
           "present"))

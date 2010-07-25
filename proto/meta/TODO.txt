@@ -8,6 +8,9 @@ selection:
 regex
 - reduction to compiled pattern? compile-time vs. run-time?
 
+next demo language?
+- python? (not typed, but rich(er) syntax)
+
 :clojure/core
 - map
 - essential operators
