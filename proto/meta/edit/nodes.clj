@@ -135,21 +135,22 @@
   
 (defmethod color :view/gray
   [n]
-  (let [b (float (node-attr n :view/gray/brightness))]
+  (let [b (float (node-attr-value n :view/gray/brightness))]
     (Color. b b b)))  ; better way to get the right constructor?
 
 (defmethod color :view/rgb
   [n]
-  (Color. (float (node-attr n :view/rgb/red))
-          (float (node-attr n :view/rgb/green))
-          (float (node-attr n :view/rgb/blue))))
+  (Color. (float (node-attr-value n :view/rgb/red))
+          (float (node-attr-value n :view/rgb/green))
+          (float (node-attr-value n :view/rgb/blue))))
 
 (defn node-color 
   "Takes a node which may or may not have a color attr, and returns an AWT Color 
   for drawing it."
   [n]
-  (if-let [cn (n :view/drawable/color)]
-    (color cn)
+  (if (has-attr? n :view/drawable/color)
+    (let [cn (node-attr n :view/drawable/color)]
+      (color cn))
     DEFAULT_COLOR))
 
 ;
@@ -191,8 +192,8 @@
 
 (defmethod size :view/chars
   [n #^Graphics2D g]
-  (let [s (as-string (node-attr n :view/chars/str))
-        f (node-attr n :view/chars/font)
+  (let [s (as-string (node-attr-value n :str))
+        f (node-attr-value n :font)
         fm (.getFontMetrics g (FONTS f))
         ; _ (println "str:" (node-id n) s)
         bounds (.getStringBounds fm s g)]
@@ -208,8 +209,8 @@
 (defmethod draw :view/chars
   [n #^Graphics2D g debug?]
   (let [ [w h b] (size n g)
-          font (FONTS (n :view/chars/font))
-          s (as-string (node-attr n :view/chars/str))
+          font (FONTS (node-attr-value n :font))
+          s (as-string (node-attr-value n :str))
           angle 0.0 ];(.getItalicAngle font) ]
     ; (println [s w h b angle])
     (if debug?
@@ -274,15 +275,15 @@
 
 (defmethod size :view/scripted
   [n #^Graphics2D g]
-  (let [nucl (node-attr n :view/scripted/nucleus)
+  (let [nucl (node-attr n :nucleus)
         [_ _ nb] (size nucl g)
         [[nucl nx ny nw nh] [sup sx sy sw sh]] (layout n g)]
     [(+ sx sw) (+ ny nh) (+ ny nb)]))
 
 (defmethod layout :view/scripted 
   [n #^Graphics2D g]
-  (let [nucl (node-attr n :view/scripted/nucleus)
-        sup (node-attr n :view/scripted/super)
+  (let [nucl (node-attr n :nucleus)
+        sup (node-attr n :super)
         [nx ny nb] (size nucl g)
         [sx sy sb] (size sup g)]
     [ [nucl 0 (/ sy 3) nx ny] [sup (+ 1 nx) 0 sx sy] ]))  ; HACK
@@ -297,7 +298,7 @@
 (defmethod size :view/sequence
   ; height is the larger of max ascent + max descent, or max height
   [n #^Graphics2D g]
-  (let [items (node-attr n :items)]
+  (let [items (node-children n)]
     (if (empty? items)
       [0 0 0]
       (let [szs (map #(size % g) items)
@@ -315,7 +316,7 @@
   ; Align baselines, and vertically center any nodes without baselines.
   [n #^Graphics2D g] 
   (let [ [w h b] (size n g)]
-    (loop [ items (n :view/sequence/items) 
+    (loop [ items (node-children n) 
             x 0 
             result [] ]
         (if (empty? items)
@@ -338,7 +339,7 @@
 
 (defmethod size :view/section
   [ n #^Graphics2D g]
-  (let [items (node-attr n :view/section/items)
+  (let [items (node-children n)
         szs (map #(size % g) items)]
     ; (println "n") (print-node n) ; HACK
     ; (println "szs" szs) ; HACK
@@ -349,7 +350,7 @@
 (defmethod layout :view/section
   [n #^Graphics2D g] 
   (let [ [w h b] (size n g)]
-    (loop [ items (node-attr n :view/section/items) 
+    (loop [ items (node-children n) 
             y 0 
             result [] ]
         (if (empty? items)
@@ -370,9 +371,9 @@
 
 (defmethod size :view/border
   [n #^Graphics2D g]
-  (let [i (node-attr n :view/border/item)
-        weight (node-attr n :view/border/weight)
-        margin (node-attr n :view/border/margin)
+  (let [i (node-attr n :item)
+        weight (node-attr-value n :weight)
+        margin (node-attr-value n :margin)
         [w h b] (size i g)]
     [ (+ weight margin w margin weight) 
       (+ weight margin h margin weight) 
@@ -382,16 +383,16 @@
     
 (defmethod layout :view/border
   [n #^Graphics2D g]
-  (let [i (node-attr n :view/border/item)
-        weight (node-attr n :view/border/weight)
-        margin (node-attr n :view/border/margin)
+  (let [i (node-attr n :item)
+        weight (node-attr-value n :weight)
+        margin (node-attr-value n :margin)
         [w h b] (size i g)]
     [ [i (+ weight margin) (+ weight margin) w h] ]))
     
 (defmethod draw :view/border
   [n #^Graphics2D g debug?]
   (let [ [w h b] (size n g) 
-          weight (node-attr n :view/border/weight) 
+          weight (node-attr-value n :weight) 
           i (if (odd? weight) 0.5 0)  ; an adjustment to make it align to pixels usually
           x2 (+ i (int w))
           y2 (+ i (int h))
@@ -457,7 +458,7 @@
   [n]
   (let [typ (subs (str (node-type n)) 1)]
     ; (println "typ:" typ)  ; HACK
-    (if-not (re-matches #"view/.*" typ)
+    (if-not (or (re-matches #"view/.*" typ) (re-matches #"core/.*" typ))
       ; (do (println "  reducing...")  ; HACK
       (node :view/border
         :weight 1

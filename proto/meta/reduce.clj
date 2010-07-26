@@ -4,48 +4,48 @@
   (:use (clojure test))
   (:use (meta core)))
   
-(def meta-reduce) ; forward-decl!
+; (def meta-reduce) ; forward-decl!
 
-(defn- meta-reduce-children
-  [n f]
-    ; (do (print "reducing children: ") (println n) ; HACK
-    (apply hash-map 
-     (apply concat 
-        (for [ [ k v ] (seq n) ]
-          ; (do (println "k:" k) ; HACK
-          [ k (cond
-                (node? v) (meta-reduce v f)
-                (vector? v) (vec (map #(meta-reduce % f) v))
-                true v)]))))
-          ; ) ; HACK
-
-
-(defn meta-reduce
-  "Evaluate any syntax extensions according to the given rules (macros).
-  For instance, the rules might reduce the full 'Clojure' syntax to the 
-  Clojure kernel language, which can then be evaluated by direct translation 
-  to raw Clojure forms.
-  f takes a node and produces a reduced node (which is then subject to 
-  continued reduction), or nil (meaning the node cannot be reduced).
-  Once the top-level node is no longer reducible, it is 
-  simply rebuilt with its recursively reduced children. A more intelligent 
-  approach might be to check each fully-reduced node against the expected 
-  grammar."
-  [n f]
-  ; (do (print "reducing: ") (println n) ; HACK
-  (let [ np (f n) ]
-    ; (print "from: ") (print-node n)
-    ; (print "to: ")(if (node? np) (print-node np) (println np))
-    (if (nil? np)
-      ; No reduction occurred, so don't loop!
-      (meta-reduce-children n f) 
-      ; Note: need to continue reducing the result, which might contain more syntax
-      (recur np f))))
-  ; ) ; HACK
-
-  ; (meta-reduce-children n f))
-    ; ) ; HACK
-  ; ) ; HACK
+; (defn- meta-reduce-children
+;   [n f]
+;     ; (do (print "reducing children: ") (println n) ; HACK
+;     (apply hash-map 
+;      (apply concat 
+;         (for [ [ k v ] (seq n) ]
+;           ; (do (println "k:" k) ; HACK
+;           [ k (cond
+;                 (node? v) (meta-reduce v f)
+;                 (vector? v) (vec (map #(meta-reduce % f) v))
+;                 true v)]))))
+;           ; ) ; HACK
+; 
+; 
+; (defn meta-reduce
+;   "Evaluate any syntax extensions according to the given rules (macros).
+;   For instance, the rules might reduce the full 'Clojure' syntax to the 
+;   Clojure kernel language, which can then be evaluated by direct translation 
+;   to raw Clojure forms.
+;   f takes a node and produces a reduced node (which is then subject to 
+;   continued reduction), or nil (meaning the node cannot be reduced).
+;   Once the top-level node is no longer reducible, it is 
+;   simply rebuilt with its recursively reduced children. A more intelligent 
+;   approach might be to check each fully-reduced node against the expected 
+;   grammar."
+;   [n f]
+;   ; (do (print "reducing: ") (println n) ; HACK
+;   (let [ np (f n) ]
+;     ; (print "from: ") (print-node n)
+;     ; (print "to: ")(if (node? np) (print-node np) (println np))
+;     (if (nil? np)
+;       ; No reduction occurred, so don't loop!
+;       (meta-reduce-children n f) 
+;       ; Note: need to continue reducing the result, which might contain more syntax
+;       (recur np f))))
+;   ; ) ; HACK
+; 
+;   ; (meta-reduce-children n f))
+;     ; ) ; HACK
+;   ; ) ; HACK
 
 
 ; ===========================================================================
@@ -53,9 +53,9 @@
 ; of the result.
 ; ===========================================================================
 
-(def PRINT true)
-(def PRINT_UNREDUCED_TYPES true)
-(def PRINT_REDUCED_TYPES true)
+(def PRINT false)
+(def PRINT_UNREDUCED_TYPES false)
+(def PRINT_REDUCED_TYPES false)
 
 (def meta-reduce-one2) ; forward-decl!
 
@@ -184,37 +184,44 @@
 (def reduce-one-plus) ; forward-decl!
 
 (defn- reduce-child-plus
+  ;; TODO: remove this? Only nodes ever make it here now, I think.
   [c f v depth]
-  ;(println "c" c)
+  ; (prn "c:" c)  ; HACK
   (cond
     (node? c) 
     (reduce-one-plus c f v depth)
     
-    (vector? c) 
-    (let [; _ (println "c: " c)
-          ts (map #(reduce-one-plus % f v depth) c)  ; TODO: thread v through the reductions
-          ; _ (println "ts:" ts)
-          ]
-      [(vec (map first ts))
-        (reduce merge {} (map second ts))
-        v])  ; TODO: return last v
+    ; (vector? c) 
+    ; (let [; _ (println "c: " c)
+    ;       ts (map #(reduce-one-plus % f v depth) c)  ; TODO: thread v through the reductions
+    ;       ; _ (println "ts:" ts)
+    ;       ]
+    ;   [(vec (map first ts))
+    ;     (reduce merge {} (map second ts))
+    ;     v])  ; TODO: return last v
     
     true 
-    [c {} v]))
+    (do
+      (println "Never happens?")
+      [c {} v])))
 
 (defn- reduce-children-plus
   "Reduce the children of a node, returning a node (with the same id and set 
   of attributes) and a map of descendant node ids to the original node id for 
   each."
   [n f v depth]
-  ; (println "n:" n)
+  ; (prn "n:")  ; HACK
+  ; (print-node n true)  ; HACK
   (cond 
     (map-node? n)
     (let [ childrenAndMaps (for [ a (node-attrs n) ]
                             (let [ c (node-attr n a)
-                                   [ rc o vp ] (reduce-child-plus c f v depth)]  ; TODO: thread the value through?
+                                   [ rc o vp ] (reduce-child-plus c f v depth)  ; TODO: thread the value through?
+                                   ; _ (println "[rc o vp]" rc o vp) ; HACK
+                                   ]
                               [ a rc o vp ]))
                               ; (do (println "b:" [ a rc o vp ]) [ a rc o vp ])))
+          ; _ (println "CaM:" childrenAndMaps)  ; HACK
           val (reduce (fn [ m [a c o vp] ] (assoc m a c)) 
                       {} childrenAndMaps)
           ; _ (doall childrenAndMaps)
@@ -242,7 +249,7 @@
       [ reducedNode origins v ])
     
     true
-    n))
+    [n {} v]))
 
 (defn- indent
   [depth] 

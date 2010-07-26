@@ -53,8 +53,36 @@
       (= true v) 
       (= false v)))
 
+(def make-node) ; forward decl.
+(def node?)
+(defn- wrap-value
+  [v]
+  (cond
+    (node? v)
+    v
+    
+    (string? v)
+    (make-node :core/string v)
+    
+    (integer? v)
+    (make-node :core/int v)
+    
+    (float? v)
+    (make-node :core/float v)
+    
+    (keyword? v)
+    (make-node :core/name v)
+
+    (or (= true v) (= false v))
+    (make-node :core/boolean v)
+    
+    true
+    (assert false)))
+
+
 (defn make-node
   "Constructor for nodes."
+  ; TODO: wrap map values in nodes (:core/string, etc.)
   ([typ val]
     (make-node typ (genid) val))
   ([typ id val]
@@ -62,7 +90,7 @@
     (assert-pred keyword? id)
     (assert-pred #(or (map? %) (vector? %) (node-value? %)) val)
     (if (map? val) 
-      [typ id (reduce merge {} (for [ [k v] val ] { (childname typ k) v }))]
+      [typ id (reduce merge {} (for [ [k v] val ] { (childname typ k) (wrap-value v) }))]
       [typ id val])))
 
       
@@ -89,17 +117,17 @@
                     (node? v)
                     v
                     
-                    (and (keyword? v) (= :core/id k))
-                    v
+                    ; (and (keyword? v) (= :core/id k))
+                    ; v
                     
-                    ; Simple values need wrapping
+                    ; Simple values will get wrapped in make-node:
                     (node-value? v)
-                    (make-node :anonymous v)
+                    v
                     
                     ; Vector needs wrapping; so do its elements, if not nodes
                     (vector? v)
-                    (make-node :anonymous 
-                      (vec (for [c v] (if (node? c) c (make-node :anonymous c)))))
+                    (make-node :core/sequence 
+                      (vec (map wrap-value v)))
                     
                     true
                     (assert-pred (fn [n] false) v)) }))
@@ -207,11 +235,19 @@
   (do
     (assert-pred has-attr? n attr)
     ((node-content n) (resolve-name n attr))))
+    
+(defn node-attr-value
+  [n attr]
+  (node-value (node-attr n attr)))
 
 (defn node-children
 	"List of child nodes."
 	[n]
 	(for [a (node-attrs n)] (node-attr n a)))
+
+(defn node-attr-children
+  [n attr]
+  (node-children (node-attr n attr)))
 
 (defn visitNode
   "Applies a function to a node, recursively. The function is first applied to 

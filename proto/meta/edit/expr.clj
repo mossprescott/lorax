@@ -187,71 +187,75 @@
           (fn [n]
             (node :view/sequence
               :items
-              (node-attr n :view/expr/juxt/boxes)))
+              (node-attr n :boxes)))
 
           :view/expr/binary
           (fn [n]
             (node :view/sequence
               :items
-              (vec (interpose (node :view/thinspace) (node-attr n :view/expr/binary/boxes)))))
+              (vec (interpose (node :view/thinspace) 
+                              (node-attr-children n :boxes)))))
   
           :view/expr/relation
           (fn [n]
             (node :view/sequence
               :items
-              (vec (interpose (node :view/mediumspace) (node-attr n :view/expr/relation/boxes)))))
+              (vec (interpose (node :view/mediumspace) 
+                              (node-attr-children n :boxes)))))
 
           :view/expr/flow
           (fn [n]
             (node :view/sequence
               :items
-              (vec (interpose (node :view/thickspace) (node-attr n :view/expr/flow/boxes)))))
+              (vec (interpose (node :view/thickspace) 
+                              (node-attr-children n :boxes)))))
 
           :view/expr/keyword
           (fn keyword [n]
             (node :view/chars
-              :str (node-attr n :view/expr/keyword/str)
+              :str (node-attr n :str)
               :font :cmbx10))
 
           :view/expr/symbol
           (fn [n]
-            (assert (contains? SYMBOLS (node-attr n :view/expr/symbol/str)))  ; not great, you really want to know the symbol that wasn't found...
-            (let [ [c f] (SYMBOLS (node-attr n :view/expr/symbol/str)) ]
-              (node :view/chars
-                :str c
-                :font f)))
+            (let [sname (node-attr-value n :str)]
+              (assert-pred #(contains? SYMBOLS %) sname)
+              (let [ [c f] (SYMBOLS sname) ]
+                (node :view/chars
+                  :str (make-node :core/string c)
+                  :font (make-node :core/name f)))))
 
           ; TODO: handle primes and subscripts somehow?
           :view/expr/var
           (fn [n]
             (node :view/chars
-              :str (node-attr n :view/expr/var/str)
+              :str (node-attr n :str)
               :font :cmmi10))
               ; :font :timesItalic))  ;; HACK
 
           :view/expr/int
           (fn [n]
             (node :view/chars
-              :str (node-attr n :view/expr/int/str)
+              :str (node-attr n :str)
               :font :cmr10))
 
           :view/expr/string
           (fn [n]
             (node :view/chars
-              :str (str \u005c (node-attr n :view/expr/string/str) "\"")
+              :str (str \u005c (node-attr-value n :str) "\"")
               :font :cmr10
               :view/drawable/color (node :view/rgb :red 0 :green 0.5 :blue 0)))
 
           :view/expr/mono
           (fn [n]
             (node :view/chars
-              :str (node-attr n :view/expr/mono/str)
+              :str (node-attr n :str)
               :font :courier))
   
           :view/expr/prod
           (fn [n]
             (node :view/chars
-              :str (node-attr n :view/expr/prod/str)
+              :str (node-attr n :str)
               :font :courierItalic))
   
           :view/expr/missing
@@ -312,16 +316,16 @@
             (cond
               (= typ :view/expr/embed)
               [(node :view/border
-                :weight 1
-                :margin 3
+                  :weight 1
+                  :margin 3
               
-                :view/drawable/colors [ (nth EMBED_BORDER_COLORS (inc level)) ]
+                  :view/drawable/colors [ (nth EMBED_BORDER_COLORS (inc level)) ]
               
-                :fill
-                (nth EMBED_COLORS (inc level))
+                  :fill
+                  (nth EMBED_COLORS (inc level))
                 
-                :item
-                (node-attr n :content))
+                  :item
+                  (node-attr n :content))
                 (inc level)]
             
               (= typ :view/expr/unbed)
@@ -329,16 +333,16 @@
                             (do (println "warning: embedding error at node " (node-id n)) 1) 
                             level)]
                 [(node :view/border
-                  :weight 1
-                  :margin 3
+                    :weight 1
+                    :margin 3
               
-                  :view/drawable/colors [ (nth EMBED_BORDER_COLORS level) ]
+                    :view/drawable/colors [ (nth EMBED_BORDER_COLORS level) ]
               
-                  :fill
-                  (nth EMBED_COLORS (dec level))
+                    :fill
+                    (nth EMBED_COLORS (dec level))
                 
-                  :item
-                  (node-attr n :content))
+                    :item
+                    (node-attr n :content))
                   (dec level)])
               
                 (contains? rules typ)
