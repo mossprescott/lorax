@@ -233,7 +233,9 @@
                                  (node-id n)
                                  val)
           origins (reduce (fn [ m [a c o vp]] (merge m o))
-                            {} childrenAndMaps)]
+                            {} childrenAndMaps)
+          ; _ (println "reduced (map):" reducedNode) ; HACK
+          ]
       [ reducedNode origins v ])
     
     (seq-node? n)
@@ -245,7 +247,10 @@
                                  (node-id n)
                                  val)
           origins (reduce (fn [ m [c o vp]] (merge m o))
-                            {} childrenAndMaps)]
+                            {} childrenAndMaps)
+          ; _ (println "reduced (seq):") ; HACK
+          ; _ (print-node reducedNode)
+          ]
       [ reducedNode origins v ])
     
     true
@@ -281,13 +286,15 @@
                                                  ; "-> []" 
                                                   (str "-> " (node-type np)))))
       (let [ [ npp o vpp] (cond 
-                          (nil? np) (reduce-children-plus n f vp (inc depth))  ; n is fully-reduced; recursively reduce its children
-                          ; (vector? np) (reduce-child-plus np f vp (inc depth))  ; Tricky! if a node was reduced to a vector, its contents may need reduction
-                          true (reduce-one-plus np f vp (inc depth))) ; n may need additional reduction
+                            (nil? np) (reduce-children-plus n f vp (inc depth))  ; n is fully-reduced; recursively reduce its children
+                            ; (vector? np) (reduce-child-plus np f vp (inc depth))  ; Tricky! if a node was reduced to a vector, its contents may need reduction
+                            true (reduce-one-plus np f vp (inc depth))) ; n may need additional reduction
               op (if (node? npp)
                   (assoc o (node-id npp) origId) ; this includes all nodes in the result, mapping new nodes to themselves
-                  o) ] ; if the result is not a node (e.g. it's a vector) then the id mapping is lost
+                  o) ; if the result is not a node (e.g. it's a vector) then the id mapping is lost
               ; [;op (if (nil? np) o (assoc o (node-id npp) origId)) ]
+              ; _ (println "reduced (one-plus):" npp) ; HACK
+              ]
           [ npp op vpp ]))
     [ n {} v ]))
 

@@ -81,16 +81,23 @@
 
 
 (defn make-node
-  "Constructor for nodes."
-  ; TODO: wrap map values in nodes (:core/string, etc.)
+  "Constructor for nodes. For convenience, any sequence value is converted to 
+  a vector (i.e. a seq-node), and any primitive value is wrapped in a node
+  with the standard type (e.g. :core/string)."
   ([typ val]
     (make-node typ (genid) val))
   ([typ id val]
     (assert-pred keyword? typ)
     (assert-pred keyword? id)
-    (assert-pred #(or (map? %) (vector? %) (node-value? %)) val)
-    (if (map? val) 
+    (assert-pred #(or (map? %) (vector? %) (seq? %) (node-value? %)) val)
+    (cond 
+      (map? val) 
       [typ id (reduce merge {} (for [ [k v] val ] { (childname typ k) (wrap-value v) }))]
+      
+      (seq? val)
+      [typ id (vec val)]
+      
+      true
       [typ id val])))
 
       
@@ -396,7 +403,8 @@
         (println ")"))
       
       true
-      (println (str indent "??? " n)))))
+      (assert false))))
+      ; (println (str indent "??? " n)))))
         
       ; (node? n)
       ; (do

@@ -57,32 +57,29 @@
         }
         parenNode 
           (fn [n]
-            (node :view/parens
-              :left "("
-              :right ")"
-              :view/drawable/color (synthetic-color-node)
-              :content n))
-        reduceBinary
+            (make-node :view/parens {
+                :left "("
+                :right ")"
+                :view/drawable/color (synthetic-color-node)
+                :content n
+              }))
+        reduceSeq
           (fn [n]
-              (let [;kw (keyword (subs (str (node-type n) "/boxes") 1))
-                    ptype (node-type n)
+              (let [ptype (node-type n)
                     wrappable (fn [c] (and
                                         (node? c)
                                         (contains? wrappableEmbeddings [ ptype (node-type c) ] )
-                                        (< 1 (count (node-attr c :boxes)))))
+                                        (< 1 (count (node-children c)))))
                     wrap (fn [n]
                           (if (wrappable n)
                             (parenNode n)
                             n))
-                    boxes (node-attr n :boxes)]
-                ; (println "kw:" kw)
-                ; (println "n:") (print-node n)
+                    boxes (node-children n)]
                 ; Note: need to make sure some child needs wrapping and otherwise return nil
                 ; to avoid infinite loops:
-                (if (and (vector? boxes) (some wrappable boxes))
-                  (node (node-type n)
-                    :boxes
-                    (vec (map wrap boxes)))
+                (if (some wrappable boxes)
+                  (make-node ptype
+                             (vec (map wrap boxes)))
                   nil)))
         reduceScripted
           (fn [n]
@@ -92,17 +89,18 @@
               (if (and (node? nucl)
                         (contains? compound (node-type nucl))
                         (< 1 (count (node-attr nucl :boxes))))
-                (node :view/scripted
-                  :nucleus
-                  (parenNode nucl)
+                (make-node :view/scripted {
+                    :nucleus
+                    (parenNode nucl)
                 
-                  :super
-                  sup))))
+                    :super
+                    sup
+                  }))))
         rules {
-          :view/expr/juxt reduceBinary
-          :view/expr/binary reduceBinary
-          :view/expr/relation reduceBinary
-          :view/expr/flow reduceBinary
+          :view/expr/juxt reduceSeq
+          :view/expr/binary reduceSeq
+          :view/expr/relation reduceSeq
+          :view/expr/flow reduceSeq
           
           :view/scripted reduceScripted
         }]
@@ -185,30 +183,26 @@
   (let [rules {
           :view/expr/juxt
           (fn [n]
-            (node :view/sequence
-              :items
-              (node-attr n :boxes)))
+            (make-node :view/sequence
+              (node-children n)))
 
           :view/expr/binary
           (fn [n]
-            (node :view/sequence
-              :items
+            (make-node :view/sequence
               (vec (interpose (node :view/thinspace) 
-                              (node-attr-children n :boxes)))))
+                              (node-children n)))))
   
           :view/expr/relation
           (fn [n]
-            (node :view/sequence
-              :items
+            (make-node :view/sequence
               (vec (interpose (node :view/mediumspace) 
-                              (node-attr-children n :boxes)))))
+                              (node-children n)))))
 
           :view/expr/flow
           (fn [n]
-            (node :view/sequence
-              :items
+            (make-node :view/sequence
               (vec (interpose (node :view/thickspace) 
-                              (node-attr-children n :boxes)))))
+                              (node-children n)))))
 
           :view/expr/keyword
           (fn keyword [n]
@@ -298,13 +292,12 @@
           ; node should really be handled in nodes.clj with custom rendering
           :view/parens
           (fn [n]
-            (node :view/sequence
-              :items [
+            (make-node :view/sequence [
                 (node :view/chars
                   :str (node-attr n :left)
                   :font :times; :cmr10
                   :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
-                (n :view/parens/content)
+                (node-attr n :content)
                 (node :view/chars
                   :str (node-attr n :right)
                   :font :times; :cmr10

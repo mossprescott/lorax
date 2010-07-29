@@ -60,6 +60,8 @@
 ;       (.setVisible true))))
 ; (celsius)
 
+(def PRINT_ALL false)
+
 (def MARGIN 10)
 (def SELECTED_COLOR 
   (Color. (float 1.0) (float 0.7) (float 0.85)))
@@ -186,14 +188,16 @@
   [] ; TODO
   nil) ; TODO
       
-; Obsolete simpler display:
+; Obsolete simpler display for :view/expr programs only:
 (defn makeFrame 
   [n title]
   (let [frame (JFrame. (str "Meta - " title))
         debugFlag (ref false)
         display (fn [n p] (exprToView (if p (parenthesize n) n)))
         ; display (fn [n p] n) ; HACK
-        nref (ref (display n false))
+        [n o] (display n false)
+        nref (ref n)
+        _ (if PRINT_ALL (print-node @nref true))
         sref (ref #{})  ; HACK
         panel #^JComponent (makePanel nref debugFlag sref {} (ref {}))
         scroll (JScrollPane. panel)
@@ -202,7 +206,8 @@
     (.addActionListener parens 
       (proxy [ActionListener] []
         (actionPerformed [evt]
-          (dosync (ref-set nref (display n (.isSelected parens))))
+          (let [ [n o] (display n (.isSelected parens))]
+            (dosync (ref-set nref n)))
           (.repaint panel))))
     (.addActionListener debug 
       (proxy [ActionListener] []
@@ -264,8 +269,6 @@
 
 
 (def PARENS_DEFAULT true)
-
-(def PRINT_ALL false)
 
 ;
 ; Selection...
