@@ -13,15 +13,17 @@
     :clojure/kernel/bind
     (fn [n]
       ; (do (println "bind" (node-id n))
-      (node :view/expr/var
-        :str (simple-name (node-id n))))
+      (make-node :view/expr/var {
+          :str (simple-name (node-id n))
+        }))
       ; )
       
     :clojure/kernel/var
     (fn [n]
       (let [r (node-attr n :ref)]
-        (node :view/expr/var
-          :str (simple-name (ref-node-id r)))))
+        (make-node :view/expr/var {
+            :str (simple-name (ref-node-id r))
+          })))
   })
         
 (defn name-to-expr

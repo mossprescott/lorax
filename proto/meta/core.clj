@@ -43,7 +43,10 @@
 ; was an instance of the struct map, that would give some "type safety".
 ; It's not clear that it would be any more efficient than a small vector.
 
-(defn node-value?
+; Better, use the new deftype form in Clojure 1.2. This is an honest-to-goodness
+; class with a proper type and platform-native fields.
+
+(defn- node-value?
   "True if the argument is of the proper type to be the value of a 'value node'."
   [v]
   (or (string? v) 
@@ -55,6 +58,7 @@
 
 (def make-node) ; forward decl.
 (def node?)
+
 (defn- wrap-value
   [v]
   (cond
@@ -77,7 +81,8 @@
     (make-node :core/boolean v)
     
     true
-    (assert false)))
+    (throw (AssertionError. (str "Invalid node value: " v)))))
+    ;(assert-pred #(= % 2) v)))
 
 
 (defn make-node
@@ -94,8 +99,8 @@
       (map? val) 
       [typ id (reduce merge {} (for [ [k v] val ] { (childname typ k) (wrap-value v) }))]
       
-      (seq? val)
-      [typ id (vec val)]
+      (or (coll? val))
+      [typ id (vec (map wrap-value val))]
       
       true
       [typ id val])))
@@ -189,6 +194,10 @@
     (assert-pred ref-node? n)
     (node-content n)))
 
+(defn value-node?
+  [n]
+  (and (node? n) (node-value? (node-content n))))
+
 (defn node-value
   "Value of a string, int, or keyword node."
   [n]
@@ -239,9 +248,9 @@
 
 (defn node-attr
   [n attr]
-  (do
-    (assert-pred has-attr? n attr)
-    ((node-content n) (resolve-name n attr))))
+  (if (has-attr? n attr)
+    ((node-content n) (resolve-name n attr))
+    (throw (AssertionError. (str "Attribute not found: " attr " in node " (node-type n) " " (node-attrs n))))))
     
 (defn node-attr-value
   [n attr]
@@ -352,9 +361,9 @@
 ; This is not so pretty, actually, but at least it makes the structure clear.
 
 (defn short-attr-name
-  [n k]
+  [n a]
   (let [nstr (str (node-type n))
-        kstr (str k)]
+        kstr (str a)]
     (if (.startsWith kstr nstr) 
       (str ":" (subs kstr (inc (count nstr)))) 
       kstr)))
@@ -403,8 +412,8 @@
         (println ")"))
       
       true
-      (assert false))))
-      ; (println (str indent "??? " n)))))
+      ; (assert false))))
+      (println (str indent "??? " n)))))
         
       ; (node? n)
       ; (do
@@ -443,9 +452,10 @@
 ; File I/O:
 
 (defn load-nodes
-  "Read nodes from a '.mlj' file. Nodes can be in raw form (i.e. maps) or as 
-  Clojure forms which evaluate to the actual nodes (i.e. '(node :foo ...)').
-  Any form which isn't a node and isn't a (node ...) form is ignored."
+  "Read nodes from a '.mlj' file. Nodes can be in raw form (i.e. 3-vectors) or as 
+  Clojure forms which evaluate to the actual nodes (i.e. '(make-node :foo ...)').
+  Any form which isn't a node and isn't a (make-node ...) or (node ...) form is 
+  ignored."
   [fname]
   (let [r (PushbackReader. (FileReader. fname))
         nodes (loop [ v [] ]
@@ -455,7 +465,7 @@
                     (cond 
                       (node? f) 
                         (recur (conj v f))
-                      (and (list? f) (= (first f) 'node)) 
+                      (and (list? f) (contains? #{'node 'make-node} (first f))) 
                         (recur (conj v (eval f)))
                       true 
                         (recur v)))))]

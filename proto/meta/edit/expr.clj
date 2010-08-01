@@ -178,6 +178,12 @@
   ]))
 
 
+(defn- as-string
+  [n]
+  (if (and (value-node? n) (string? (node-value n)))
+      n
+      (make-node :core/string (str (node-type n)))))
+
 (defn exprToView 
   [n]
   (let [rules {
@@ -207,7 +213,7 @@
           :view/expr/keyword
           (fn keyword [n]
             (node :view/chars
-              :str (node-attr n :str)
+              :str (as-string (node-attr n :str))
               :font :cmbx10))
 
           :view/expr/symbol
@@ -223,33 +229,36 @@
           :view/expr/var
           (fn [n]
             (node :view/chars
-              :str (node-attr n :str)
+              :str (as-string (node-attr n :str))
               :font :cmmi10))
               ; :font :timesItalic))  ;; HACK
 
           :view/expr/int
           (fn [n]
             (node :view/chars
-              :str (node-attr n :str)
+              :str (as-string (node-attr n :str))
               :font :cmr10))
 
           :view/expr/string
           (fn [n]
-            (node :view/chars
-              :str (str \u005c (node-attr-value n :str) "\"")
-              :font :cmr10
-              :view/drawable/color (node :view/rgb :red 0 :green 0.5 :blue 0)))
+            (let [val (node-attr n :str)
+                  s (as-string val)]
+              (make-node :view/chars {
+                  :str (str \u005c s "\"")
+                  :font :cmr10
+                  :view/drawable/color (node :view/rgb :red 0 :green 0.5 :blue 0)
+                })))
 
           :view/expr/mono
           (fn [n]
             (node :view/chars
-              :str (node-attr n :str)
+              :str (as-string (node-attr n :str))
               :font :courier))
   
           :view/expr/prod
           (fn [n]
             (node :view/chars
-              :str (node-attr n :str)
+              :str (as-string (node-attr n :str))
               :font :courierItalic))
   
           :view/expr/missing

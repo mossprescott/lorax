@@ -118,4 +118,6 @@
 ; (print-node p2p-reduced)
 
 ; (makeFrame p2 "view/expr/...")
-(makeSyntaxFrame p2 "view/expr/..." (fn [n] (meta-reduce2 n (reduceByType {}))) {})
+(makeSyntaxFrame p2 "view/expr/..." 
+  (fn [n] (meta-reduce2 n (reduceByType {})))  ; Note: no-op reduction -- the node is already in :view/expr
+  {})

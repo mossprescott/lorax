@@ -220,8 +220,7 @@
         instances (invert-set-map supers)
         ;_ (println instances)
         ]
-    (node :structure/language
-      :rules
+    (make-node :structure/language
       (vec (for [r (node-attr grammar :grammar/language/rules)]
               (node :structure/rule
                 :type                 
@@ -241,8 +240,8 @@
 (defn- getGrammarRule
   "Rule node for the given type, or nil"
   [grammar nodeType]
-  (let [ matches (for [r (node-attr grammar :grammar/language/rules) 
-                    :when (= nodeType (node-attr r :grammar/rule/type))] r) ]
+  (let [ matches (for [r (node-children grammar) 
+                    :when (= nodeType (node-attr r :type))] r) ]
     (condp = (count matches)
       0 nil
       1 (first matches)
@@ -321,9 +320,8 @@
   ; TODO: this should be a trivial operation on nodes -- make a new node with 
   ; the concatenated children of some nodes. What language is provided for that?
   [& more]
-  (node :grammar/language
-    :rules
-    (vec (mapcat #(node-attr % :grammar/language/rules) more))))
+  (make-node :grammar/language
+    (vec (mapcat node-children more))))
 
 ;
 ; Presentation for the structure specification language:
@@ -454,14 +452,14 @@
   
   :structure/node
   (fn [n]
-    (node :view/expr/prod :str (baseName (node-attr n :structure/node/type))))  ; TODO
+    (node :view/expr/prod :str (baseName (node-attr-value n :structure/node/type))))  ; TODO
   
   :structure/ref
   (fn [n]
     (node :view/expr/flow
       :boxes [
         (node :view/expr/keyword :str "ref")
-        (node :view/expr/prod :str (baseName (node-attr n :structure/ref/type)))  ; TODO
+        (node :view/expr/prod :str (baseName (node-attr-value n :structure/ref/type)))  ; TODO
       ]))
 
   :structure/any
@@ -480,103 +478,146 @@
 (def grammarPresRules {
   :grammar/language
   (fn [n] 
-    (node :view/section
-      :items
-      (node-attr n :rules)))
+    (make-node :view/section
+      (node-children n)))
   
   :grammar/rule
   (fn [n]
-    (node :view/section
-      :items [
-        (node :view/expr/flow
-          :boxes [
-            (node :view/expr/prod :str (simpleName (node-attr n :type)))
-            (node :view/expr/symbol :str :to)
-            (node :view/expr/juxt 
-              :boxes 
-              (vec (interpose 
-                    (node :view/chars/str :str ", " :font :cmr10)
-                    (for [ kw (node-attr n :supers) ] 
-                      (node :view/expr/prod :str (simpleName kw)))))) ;; HACK?
+    (make-node :view/section [
+        (make-node :view/expr/flow [
+            (node-attr n :type)
+            ; (make-node :view/expr/prod { 
+            ;     :str (simpleName (node-attr-value n :type)) 
+            ;   })
+            (make-node :view/expr/symbol {
+                :str :to
+              })
+            (node-attr n :supers)
           ])
-        (node :view/sequence
-          :items [
+        (make-node :view/sequence [
+            (node :view/quad)
+            (node-attr n :attrs)
+          ])
+        (make-node :view/sequence [
             (node :view/quad)
             (node :view/expr/embed
               :content
               (node-attr n :display))
           ])
         (with-attr n :expand e
-          (node :view/sequence
-            :items [
+          (node :view/sequence [
               (node :view/quad)
               (node :view/expr/symbol :str :to)
               (node :view/thickspace)
               e
             ])
-          (node :view/sequence :items [])) ; HACK: empty node
+          (make-node :view/sequence [])) ; HACK: empty node
         (node :view/expr/keyword :str " ")
       ]))
       
-  ; Tricky: a single sequence node lives where a vector of nodes is expected,
-  ; so it has to be reduced to a vector of some kind or all hell breaks loose
-  :grammar/sequence
+  :grammar/types
   (fn [n]
-    ; (do (println n)
-    (let [name (baseName (node-attr n :name))  ; TODO: know the parent rule type, so it can be stripped?
-          v (node :view/expr/unbed
-              :content
-              (node :view/expr/relation
-                :boxes [
-                  (node :view/expr/mono :str name)
-                  (node :view/expr/keyword :str ":")
-                  (node :view/scripted
-                    :nucleus
-                    (node :view/expr/relation 
-                      :boxes
-                      (vec (interpose
-                            (node :view/expr/symbol :str "|")
-                            (with-attr-seq n :options))))
-                    
-                    :super
-                    (node :view/chars :str "*" :font :cmr10-script))  ; HACK
-                ]))
-          e (node :view/expr/keyword :str "...")
-          cs [ v e ] ]
-      (if (has-attr? n :separator)
-        (vec (interpose (node-attr n :separator) cs))
-        cs)))
+    (make-node :view/expr/juxt
+      (vec (interpose
+              (make-node :view/sequence [
+                  (make-node :view/expr/keyword { :str ", " })
+                  (make-node :view/thinspace {})
+                ])
+              (node-children n)))))
+
+  :grammar/type
+  (fn [n]
+    (make-node :view/expr/prod {
+        :str (baseName (node-value n))
+      }))
+  
+  :grammar/attrs
+  (fn [n]
+    (make-node :view/section
+      (node-children n)))
+
+  :grammar/attr
+  (fn [n]
+    (make-node :view/expr/relation [
+        (node-attr n :name)
+        (make-node :view/expr/keyword { :str ":" })
+        (node-attr n :options)
+      ]))
+  
+  :grammar/name
+  (fn [n]
+    (make-node :view/expr/var {
+        :str (baseName (node-value n))
+      }))
+      
+  :grammar/options
+  (fn [n] 
+    (make-node :view/expr/binary
+      (interpose (make-node :view/expr/keyword { :str "|" })
+                 (node-children n))))
+  
+  :grammar/ref
+  (fn [n]
+    (make-node :view/expr/unbed {
+        :content
+        (make-node :view/expr/var { :str (baseName (ref-node-id (node-attr n :ref))) })  ; HACK: will be handled by the name reduction
+      }))
+  
+  ; ; Tricky: a single sequence node lives where a vector of nodes is expected,
+  ; ; so it has to be reduced to a vector of some kind or all hell breaks loose
+  ; :grammar/sequence
+  ; (fn [n]
+  ;   ; (do (println n)
+  ;   (let [name (baseName (node-attr n :name))  ; TODO: know the parent rule type, so it can be stripped?
+  ;         v (node :view/expr/unbed
+  ;             :content
+  ;             (make-node :view/expr/relation [
+  ;                 (node :view/expr/mono :str name)
+  ;                 (node :view/expr/keyword :str ":")
+  ;                 (node :view/scripted
+  ;                   :nucleus
+  ;                   (node :view/expr/relation 
+  ;                     (vec (interpose
+  ;                           (node :view/expr/symbol :str "|")
+  ;                           (with-attr-seq n :options))))
+  ;                   
+  ;                   :super
+  ;                   (node :view/chars :str "*" :font :cmr10-script))  ; HACK
+  ;               ]))
+  ;         e (node :view/expr/keyword :str "...")
+  ;         cs [ v e ] ]
+  ;     (if (has-attr? n :separator)
+  ;       (vec (interpose (node-attr n :separator) cs))
+  ;       cs)))
         
-    :grammar/attr
-    (fn [n]
-      (let [name (baseName (node-attr n :name))  ; TODO: know the parent rule type, so it can be stripped?
-            options (with-attr-seq n :options)
-            optNode (node :view/expr/binary 
-                :boxes
-                (vec (interpose
-                      (node :view/expr/symbol :str "|")
-                      options)))
-            onp (if (node-attr n :optional)
-                  (node :view/expr/juxt
-                    :boxes [
-                      optNode
-                      (node :view/expr/keyword :str "?")
-                    ])
-                    optNode)
-            a (node :view/expr/relation
-                :boxes [
-                  (node :view/expr/mono :str name)
-                  (node :view/expr/keyword :str ":")
-                  onp
-                  ])
-            b (node :view/expr/unbed
-                :content a)] 
-            ; (node :view/border
-            ;                 :weight 1
-            ;                 :margin 1
-            ;                 :view/drawable/colors [ (node :view/rgb :red 0.9 :green 0.7 :blue 0.7) ]
-            ;                 :item a)]
-        b))
+    ; :grammar/attr
+    ; (fn [n]
+    ;   (let [name (baseName (node-attr n :name))  ; TODO: know the parent rule type, so it can be stripped?
+    ;         options (with-attr-seq n :options)
+    ;         optNode (make-node :view/expr/binary 
+    ;                   (vec (interpose
+    ;                         (make-node :view/expr/symbol { :str "|" })
+    ;                         (node-children options))))
+    ;         onp (if (node-attr n :optional)
+    ;               (make-node :view/expr/juxt [
+    ;                   optNode
+    ;                   (make-node :view/expr/keyword { :str "?" })
+    ;                 ])
+    ;                 optNode)
+    ;         a (make-node :view/expr/relation [
+    ;               (make-node :view/expr/mono { :str name })
+    ;               (make-node :view/expr/keyword { :str ":" })
+    ;               onp
+    ;               ])
+    ;         b (make-node :view/expr/unbed {
+    ;               :content a
+    ;             })] 
+    ;         ; (node :view/border
+    ;         ;                 :weight 1
+    ;         ;                 :margin 1
+    ;         ;                 :view/drawable/colors [ (node :view/rgb :red 0.9 :green 0.7 :blue 0.7) ]
+    ;         ;                 :item a)]
+    ;     b))
   })
 
 ;

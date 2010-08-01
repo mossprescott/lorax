@@ -1,12 +1,34 @@
+Fix grammar/structure checking:
+- fix grammar display
+- fix sequence attr
+
+Fix grammar-based reduction:
+- 
+
 selection:
-- selection of sequences
 - selection of string, int
 - disable the buttons
 - select :missing nodes
 - ordering of :view/scripted attributes (the only one so far that isn't implicitly ordered)
 
+
+
+Better name reduction
+
+Make display also a quoted expression, so you can write arbitrary code...
+
 regex
 - reduction to compiled pattern? compile-time vs. run-time?
+- 
+
+additional views:
+- selected node detail
+  - type, id, kind (map, seq, string, int, float, name)
+  - visible children
+  - invisible children
+- tree view
+  - render hierarchy in simple tree form
+  - makes the selection operations obvious?
 
 next demo language?
 - python? (not typed, but rich(er) syntax)
@@ -17,14 +39,6 @@ next demo language?
 - list comprehensions
 - several lambda forms (lightweight to heavyweight)
 
-Better name reduction
-
-
-
-Make it real:
-- Make string, int, float, bool values a form of node, so their ids can be 
-tracked for editing purposes.
-- make display also a quoted expression, so you can write arbitrary code...
 
 
 presentation reduction:

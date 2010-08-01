@@ -348,7 +348,7 @@
   ([n attrName c body]
     `(with-attr ~n ~attrName ~c ~body 
       (node :view/expr/missing))))
-  
+
 (defmacro with-attr-seq
   "With 2 arguments, returns either the value of the attribute or a sequence
   containing only a 'missing' node. With 4 arguments, binds _c_ to the value 
@@ -358,7 +358,7 @@
     `(with-attr-seq ~n ~attrName c# c#))
   ([n attrName c body]
     `(with-attr ~n ~attrName ~c ~body 
-      [(node :view/expr/missing)])))
+      (make-node :core/sequence [ (make-node :view/expr/missing {}) ]))))
   
 
 (defn apply-until

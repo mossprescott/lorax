@@ -146,7 +146,7 @@
                   ;                                   (.getGraphics this))) ; HACK
                   ;         (println "size" (size (node :view/sequence :items [ (node :view/chars :str "abc" :font :cmr10) (node :view/chars :str "a" :font :cmmi10) ]) 
                   ;                                   (.getGraphics this))) ; HACK
-                  (drawNode @nref (doto (.create g) (.translate MARGIN MARGIN)) @dref @sref errors @oref)))
+                  (time (drawNode @nref (doto (.create g) (.translate MARGIN MARGIN)) @dref @sref errors @oref))))
               (getPreferredSize []
                 (let [this #^JComponent this
                       g (.getGraphics this)

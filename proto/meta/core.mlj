@@ -7,8 +7,7 @@
 
 (use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
 
-(node :grammar/language
-  :rules [
+(make-node :grammar/language [
   
     (node :grammar/rule
       :type 

@@ -186,13 +186,13 @@
   is a grammar/attr node, mostly."
   [str-attr]
   (cond 
-    (string? str-attr) str-attr 
-    (node? str-attr) (subs (str (node-type str-attr)) 1)
+    (value-node? str-attr) (str (node-value str-attr))
+    (node? str-attr) (subs (str (node-type str-attr)) 1)  ; HACK
     true (str str-attr)))
 
 (defmethod size :view/chars
   [n #^Graphics2D g]
-  (let [s (as-string (node-attr-value n :str))
+  (let [s (as-string (node-attr n :str))
         f (node-attr-value n :font)
         fm (.getFontMetrics g (FONTS f))
         ; _ (println "str:" (node-id n) s)
@@ -396,7 +396,7 @@
           i (if (odd? weight) 0.5 0)  ; an adjustment to make it align to pixels usually
           x2 (+ i (int w))
           y2 (+ i (int h))
-          colors (for [c (node-attr n :view/drawable/colors)] (color c))
+          colors (for [c (node-attr-children n :view/drawable/colors)] (color c))
           ; foo (println colors)
           ]
     (do
@@ -439,17 +439,21 @@
 ;
 
 (defn- reduceOne
+  "Reduce a single child of a node which was reduced by the generic reduction."
   [v]
-  (cond 
-    (node? v) v
-
-    (vector? v) (node :view/section 
-                  :items 
-                  (vec (map reduceOne v)))
-
-    (string? v) (node :view/expr/string :str v)
-
-    true (node :view/expr/keyword :str (str v))))
+  (condp = (node-type v) 
+    :core/name
+    (make-node :view/expr/keyword { :str (make-node :core/string (subs (str (node-value v)) 1)) })
+    
+    v))
+    ; (node? v) v
+    ; 
+    ; (vector? v) (make-node :view/section
+    ;                 (vec (map reduceOne v)))
+    ; 
+    ; (string? v) (make-node :view/expr/string { :str v })
+    ; 
+    ; true (make-node :view/expr/keyword { :str (str v) })))
 
 
 (defn reduceAny
@@ -457,30 +461,28 @@
   which shows all children."
   [n]
   (let [typ (subs (str (node-type n)) 1)]
-    ; (println "typ:" typ)  ; HACK
-    (if-not (or (re-matches #"view/.*" typ) (re-matches #"core/.*" typ))
+; (prn "typ:" typ)  ; HACK
+    (cond
+      (not (or (re-matches #"view/.*" typ) (re-matches #"core/.*" typ)))
       ; (do (println "  reducing...")  ; HACK
       (node :view/border
         :weight 1
         :margin 1
         :view/drawable/colors [ (node :view/rgb :red 0.2 :green 0.2 :blue 0.5) ]
         :item
-        (node :view/section
-          :items [
+        (make-node :view/section [
             (node :view/chars 
               :str typ
               :font :courier)
-            (node :view/sequence
-              :items [
+            (make-node :view/sequence [
                 (node :view/quad)
-                (node :view/section
-                  :items
+                (make-node :view/section
                   (vec 
                     (for [a (node-attrs n)]
-                      (let [v (node-attr n a)]
-                        (node :view/expr/flow
-                          :boxes [
-                            (node :view/expr/mono :str (subs (short-attr-name n a) 1))  ; TODO: strip node type
+                      (let [v (node-attr n a)
+                            ap (if (keyword? a) (subs (short-attr-name n a) 1) (str a))]
+                        (make-node :view/expr/flow [
+                            (node :view/expr/mono :str ap)
                             (node :view/expr/symbol :str :mapsto)
                             (reduceOne v)
                           ])))))

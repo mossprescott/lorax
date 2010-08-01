@@ -12,23 +12,28 @@
 (defn load-grammar
   [& fs]
   (apply compose-grammars 
+  ; (dorun (map print-node
+  ; (println
     (map load-node fs)))
+    
 
 (def grammar-grammar 
-  (load-grammar "meta/grammar.mlj" "meta/edit/view.mlj" "meta/edit/expr.mlj" 
-                    "meta/clojure/kernel2.mlj" "meta/clojure/core.mlj"))
+  ; (load-grammar "meta/grammar.mlj" "meta/edit/view.mlj" "meta/edit/expr.mlj" 
+  ;                   "meta/clojure/kernel2.mlj" "meta/clojure/core.mlj"))
+  (load-grammar "meta/clojure/kernel2.mlj"))
 
-(def grammar-structure
-  (grammar-to-structure grammar-grammar))
+; (def grammar-structure
+;   (grammar-to-structure grammar-grammar))
 
-(def grammar-checker
-  (make-structure-checker grammar-structure))
+; (def grammar-checker
+;   (make-structure-checker grammar-structure))
 
 (def grammar-display-simple
   (reduceByType (merge grammarPresRules structurePresRules)))
 
 (def clojure-grammar 
-  (load-grammar "meta/core.mlj" "meta/clojure/kernel2.mlj" "meta/clojure/core.mlj"))
+  ; (load-grammar "meta/core.mlj" "meta/clojure/kernel2.mlj" "meta/clojure/core.mlj"))
+  (load-grammar "meta/core.mlj" "meta/clojure/kernel2.mlj"))
   
 (def clojure-display
   (grammar-to-display clojure-grammar))
@@ -48,7 +53,8 @@
                     (let [; _ (print-node n true)
                           display (apply-until name-display 
                                               grammar-display-simple 
-                                              clojure-display)
+                                              ; clojure-display)
+                                              )
                           np (display n)
                           ; np (grammar-display-simple n)
                           ; _ (println "is gr/str:" (not (nil? np)))
@@ -113,8 +119,8 @@
 (defn show
   [f]
   (let [gr (load-node f)
-        _ (print-node gr true)
-        errors (grammar-checker gr)
+        ; _ (do (print "gr: ") (print-node gr true)) ; HACK
+        errors {} ;(grammar-checker gr)
         _ (show-errors errors)]
     (makeSyntaxFrame gr f grammar-display errors)))
 
