@@ -14,8 +14,11 @@
 	            Graphics2D))
 	(:import (java.awt.geom 
 	            Line2D$Float 
+	            Rectangle2D
 	            Rectangle2D$Float)))
 	
+(set! *warn-on-reflection* true)
+
 ; Nodes:
 
 ; :view/color
@@ -177,6 +180,14 @@
   not the children), assuming the upper-left corner is located at the origin."
   (fn [n gfx debug?] (node-type-or-nil n)))
 
+(defn- string-bounds 
+  "Encapsulate size calculation for strings, in the hopes that memo-izing 
+  it would be a big win, but it must get cached somewhere else because it 
+  doesn't seem to make much difference (tested by returning a constant here)."
+  [s f #^Graphics2D g]
+  (let [fm (.getFontMetrics g (FONTS f))]
+    (.getStringBounds fm s g)))
+
 ;
 ; Chars:
 ;
@@ -194,9 +205,10 @@
   [n #^Graphics2D g]
   (let [s (as-string (node-attr n :str))
         f (node-attr-value n :font)
-        fm (.getFontMetrics g (FONTS f))
+        ; fm (.getFontMetrics g (FONTS f))
         ; _ (println "str:" (node-id n) s)
-        bounds (.getStringBounds fm s g)]
+        ; bounds (.getStringBounds fm s g)]
+        #^Rectangle2D bounds (string-bounds s f g)]
       ; (println bounds)
       [(.getWidth bounds)
         (if (= f :cmsy10)  ; HACK: workaround weird descent in the symbol font for now
@@ -210,7 +222,7 @@
   [n #^Graphics2D g debug?]
   (let [ [w h b] (size n g)
           font (FONTS (node-attr-value n :font))
-          s (as-string (node-attr-value n :str))
+          #^String s (as-string (node-attr-value n :str))
           angle 0.0 ];(.getItalicAngle font) ]
     ; (println [s w h b angle])
     (if debug?
