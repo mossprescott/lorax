@@ -560,7 +560,8 @@
   (fn [n]
     (make-node :view/expr/unbed {
         :content
-        (make-node :view/expr/var { :str (baseName (ref-node-id (node-attr n :ref))) })  ; HACK: will be handled by the name reduction
+        (node-attr n :ref)
+        ; (make-node :view/expr/var { :str (baseName (ref-node-id (node-attr n :ref))) })  ; HACK: will be handled by the name reduction
       }))
   
   ; ; Tricky: a single sequence node lives where a vector of nodes is expected,

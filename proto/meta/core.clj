@@ -10,7 +10,9 @@
             FileReader
             PushbackReader)))
 
-
+;
+; General utilities:
+;
 (defmacro assert-pred
   "Evaluates (pred x) and throws an exception if it does not evaluate to
   logical true."
@@ -18,6 +20,16 @@
   (when *assert*
     `(when-not (~pred ~@more)
        (throw (new AssertionError (str '(~pred ~@more) "; " '~@more " -> " ~@more))))))
+
+(defmacro mapfor
+  "Macro for building maps. Takes a list of bindings as in 'for, and 
+  expressions for the key and value. Uses a transient map for speed (roughly
+  4x faster than the obvious '(reduce merge ...))."
+  [bind key val]
+  `(persistent! 
+    (reduce #(conj! %1 %2) 
+            (transient {})
+            (for ~bind [~key ~val]))))
 
 ;
 ; Some utilities for working with nodes:
@@ -38,13 +50,6 @@
   (if (not= (.indexOf (str kw) (int \/)) -1)
     kw
     (keyword (str (kwname t) "/" (kwname kw)))))
-
-; TODO: use struct-map for nodes? If there was a way to test that an object 
-; was an instance of the struct map, that would give some "type safety".
-; It's not clear that it would be any more efficient than a small vector.
-
-; Better, use the new deftype form in Clojure 1.2. This is an honest-to-goodness
-; class with a proper type and platform-native fields.
 
 (defn- node-value?
   "True if the argument is of the proper type to be the value of a 'value node'."
@@ -84,35 +89,58 @@
     (throw (AssertionError. (str "Invalid node value: " v)))))
     ;(assert-pred #(= % 2) v)))
 
+;
+; Node type, using the new deftype construct of Clojure 1.2.
+;
+(deftype nodetype [type id value]
+  Object
+  (#^boolean equals [#^Object this #^Object obj]
+    ; (println "?" this obj (instance? nodetype obj))
+    (and ; (instance? nodetype obj)  ; This doesn't work for some reason. Namespace issues?
+         (= (.type this) (.type obj))
+         ; (= (.id this) (.id obj))  ; HACK: ignore ids for now
+         (= (.value this) (.value obj))))
+  (toString [#^Object this]
+    (str "(make-node " (.type this) " " (.id this) " " (.value this) ")")))
+
+; (println (.getName nodetype))
+; (doseq [m (concat (.getDeclaredFields nodetype)
+;                   (.getDeclaredMethods nodetype))]
+;        (println m))
+
 
 (defn make-node
-  "Constructor for nodes. For convenience, any sequence value is converted to 
-  a vector (i.e. a seq-node), and any primitive value is wrapped in a node
-  with the standard type (e.g. :core/string)."
+  "Constructor for nodes. For convenience, any 'collection' value is converted to 
+  a vector (i.e. a seq-node), any primitive value is wrapped in a node
+  with the standard type (e.g. :core/string), and any un-qualified attribute 
+  name is prefixed with the node type name."
   ([typ val]
     (make-node typ (genid) val))
   ([typ id val]
     (assert-pred keyword? typ)
     (assert-pred keyword? id)
     (assert-pred #(or (map? %) (vector? %) (seq? %) (node-value? %)) val)
-    (cond 
-      (map? val) 
-      [typ id (reduce merge {} (for [ [k v] val ] { (childname typ k) (wrap-value v) }))]
+    (let [v (cond 
+              (map? val)
+              (mapfor [ [k v] val ] (childname typ k) (wrap-value v)) 
       
-      (or (coll? val))
-      [typ id (vec (map wrap-value val))]
+              (or (coll? val))
+              (vec (map wrap-value val))
       
-      true
-      [typ id val])))
+              true
+              val)]
+      (nodetype. typ id v))))
+      ; [typ id v])))
 
       
 (defn node? 
   "True if x represents an AST node (including ref nodes)."
   [x]
-  (and (vector? x)
-      (= (count x) 3)
-      (keyword? (x 0))
-      (keyword? (x 1))))
+  (instance? nodetype x))
+  ; (and (vector? x)
+  ;     (= (count x) 3)
+  ;     (keyword? (x 0))
+  ;     (keyword? (x 1))))
 
 
 (defn node
@@ -122,10 +150,9 @@
   [t & children]
   (do 
     (assert-pred even? (count children))
-    (let [m (reduce merge {}
-              (for [ [k v] (partition 2 children) ]
-                { (childname t k) 
-                  (cond 
+    (let [m (mapfor [ [k v] (partition 2 children) ]
+                (childname t k) 
+                (cond 
                     (node? v)
                     v
                     
@@ -142,38 +169,41 @@
                       (vec (map wrap-value v)))
                     
                     true
-                    (assert-pred (fn [n] false) v)) }))
+                    (assert-pred (fn [n] false) v)))
           id (if-let [i (m :core/id)] i (genid))]
       (make-node t id (dissoc m :core/id)))))
       
 (defn node-type 
   "The 'type' of the node (a keyword)."
-  [n]
+  [#^nodetype n]
   (do
     (assert-pred node? n)
-    (n 0)))
+    (.type n)))
+    ; (n 0)))
 
 (defn node-id 
   "The id of the node (a keyword)."
-  [n]
+  [#^nodetype n]
   (do
     (assert-pred node? n)
-    (n 1)))
+    (.id n)))
+    ; (n 1)))
 
 (defn- node-content
   "The content of the node (a map, vector, id (keyword) or simple value)."
-  [n]
+  [#^nodetype n]
   (do
     (assert-pred node? n)
-    (n 2)))
+    (.value n)))
+    ; (n 2)))
 
 
 (defn map-node?
-  [n]
+  [#^nodetype n]
   (map? (node-content n)))
   
 (defn seq-node?
-  [n]
+  [#^nodetype n]
   (vector? (node-content n)))
 
 (defn ref-node
@@ -183,24 +213,24 @@
     
 (defn ref-node?
   "true if x is a reference-node (that is, a node that represents a pointer to another node)"
-  [x]
+  [#^nodetype x]
   (and (node? x) 
         (= (node-type x) :core/ref)))
 
 (defn ref-node-id
   "Id of the node pointed to by the given reference-node."
-  [n]
+  [#^nodetype n]
   (do
     (assert-pred ref-node? n)
     (node-content n)))
 
 (defn value-node?
-  [n]
+  [#^nodetype n]
   (and (node? n) (node-value? (node-content n))))
 
 (defn node-value
   "Value of a string, int, or keyword node."
-  [n]
+  [#^nodetype n]
   (do
     (assert-pred #(and (node? %)
                         (not (or (map-node? %) (seq-node? %)))) n)
@@ -208,7 +238,7 @@
 
 (defn node-attrs
 	"Seq of attribute/field names/indices."  ; TODO is this useful on sequences?
-	[n]
+	[#^nodetype n]
 	(do
     (assert-pred node? n)
     (cond
@@ -241,28 +271,28 @@
     attr))
 
 (defn has-attr?
-  [n attr]
+  [#^nodetype n attr]
   (do 
     (assert-pred #(or (map-node? %) (seq-node? %)) n)
     (contains? (node-content n) (resolve-name n attr))))
 
 (defn node-attr
-  [n attr]
+  [#^nodetype n attr]
   (if (has-attr? n attr)
     ((node-content n) (resolve-name n attr))
     (throw (AssertionError. (str "Attribute not found: " attr " in node " (node-type n) " " (node-attrs n))))))
     
 (defn node-attr-value
-  [n attr]
+  [#^nodetype n attr]
   (node-value (node-attr n attr)))
 
 (defn node-children
 	"List of child nodes."
-	[n]
+	[#^nodetype n]
 	(for [a (node-attrs n)] (node-attr n a)))
 
 (defn node-attr-children
-  [n attr]
+  [#^nodetype n attr]
   (node-children (node-attr n attr)))
 
 (defn visitNode
@@ -283,7 +313,7 @@
   (but more or less in-order).
   
   TODO: should be lazy?"
-  [n f env]
+  [#^nodetype n f env]
   (let [ [result newEnv] (f n env)]
     (apply concat
       [result]
@@ -292,7 +322,7 @@
 
 (defn deep-node-ids
   "Seq of all ids found in the entire tree."
-  [n]
+  [#^nodetype n]
   (visitNode n (fn [n env] [(node-id n) env]) nil))
   ; (reduce union #{(node-id n)}
   ;   (for [a (node-attrs n)]
@@ -304,7 +334,7 @@
 
 
 (defn find-node
-  [n id]
+  [#^nodetype n id]
   (first (for [n (visitNode n #(vec [%1 %2]) nil) :when (= (node-id n) id)] n)))
 
 (defn check-refs
@@ -326,8 +356,8 @@
   left unchanged."
   ; Would it be easier to build this as a reduction? That would require an 
   ; awkward dep. on reduce.clj (or moving this function there)
-  [n]
-  (let [ old-to-new-id (reduce merge {} (for [ i (deep-node-ids n) ] { i (genid) })) ]
+  [#^nodetype n]
+  (let [ old-to-new-id (mapfor [ i (deep-node-ids n) ] i (genid)) ]
     (letfn [(map-id 
               [i] 
               (get old-to-new-id i i))
@@ -337,9 +367,8 @@
                 (map-node? n) 
                 (make-node (node-type n) 
                            (map-id (node-id n))
-                           (reduce merge {}
-                              (for [a (node-attrs n)]
-                                {a (rename-node (node-attr n a))})))
+                           (mapfor [a (node-attrs n)]
+                                a (rename-node (node-attr n a))))
                       
                 (seq-node? n)
                 (make-node (node-type n) 
@@ -361,7 +390,7 @@
 ; This is not so pretty, actually, but at least it makes the structure clear.
 
 (defn short-attr-name
-  [n a]
+  [#^nodetype n a]
   (let [nstr (str (node-type n))
         kstr (str a)]
     (if (.startsWith kstr nstr) 
@@ -371,11 +400,11 @@
 (defn print-node
   "Prints a parsable (and vaguely human-readable) representation of the given
   node. Note: it's effectively a pretty-printed program using the (make-node) fn."
-  ([n]
+  ([#^nodetype n]
     (print-node n false))
-  ([n allIds]
+  ([#^nodetype n allIds]
     (print-node n allIds ""))
-  ([n allIds indent]
+  ([#^nodetype n allIds indent]
     ; TODO: handle ref-node
     (cond
       (node? n)

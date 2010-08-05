@@ -117,4 +117,61 @@ a
 			acc)))
 
 ; (defn gcd [a b]
-	
+
+
+(defn makeMap1
+  [x]
+  (reduce merge (for [i (range x)] { i (* i i) })))
+  
+(defn makeMap2
+  [x]
+  (reduce #(apply assoc %1 %2) {} (for [i (range x)] [ i (* i i) ])))
+  
+(defn makeMap3
+  [x]
+  (persistent! (reduce #(apply assoc! %1 %2) (transient {}) (for [i (range x)] [ i (* i i) ]))))
+
+(defmacro mapfor
+  [bind key val]
+  `(persistent! 
+    (reduce #(apply assoc! %1 %2) 
+            (transient {})
+            (for ~bind [~key ~val]))))
+
+(defn makeMap4
+  [x]
+  (mapfor [i (range x)] i (* i i)))
+  
+(defmacro mapfor2
+  [bind key val]
+  `(persistent! 
+    (reduce #(conj! %1 %2) 
+            (transient {})
+            (for ~bind [~key ~val]))))
+
+(defn makeMap5
+  [x]
+  (mapfor2 [i (range x)] i (* i i)))
+  
+(defmacro mapfor3
+  [bind key val]
+  `(persistent! 
+    (reduce (fn [m# p#] (conj! m# p#)) 
+            (transient {})
+            (for ~bind [~key ~val]))))
+
+(defn makeMap6
+  [x]
+  (mapfor3 [i (range x)] i (* i i)))
+
+(println (macroexpand-1 '(mapfor3 [i (range x)] i (* i i))))
+(println (makeMap6 10))  
+
+(println (t2 [makeMap1 makeMap2 makeMap3 makeMap4 makeMap5 makeMap6] 10 100000))
+(println (t2 [makeMap1 makeMap2 makeMap3 makeMap4 makeMap5 makeMap6] 10 100000))
+; (dorun (makeMap1 100000))
+; (dorun (makeMap2 100000))
+; (time (dorun (makeMap1 100000)))
+; (time (dorun (makeMap2 100000)))
+; (time (dorun (makeMap1 100000)))
+; (time (dorun (makeMap2 100000)))

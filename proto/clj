@@ -2,6 +2,8 @@
 
 JAVA=/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Home/bin/java
 #JAVA=java
+
+#JAVA_OPTS=""
 JAVA_OPTS="-server"
 
 #READLINE_LIB=~/libreadline-java-0.8.0/libreadline-java.jar
@@ -9,10 +11,12 @@ JAVA_OPTS="-server"
 JLINE_LIB=~/app/jline-0_9_5.jar
 JLINE_CLASS=jline.ConsoleRunner
 
-CLOJURE_LIB=~/app/clojure-1.1.0/clojure.jar
+#CLOJURE_LIB=~/app/clojure-1.1.0/clojure.jar
+CLOJURE_LIB=~/app/clojure-1.2.0-RC1/clojure.jar
 CLOJURE_CLASS=clojure.main
 
-CONTRIB_LIB=~/app/clojure-contrib-1.1.0rc2/clojure-contrib.jar
+#CONTRIB_LIB=~/app/clojure-contrib-1.1.0rc2/clojure-contrib.jar
+CONTRIB_LIB=~/app/clojure-contrib-1.2.0-RC1/clojure-contrib.jar
 
 # DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
 

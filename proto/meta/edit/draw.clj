@@ -60,7 +60,7 @@
 ;       (.setVisible true))))
 ; (celsius)
 
-(def PRINT_ALL false)
+(def PRINT_ALL true)
 
 (def MARGIN 10)
 (def SELECTED_COLOR 
@@ -146,6 +146,7 @@
                   ;                                   (.getGraphics this))) ; HACK
                   ;         (println "size" (size (node :view/sequence :items [ (node :view/chars :str "abc" :font :cmr10) (node :view/chars :str "a" :font :cmmi10) ]) 
                   ;                                   (.getGraphics this))) ; HACK
+                  (print "drawNode: ")
                   (time (drawNode @nref (doto (.create g) (.translate MARGIN MARGIN)) @dref @sref errors @oref))))
               (getPreferredSize []
                 (let [this #^JComponent this
@@ -280,7 +281,7 @@
   [coll] 
   (map vector (iterate inc 0) coll))  
 (defn index-filter 
-  "Sequence of indexes for which the predicate is true for the corresponding element."
+  "Sequence of indexes of elements for which the predicate is true."
   [pred coll]
   (when pred 
     (for [[idx elt] (indexed coll) :when (pred elt)] idx)))

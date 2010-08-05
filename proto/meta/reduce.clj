@@ -126,7 +126,7 @@
 (defn- submap
   "A new map containing mappings from m for only the keys in ks."
   [m ks]
-  (reduce merge {} (for [k (keys m) :when (ks k)] {k (m k)})))
+  (mapfor [k (keys m) :when (ks k)] k (m k)))
 
 (deftest submap-empty
   (is (= {} (submap {} #{}))))
@@ -137,7 +137,7 @@
 (defn- valuesubmap
   "A new map containing mappings from m for only the values in vs."
   [m vs]
-  (reduce merge {} (for [k (keys m) :when (vs (m k))] {k (m k)})))
+  (mapfor [k (keys m) :when (vs (m k))] k (m k)))
 
 (deftest valuesubmap-empty
   (is (= {} (submap {} #{}))))
@@ -156,7 +156,7 @@
   by looking up the node and its ancestors in order.
   Currently works by filtering the result of meta-reduce-one2 to include mappings for
   nodes in the original program only. This isn't particulary clever or efficient."
-  [n f]
+  [#^nodetype n f]
   (let [fp (fn [n v] [(f n) nil])
         [np o vp] (reduce-plus n fp nil)]
     [np o]))
@@ -169,7 +169,7 @@
   "Reduction fxn built from a map of node types to fxns."
   ; TODO: accept multiple maps (and merge them?)
   [rules]
-  (fn [n] 
+  (fn [#^nodetype n] 
     (if-let [ f (rules (node-type n)) ]
       (f n)
       nil)))
@@ -209,7 +209,7 @@
   "Reduce the children of a node, returning a node (with the same id and set 
   of attributes) and a map of descendant node ids to the original node id for 
   each."
-  [n f v depth]
+  [#^nodetype n f v depth]
   ; (prn "n:")  ; HACK
   ; (print-node n true)  ; HACK
   (cond 
@@ -268,7 +268,7 @@
   by looking up the node and its ancestors in order.
   The resulting map contains the ids of all resulting nodes, whether or not they appear
   in the 'original' program."
-  [n f v depth]
+  [#^nodetype n f v depth]
   (if (node? n)
     (let [ ; _ (print-node n true)
             ; _ (println "keys:" (keys n))
@@ -304,7 +304,7 @@
   and a value which has been threaded through the reduction.
   The reduction function takes a node and value, and returns a vector of
   a reduced node (or nil) and a new value."
-  [n f v]
+  [#^nodetype n f v]
   (do
     (if PRINT_REDUCED_TYPES (println "\nreduce-plus:" (node-type n)))
     (let [origIds (set (deep-node-ids n))
@@ -321,6 +321,17 @@
       (f n v)
       [nil v])))
 
+(defn compose-reductions
+  "Given a list of reduction fxns (node -> [reduced-node { reduced-id to source-id }]),
+  returns a function applying them in turn."
+  ([r1 r2]
+    (fn [n]
+      (let [ [n1 o1] (r1 n)
+             [n2 o2] (r2 n1)
+             o (mapfor [ [r s] o2 ] r (o1 s)) ]
+        [n2 o])))
+  ([r1 r2 & more]
+    (compose-reductions r1 (apply compose-reductions r2 more))))
 
 ;
 ; Safe attribute accessors, which return some sort of default if the attribute 

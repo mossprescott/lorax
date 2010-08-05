@@ -93,18 +93,6 @@
             :type
             :view/expr/int
           })
-        ; (make-node :view/expr/int {
-        ;   :str
-        ;   (node :grammar/attr
-        ;     :name 
-        ;     :clojure/kernel/int/value
-        ;   
-        ;     :options 
-        ;     (make-node :grammar/nodes [
-        ;         (node :structure/int)
-        ;       ])
-        ;     
-        ;     :optional false)})
       })
         
     (make-node :grammar/rule {
@@ -121,7 +109,7 @@
             (make-node :grammar/attr :string_value {
                 :name
                 (make-node :grammar/name :clojure/kernel/string/value)
-
+    
                 :options
                 (make-node :grammar/options [
                     (node :structure/string)
@@ -140,18 +128,6 @@
             :type
             :view/expr/string
           })
-        ; (node :view/expr/string
-        ;   :str
-        ;   (node :grammar/attr
-        ;     :name 
-        ;     :clojure/kernel/string/value
-        ;   
-        ;     :options
-        ;     (make-node :grammar/nodes [
-        ;         (node :structure/string)
-        ;       ])
-        ;     
-        ;     :optional false))
       })
       
     (make-node :grammar/rule {
@@ -172,7 +148,7 @@
             :str "x" 
           })
       })
-
+    
     (make-node :grammar/rule {
         :type
         (make-node :grammar/type :clojure/kernel/lambda)
@@ -194,7 +170,7 @@
                         :type :clojure/kernel/params
                       })
                   ])
-
+    
                 :optional false
               })
             (make-node :grammar/attr :lambda_body {
@@ -207,7 +183,7 @@
                         :type :clojure/kernel/expr
                       })
                   ])
-
+    
                 :optional false
               })
           ])
@@ -215,7 +191,7 @@
         :display
         (make-node :view/expr/flow [
             (node :view/expr/keyword :str "fn")
-
+    
             (make-node :grammar/ref {
                 :ref
                 (ref-node :lambda_params)
@@ -242,7 +218,7 @@
                 :ref
                 (ref-node :lambda_body)
               })
-
+    
         ;     (node :grammar/attr
         ;       :name 
         ;       :clojure/kernel/lambda/body

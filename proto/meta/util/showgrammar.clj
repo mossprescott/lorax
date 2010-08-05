@@ -39,8 +39,8 @@
   (grammar-to-display clojure-grammar))
   ; (reduceByType kernelPresRules))
 
-(def name-display
-  (reduceByType nameRules))
+; (def name-display
+;   (reduceByType nameRules))
 
 ; "display" fxn for grammars, built from:
 ;  - the simple reductions for :structure and :grammar languages
@@ -51,25 +51,17 @@
                   (if-let [f (metaExprRules (node-type n))]
                     (f n v)
                     (let [; _ (print-node n true)
-                          display (apply-until name-display 
-                                              grammar-display-simple 
+                          display grammar-display-simple 
+                                    ; (apply-until grammar-display-simple 
                                               ; clojure-display)
-                                              )
                           np (display n)
-                          ; np (grammar-display-simple n)
-                          ; _ (println "is gr/str:" (not (nil? np)))
-                          ; npp (if (nil? np) 
-                          ;         (clojure-display n) 
-                          ;         np)
-                          ; _ (if (nil? npp) (println "not reduced") (print-node npp true))
-                          ; _ (println)
                           ]
                         [np v])))
         display (fn [n] 
                   (let [ v (set (deep-node-ids n))
-                        [np o vp] (reduce-plus n dispFn v)]
+                         [np o vp] (reduce-plus n dispFn v) ]
                     [np o]))]
-    display))
+    (compose-reductions name-to-expr display)))
 
 ; (defn showGrammar2
 ;   [title gr]
