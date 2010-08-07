@@ -3,6 +3,10 @@
 ; code working with nodes should be based on them to get a measure of 
 ; abstraction/implementation independence.
 
+; Note: turn this on _before_ the namespace declaration, so it applies to all
+; namespaces...
+(set! *warn-on-reflection* true)
+
 (ns meta.core
   (:use (clojure set test))
   (:require [clojure.zip :as zip])
@@ -94,13 +98,14 @@
 ;
 (deftype nodetype [type id value]
   Object
-  (#^boolean equals [#^Object this #^Object obj]
+  (^boolean equals [^nodetype this ^Object obj]
     ; (println "?" this obj (instance? nodetype obj))
-    (and ; (instance? nodetype obj)  ; This doesn't work for some reason. Namespace issues?
-         (= (.type this) (.type obj))
-         ; (= (.id this) (.id obj))  ; HACK: ignore ids for now
-         (= (.value this) (.value obj))))
-  (toString [#^Object this]
+    (let [^nodetype other obj]
+      (and ; (instance? nodetype obj)  ; This doesn't work for some reason. Namespace issues?
+           (= (.type this) (.type other))
+           ; (= (.id this) (.id obj))  ; HACK: ignore ids for now
+           (= (.value this) (.value other)))))
+  (toString [^Object this]
     (str "(make-node " (.type this) " " (.id this) " " (.value this) ")")))
 
 ; (println (.getName nodetype))
@@ -249,20 +254,32 @@
 	    (range (count (node-content n))))))
 
 (defn- str-contains?
-  [str substr]
-  (not= -1 (.indexOf str substr)))
+  [s c]
+  (not= -1 (.indexOf (str s) (int c))))  ; Note: the signature is String.indexOf(int ch)!
+
+; (defmacro str-contains?
+;   [s c]
+;   `(not= -1 (.indexOf ~s (int ~c))))  ; Note: the signature is String.indexOf(int ch)!
 
 (defn- name-to-str
   [kw]
   (subs (str kw) 1))
 
+
+; Optimization: fullName is heavily used and easily memoized. That saves 
+; building strings each time an attribute needs to be looked up:
+(def fullNameForType
+  (memoize
+    (fn
+      [t attr]
+      (if (str-contains? (str attr) \/)
+        attr 
+        (keyword (str (name-to-str t) 
+                      \/
+                      (name-to-str attr)))))))
 (defn- fullName
   [n attr]
-  (if (str-contains? (str attr) "/") 
-    attr 
-    (keyword (str (name-to-str (node-type n)) 
-                "/" 
-                (name-to-str attr)))))
+  (fullNameForType (node-type n) attr))
 
 (defn- resolve-name
   [n attr]
@@ -486,7 +503,7 @@
   Any form which isn't a node and isn't a (make-node ...) or (node ...) form is 
   ignored."
   [fname]
-  (let [r (PushbackReader. (FileReader. fname))
+  (let [r (PushbackReader. (FileReader. (str fname)))
         nodes (loop [ v [] ]
                 (let [ f (read r false :eof) ]
                   (if (= f :eof)
