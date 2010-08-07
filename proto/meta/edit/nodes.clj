@@ -180,13 +180,28 @@
   not the children), assuming the upper-left corner is located at the origin."
   (fn [n gfx debug?] (node-type-or-nil n)))
 
-(defn- string-bounds 
-  "Encapsulate size calculation for strings, in the hopes that memo-izing 
-  it would be a big win, but it must get cached somewhere else because it 
-  doesn't seem to make much difference (tested by returning a constant here)."
-  [s f #^Graphics2D g]
-  (let [fm (.getFontMetrics g (FONTS f))]
-    (.getStringBounds fm s g)))
+
+(defn memoize2
+  "Returns a memoized version of a referentially transparent function, using 
+  only the first two arguments as the key."
+  [f]
+  (let [mem (atom {})]
+    (fn [a b & more]
+      (let [key [a b]]
+        (if-let [e (find @mem key)]
+          (val e)
+          (let [ret (apply f a b more)]
+            (swap! mem assoc key ret)
+            ret))))))
+
+(def string-bounds
+  ; Encapsulate size calculation for strings and memoize it to save the cost 
+  ; repeated FontMetrics calculations. This becomes important only when various
+  ; other bottlenecks are eliminated.
+  (memoize2
+    (fn [s f #^Graphics2D g]
+      (let [fm (.getFontMetrics g (FONTS f))]
+        (.getStringBounds fm s g)))))
 
 ;
 ; Chars:
