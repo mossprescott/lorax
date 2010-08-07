@@ -4,6 +4,8 @@
 ; Currently uses the hand-written display reduction for the :grammar language;
 ; at some point it might be simpler to use the reduction in grammar.mlj.
 
+(set! *warn-on-reflection* true)
+
 (ns meta.util.showgrammar
   (:use (meta core check reduce name)
         (meta.edit expr draw)
@@ -43,9 +45,13 @@
 ;   (reduceByType nameRules))
 
 ; "display" fxn for grammars, built from:
-;  - the simple reductions for :structure and :grammar languages
 ;  - the trickier reduction for :view/expr
+;  - the name reduction
+;  - the simple reductions for :structure and :grammar languages
 ;  - (eventually) the display reductions for :clojure/kernel and /core
+; This is a gigantic hack now. For one thing, the "meta-expr" reduction
+; has to provided with the set of source ids, which has to be captured _before_
+; the name reduction runs...
 (def grammar-display
   (let [dispFn (fn [n v]
                   (if-let [f (metaExprRules (node-type n))]
@@ -57,11 +63,14 @@
                           np (display n)
                           ]
                         [np v])))
-        display (fn [n] 
-                  (let [ v (set (deep-node-ids n))
-                         [np o vp] (reduce-plus n dispFn v) ]
-                    [np o]))]
-    (compose-reductions name-to-expr display)))
+        d (fn [n]
+            (let [ v (set (deep-node-ids n))
+                   display (fn [n] 
+                               (let [ [np o vp] (reduce-plus n dispFn v) ]
+                                 [np o]))
+                   d2 (compose-reductions name-to-expr display)]
+              (d2 n)))]
+      d))
 
 ; (defn showGrammar2
 ;   [title gr]
