@@ -56,6 +56,7 @@
 (defn reduce-names
   "Reduce nodes which introduce 'bindings' and nodes that refer to them,
   given a fn producing a name (a simple string, for now)."
+  ; TODO: uniquify names that are re-used (primes?)
   [root findRules rules]
   (let [vf (fn [n env] 
               (if-let [fr (findRules (node-type n))]
@@ -65,7 +66,7 @@
                     [{} nil]))
                 [{} nil]))
         id-to-name (reduce merge {} (visitNode root vf nil))
-        _ (println "id-to-name:" id-to-name)
+        ; _ (println "id-to-name:" id-to-name)
         rf (fn [n]
               (if (ref-node? n)
                 (if-let [name (id-to-name (ref-node-id n))]
