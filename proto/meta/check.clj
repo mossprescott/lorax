@@ -8,7 +8,6 @@
 (ns meta.check
   (:use (clojure set test)
         (meta core reduce)))
-  
 
 ; Structure language:
 ; Expresses constraints on what types of nodes and values can inhabit the 
@@ -500,9 +499,7 @@
           ])
         (make-node :view/sequence [
             (node :view/quad)
-            (node :view/expr/embed
-              :content
-              (node-attr n :display))
+            (node-attr n :display)
           ])
         (with-attr n :expand e
           (node :view/sequence [
@@ -619,6 +616,14 @@
     ;         ;                 :view/drawable/colors [ (node :view/rgb :red 0.9 :green 0.7 :blue 0.7) ]
     ;         ;                 :item a)]
     ;     b))
+    
+    ; HACK: _very_ temporary! until I get grammar-based reduction working again!
+    :clojure/kernel/quote
+    (fn [n]
+      (make-node :view/expr/embed {
+          :content
+          (node-attr n :body)
+        }))
   })
 
 ;
