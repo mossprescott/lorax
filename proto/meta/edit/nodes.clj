@@ -471,6 +471,19 @@
   (condp = (node-type v) 
     :core/name
     (make-node :view/expr/keyword { :str (make-node :core/string (subs (str (node-value v)) 1)) })
+
+    :core/string
+    (do (print "v(string):" (node-value v) (value-node? v) " ") (print-node v)  ; HACK
+    (make-node :view/chars { 
+      :str (str \" (node-value v) \") 
+      :font :cmr10 
+      :view/drawable/color (make-node :view/rgb { :red 0 :green 0.7 :blue 0 })
+    })
+    ; (make-node :view/expr/string { :str (str \" (node-value v) \") })
+    )  ; HACK
+    
+    :core/int
+    (make-node :view/expr/int { :str (str (node-value v)) })
     
     v))
     ; (node? v) v
@@ -490,29 +503,63 @@
   (let [typ (subs (str (node-type n)) 1)]
 ; (prn "typ:" typ)  ; HACK
     (cond
+      ; TODO: use the reduction for any node with an error given only the :view grammar
       (not (or (re-matches #"view/.*" typ) (re-matches #"core/.*" typ)))
       ; (do (println "  reducing...")  ; HACK
       (node :view/border
         :weight 1
         :margin 1
-        :view/drawable/colors [ (node :view/rgb :red 0.2 :green 0.2 :blue 0.5) ]
+        :view/drawable/colors [ (node :view/rgb :red 0.5 :green 0.5 :blue 0.5) ]
         :item
         (make-node :view/section [
-            (node :view/chars 
+            (make-node :view/chars {
               :str typ
-              :font :courier)
+              :font :courier
+            })
             (make-node :view/sequence [
                 (node :view/quad)
-                (make-node :view/section
-                  (vec 
-                    (for [a (node-attrs n)]
-                      (let [v (node-attr n a)
-                            ap (if (keyword? a) (subs (short-attr-name n a) 1) (str a))]
-                        (make-node :view/expr/flow [
-                            (node :view/expr/mono :str ap)
-                            (node :view/expr/symbol :str :mapsto)
-                            (reduceOne v)
-                          ])))))
+                (if (value-node? n)
+                  (let [v (node-value n) _ (println "val:" v)]
+                    (cond
+                      (integer? v)
+                      ; (make-node :view/expr/int { :str (str v) })
+                      (make-node :view/chars {
+                        :str (str v)
+                        :font :cmr10
+                      })
+                      
+                      (keyword? v)
+                      (make-node :view/expr/keyword { :str (subs (str v) 1) })
+                      
+                      (string? v)
+                      ; (make-node :view/expr/string { :str "abc" })
+                      (do (println "str:" typ v)  ; HACK
+                      (make-node :view/chars { 
+                        :str (str \" v \") 
+                        :font :cmr10 
+                        :view/drawable/color (make-node :view/rgb { :red 0 :green 0.7 :blue 0 })
+                      })
+                      )  ; HACK
+                      
+                      true
+                      ; (make-node :view/expr/mono { :str (str v) })))
+                      (make-node :view/chars { 
+                        :str (str v) 
+                        :font :courier 
+                        :view/drawable/color (make-node :view/rgb { :red 0.3 :green 0.3 :blue 0.3 })
+                      })))
+                  (make-node :view/section
+                    (vec 
+                      (for [a (node-attrs n)]
+                        (let [v (node-attr n a)
+                              ap (if (keyword? a) (subs (short-attr-name n a) 1) (str a))]
+                          (make-node :view/sequence [
+                              (make-node :view/expr/mono { :str ap })
+                              (make-node :view/quad)
+                              (make-node :view/expr/symbol { :str :mapsto })
+                              (make-node :view/quad)
+                              (reduceOne v)
+                            ]))))))
               ])
             ])))))
     

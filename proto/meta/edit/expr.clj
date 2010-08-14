@@ -88,7 +88,7 @@
                   sup (node-attr n :view/scripted/super)]
               (if (and (node? nucl)
                         (contains? compound (node-type nucl))
-                        (< 1 (count (node-attr nucl :boxes))))
+                        (< 1 (count (node-children nucl))))
                 (make-node :view/scripted {
                     :nucleus
                     (parenNode nucl)
@@ -181,7 +181,7 @@
 (defn- as-string
   [n]
   (if (and (value-node? n) (string? (node-value n)))
-      n
+      (node-value n)
       (make-node :core/string (str (node-type n)))))
 
 (defn exprToView 
@@ -243,11 +243,21 @@
           (fn [n]
             (let [val (node-attr n :str)
                   s (as-string val)]
-              (make-node :view/chars {
-                  :str (str \u005c s "\"")
+              (make-node :view/sequence [
+                (make-node :view/chars {
+                  :str "\u005c"  ; Note: open and close quote chars for :cmr
+                  :font :cmr10
+                })
+                (make-node :view/chars {
+                  :str s
                   :font :cmr10
                   :view/drawable/color (node :view/rgb :red 0 :green 0.5 :blue 0)
-                })))
+                })
+                (make-node :view/chars {
+                  :str "\""  ; Note: open and close quote chars for :cmr
+                  :font :cmr10
+                })
+              ])))
 
           :view/expr/mono
           (fn [n]
@@ -434,14 +444,21 @@
 ;
 ; Reduction of :view/expr nodes. Each node is reduced only once, and only if 
 ; its id appears in the set which is provided as the reduction's aux. value.
+; Note the special handling of unquote's, which are 
 ;
 (def metaExprRules
-  (letfn [ (borderize [b title]
+  (letfn [ (borderize 
+              [b title value-attr]
               (fn [n v]
-                ; TODO: titled borders?
                 (let [id (node-id n)]
                   (if (contains? v id)
-                    (let [ np (node :view/scripted
+                    (let [ val (if-not value-attr 
+                                       n
+                                       (let [a (node-attr n value-attr)]
+                                         (if (value-node? a)
+                                           n
+                                           a)))
+                           np (node :view/scripted
                                 :nucleus
                                 (node :view/border
                                   :weight 1
@@ -452,7 +469,7 @@
                                   ]
     
                                   :item
-                                  n)
+                                  val)
                                   
                                 :super
                                 (node :view/chars :str title :font :tiny)) ]
@@ -460,38 +477,38 @@
                     [ nil v ]))))]
   {  
     :view/juxt
-    (borderize 0.7 "juxt")
+    (borderize 0.7 "juxt" nil)
   
     :view/expr/binary
-    (borderize 0.7 "binary")
+    (borderize 0.7 "binary" nil)
   
     :view/expr/relation
-    (borderize 0.7 "relation")
+    (borderize 0.7 "relation" nil)
 
     :view/expr/flow
-    (borderize 0.7 "flow")
+    (borderize 0.7 "flow" nil)
 
     :view/expr/keyword
-    (borderize 0.7 "kw")
+    (borderize 0.7 "kw" :str)
 
     :view/expr/symbol
-    (borderize 0.7 "sym")
+    (borderize 0.7 "sym" :str)
 
     :view/expr/var
-    (borderize 0.7 "var")
+    (borderize 0.7 "var" :str)
 
     :view/expr/int
-    (borderize 0.7 "int")
+    (borderize 0.7 "int" :str)
       ; (node :view/chars
       ;   :str (node-attr n :view/expr/int/str)
       ;   :font :cmr10))
 
     :view/expr/string
-    (borderize 0.7 "str")
+    (borderize 0.7 "str" :str)
 
     :view/expr/mono
-    (borderize 0.7 "mono")
+    (borderize 0.7 "mono" :str)
   
     :view/expr/prod
-    (borderize 0.7 "prod")
+    (borderize 0.7 "prod" :str)
   }))

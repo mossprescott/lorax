@@ -48,9 +48,6 @@
                 ; _ (println as)
                 exp (node-attr r :expand)  ; TODO: rename, to avoid id collisions!
                 
-                ; HACK: assuming one child for now
-                ; [cid cname] (first as)
-
                 ; new id for the arg of the expansion fn:
                 nid (genid "n")
 

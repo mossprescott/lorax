@@ -36,8 +36,6 @@
       Line2D$Float
       Rectangle2D$Float)))
   
-(set! *warn-on-reflection* true)
-
 ; (defn celsius []
 ;   (let [frame (JFrame. "Celsius Converter")
 ;         temp-text (JTextField.)
@@ -60,7 +58,7 @@
 ;       (.setVisible true))))
 ; (celsius)
 
-(def PRINT_ALL true)
+(def PRINT_ALL false)
 
 (def MARGIN 10)
 (def SELECTED_COLOR 
@@ -471,6 +469,6 @@
               nil))))
     nil))
 
-(defn makeKernelFrame 
-  [n title errors]
-  (makeSyntaxFrame n title #(meta-reduce2 % (reduceByType kernelPresRules)) errors))
+; (defn makeKernelFrame 
+;   [n title errors]
+;   (makeSyntaxFrame n title #(meta-reduce2 % (reduceByType kernelPresRules)) errors))

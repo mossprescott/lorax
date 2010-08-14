@@ -4,8 +4,6 @@
 ; Currently uses the hand-written display reduction for the :grammar language;
 ; at some point it might be simpler to use the reduction in grammar.mlj.
 
-(set! *warn-on-reflection* true)
-
 (ns meta.util.showgrammar
   (:use (meta core check reduce name)
         (meta.edit expr draw)
@@ -35,7 +33,7 @@
 
 (def clojure-grammar 
   ; (load-grammar "meta/core.mlj" "meta/clojure/kernel2.mlj" "meta/clojure/core.mlj"))
-  (load-grammar "meta/core.mlj" "meta/clojure/kernel2.mlj"))
+  (load-grammar "meta/clojure/kernel2.mlj"))
   
 (def clojure-display
   (grammar-to-display clojure-grammar))
@@ -57,9 +55,8 @@
                   (if-let [f (metaExprRules (node-type n))]
                     (f n v)
                     (let [; _ (print-node n true)
-                          display grammar-display-simple 
-                                    ; (apply-until grammar-display-simple 
-                                              ; clojure-display)
+                          display (apply-until grammar-display-simple
+                                               clojure-display)
                           np (display n)
                           ]
                         [np v])))

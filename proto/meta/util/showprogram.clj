@@ -17,7 +17,7 @@
   (let [pr (load-node f)
         errors (core-checker pr)
         _ (show-errors errors)
-        display #(meta-reduce2 % (apply-until name-display core-display))]
+        display (compose-reductions name-to-expr #(meta-reduce2 % core-display))]
     (makeSyntaxFrame pr f display errors)))
 
 (doseq [f *command-line-args*]

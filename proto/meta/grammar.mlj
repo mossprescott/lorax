@@ -2,22 +2,37 @@
 ; as well as a presentation reduction, and which can be reduced/compiled down 
 ; into both a regular 'structure' program and a presentation reduction.
 
-; This grammar also provides rules for several nodes from the :structure 
-; language, which are used by :grammar rules, because there is currently no
-; grammar in this language for :structure.
-
-; Once again, this is painfuly circular.
-
 (use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
 
-(node :grammar/language
-  :rules [
+(make-node :grammar/language [
   
-    (node :grammar/rule
+    (make-node :grammar/mapNode {
       :type 
-      :grammar/language
+      (make-node :grammar/type :grammar/language)
       
-      :supers []
+      :supers 
+      (make-node :grammar/types [])
+      
+      :attrs
+      (make-node :grammar/attrs [
+          (make-node :grammar/attr :mapNode_type)
+              :name 
+              (make-node :grammar/name :grammar/attr/name)
+            
+              :options
+              (make-node :grammar/options [
+                  (make-node :grammar/node {
+                      :type
+                      :grammar/name
+                    })
+                ])
+              
+              :optional 
+              false
+            })
+        ])
+        
+      ; TODO: fix from here on...
       
       :display
       (node :view/section

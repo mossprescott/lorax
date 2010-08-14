@@ -7,8 +7,7 @@
 
 (use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
 
-(node :grammar/language
-  :rules [
+(make-node :grammar/language [
   
     ; ; HACK: ":kernel"-language program node (was using this in my example)
     ; (node :grammar/rule
@@ -34,1042 +33,1059 @@
     ;       :separator
     ;       (node :view/expr/keyword :str " "))))
 
-    (node :grammar/rule
+    (make-node :grammar/seqNode {
       :type 
-      :clojure/core/program
+      (make-node :grammar/type :clojure/core/program)
       
-      :supers []
+      :supers 
+      (make-node :grammar/types [])
+
+      :options 
+      (make-node :grammar/options [
+        ; TODO
+      ])
       
+      :min 0
+          
       :display
-      (node :view/section
-        :items
-        (node :grammar/sequence
-          :name
-          :clojure/core/program/exprs
+      (make-node :grammar/seq {
+        :type 
+        (make-node :grammar/type :view/section)
         
-          :options [
-            (node :structure/node
-              :type :clojure/kernel/expr)
-          ]
-          
-          :min 0
-          
-          :separator
-          (node :view/expr/keyword :str " "))
-      
-      ; TODO: reduction to :clojure/kernel
-      ))
+        :separator
+        (make-node :view/expr/keyword { :str " " })
+      })
+    })
 
-    (node :grammar/rule
-      :type
-      :clojure/core/session
-      
-      :supers []
-      
-      :display
-      (node :view/section
-        :items
-        (node :grammar/sequence
-          :name 
-          :clojure/core/session/exchanges
-          
-          :options [
-            (node :structure/node
-              :type :clojure/core/exchange)
-          ]
-          
-          :min 0
-          
-          :separator
-          (node :view/expr/keyword :str " "))))
-    
-    (node :grammar/rule
-      :type
-      :clojure/core/exchange
-      
-      :supers []
-      
-      :display
-      (node :view/section
-        :items [
-          (node :view/sequence
-            :items [
-              (node :view/expr/keyword :str "X:")
-              (node :view/quad)
-              (node :grammar/attr
-                :name
-                :clojure/core/exchange/expr
-                
-                :options [
-                  (node :structure/node
-                    :type :clojure/kernel/expr)
-                ]
-                
-                :optional
-                false)
-            ])
-
-          ; Disabled for now:
-          (node :view/sequence
-            :items [
-              (node :view/expr/keyword :str "K:")
-              (node :view/quad)
-              (node :grammar/attr
-                :name
-                :clojure/core/exchange/kernel
-                
-                :options [
-                  (node :structure/node
-                    :type :clojure/kernel/expr)
-                ]
-                
-                :optional
-                false)
-            ])
-
-          (node :view/sequence
-            :items [
-              (node :view/expr/keyword :str "V:")
-              (node :view/quad)
-              (node :grammar/attr
-                :name
-                :clojure/core/exchange/value
-                
-                :options [
-                  (node :structure/node
-                    :type :clojure/kernel/expr)
-                  (node :structure/string)  ; for errors?
-                ]
-                
-                :optional
-                false)
-            ])
-        ]))
       ; (node :view/section
-      ;   :items [
-      ;     (node :view/expr/keyword :str "Expr:") ; TODO: subscript?
-      ;     (node :view/sequence
-      ;       :items [
-      ;         (node :view/quad)
-      ;         (node :grammar/attr
-      ;           :name
-      ;           :clojure/core/exchange/expr
-      ;           
-      ;           :options [
-      ;             (node :structure/node
-      ;               :type :clojure/kernel/expr)
-      ;           ]
-      ;           
-      ;           :optional
-      ;           false)
-      ;       ])
-      ;     (node :view/expr/keyword :str "Kernel:") ; TODO: subscript?
-      ;     (node :view/sequence
-      ;       :items [
-      ;         (node :view/quad)
-      ;         (node :grammar/attr
-      ;           :name
-      ;           :clojure/core/exchange/kernel
-      ;           
-      ;           :options [
-      ;             (node :structure/node
-      ;               :type :clojure/kernel/expr)
-      ;           ]
-      ;           
-      ;           :optional
-      ;           false)
-      ;       ])
-      ;     (node :view/expr/keyword :str "Value:") ; TODO: subscript?
-      ;     (node :view/sequence
-      ;       :items [
-      ;         (node :view/quad)
-      ;         (node :grammar/attr
-      ;           :name
-      ;           :clojure/core/exchange/value
-      ;           
-      ;           :options [
-      ;             (node :structure/node
-      ;               :type :clojure/kernel/expr)
-      ;             (node :structure/string)  ; for errors?
-      ;           ]
-      ;           
-      ;           :optional
-      ;           false)
-      ;       ])
-      ;   ]))
+      ;   :items
+      ;   (node :grammar/sequence
+      ;     :name
+      ;     :clojure/core/program/exprs
+      ;   
+      ;     :options [
+      ;       (node :structure/node
+      ;         :type :clojure/kernel/expr)
+      ;     ]
+      ;     
+      ;     :min 0
+      ;     
+      ;     :separator
+      ;     (node :view/expr/keyword :str " "))
+      ; 
+      ; ; TODO: reduction to :clojure/kernel
+      ; ))
 
-    (node :grammar/rule
-      :type
-      :clojure/core/not
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/juxt
-        :boxes [
-          (node :view/expr/symbol :str :neg)
-          (node :grammar/attr :core/id :e
-            :name
-            :clojure/core/not/expr
-            
-            :options [
-              (node :structure/node 
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional
-            false)
-        ])
-        
-      :expand
-      (node :clojure/kernel/quote
-        :body
-        (node :clojure/kernel/app
-          :expr
-          (node :clojure/kernel/extern
-            :name "not")
-          
-          :args [
-            (node :clojure/kernel/unquote
-              :body
-              (node :clojure/kernel/var
-                :ref (ref-node :e)))
-          ])))
-
-    ; _unary_ minus
-    (node :grammar/rule
-      :type
-      :clojure/core/unaryminus
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/juxt
-        :boxes [
-          (node :view/expr/symbol :str "-")
-          (node :grammar/attr :core/id :e2
-            :name
-            :clojure/core/unaryminus/expr
-          
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-          
-            :optional false)
-        ])
-        
-      :expand
-      (node :clojure/kernel/quote
-        :body
-        (node :clojure/kernel/app
-          :expr
-          (node :clojure/kernel/extern
-            :name "-")
-          
-          :args [
-            (node :clojure/kernel/unquote
-              :body
-              (node :clojure/kernel/var
-                :ref (ref-node :e2)))
-          ])))
-
-    ; binary AND
-    (node :grammar/rule
-      :type
-      :clojure/core/and
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display  ; TODO: quote it?
-      (node :view/expr/relation
-        :boxes [
-          (node :grammar/attr :core/id :left
-            :name 
-            :clojure/core/and/left
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-          (node :view/expr/keyword :str "and")
-          (node :grammar/attr :core/id :right
-            :name 
-            :clojure/core/and/right
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-        ])
-        
-        :expand
-        (node :clojure/kernel/quote
-          :body
-          (node :clojure/kernel/let
-            :bind 
-            (node :clojure/kernel/bind :core/id :l)
-            
-            :expr
-            (node :clojure/kernel/unquote
-              :body
-              (node :clojure/kernel/var 
-                :ref (ref-node :left)))
-            
-            :body
-            (node :clojure/kernel/if
-              :test
-              (node :clojure/core/not 
-                :expr
-                (node :clojure/kernel/var 
-                  :ref (ref-node :l)))
-              
-              :then
-              (node :clojure/kernel/var 
-                :ref (ref-node :l))
-              
-              :else
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :right)))))))
-        
-    ; TODO: OR
-        
-    ; binary +
-    (node :grammar/rule
-      :type
-      :clojure/core/plus
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display  ; TODO: quote it?
-      (node :view/expr/binary
-        :boxes [
-          (node :grammar/attr :core/id :left2
-            :name 
-            :clojure/core/plus/left
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-          (node :view/expr/symbol :str "+")
-          (node :grammar/attr :core/id :right2
-            :name 
-            :clojure/core/plus/right
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-        ])
-        
-        :expand
-        (node :clojure/kernel/quote
-          :body
-          (node :clojure/kernel/app
-            :expr 
-            (node :clojure/kernel/extern :name "+")
-            
-            :args [
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :left2)))
-              
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :right2)))
-            ])))
-
-    ; binary -
-    (node :grammar/rule
-      :type
-      :clojure/core/minus
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display  ; TODO: quote it?
-      (node :view/expr/binary
-        :boxes [
-          (node :grammar/attr :core/id :left3
-            :name 
-            :clojure/core/minus/left
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-          (node :view/expr/symbol :str "-")
-          (node :grammar/attr :core/id :right3
-            :name 
-            :clojure/core/minus/right
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-        ])
-        
-        :expand
-        (node :clojure/kernel/quote
-          :body
-          (node :clojure/kernel/app
-            :expr 
-            (node :clojure/kernel/extern :name "-")
-            
-            :args [
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :left3)))
-              
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :right3)))
-            ])))
-
-    ; binary *
-    (node :grammar/rule
-      :type
-      :clojure/core/times
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display  ; TODO: quote it?
-      (node :view/expr/binary
-        :boxes [
-          (node :grammar/attr :core/id :left4
-            :name 
-            :clojure/core/times/left
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-          (node :view/expr/symbol :str :times)
-          (node :grammar/attr :core/id :right4
-            :name 
-            :clojure/core/times/right
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-        ])
-        
-        :expand
-        (node :clojure/kernel/quote
-          :body
-          (node :clojure/kernel/app
-            :expr 
-            (node :clojure/kernel/extern :name "*")
-            
-            :args [
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :left4)))
-              
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :right4)))
-            ])))
-
-    ; binary >
-    (node :grammar/rule
-      :type
-      :clojure/core/greater
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display  ; TODO: quote it?
-      (node :view/expr/relation
-        :boxes [
-          (node :grammar/attr :core/id :left5
-            :name 
-            :clojure/core/greater/left
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-          (node :view/expr/symbol :str ">")
-          (node :grammar/attr :core/id :right5
-            :name 
-            :clojure/core/greater/right
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-        ])
-        
-        :expand
-        (node :clojure/kernel/quote
-          :body
-          (node :clojure/kernel/app
-            :expr 
-            (node :clojure/kernel/extern :name ">")
-            
-            :args [
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :left5)))
-              
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :right5)))
-            ])))
-
-    ; TODO: >=, <, <=, =, !=
-    
-    
-    
-    ;
-    ; Sequences
-    ;
-    
-    ; Sequence (list) constructor:
-    (node :grammar/rule
-      :type
-      :clojure/core/sequence
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/sequence
-        :items
-        (node :grammar/sequence :core/id :items1
-          :name 
-          :clojure/core/sequence/items
-          
-          :options [
-            (node :structure/node
-              :type :clojure/kernel/expr)
-          ]
-          
-          :min 0
-          
-          :separator
-          (node :view/sequence
-            :items [
-              (node :view/expr/keyword :str ",")
-              (node :view/thickspace)
-            ])))
-      
-      :expand
-      (node :clojure/kernel/quote
-        :body
-        (node :clojure/kernel/app
-          :expr
-          (node :clojure/kernel/extern
-            :name "list")
-            
-          :args
-          (node :clojure/kernel/unquote
-            :body
-            (node :clojure/kernel/var
-              :ref (ref-node :items1))))))
-
-    ; cons(), as "."
-    (node :grammar/rule
-      :type 
-      :clojure/core/cons
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/relation
-        :boxes [
-          (node :grammar/attr :core/id :first0
-            :name 
-            :clojure/core/cons/first
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-          (node :view/expr/symbol :str ".")
-          (node :grammar/attr
-            :name 
-            :clojure/core/cons/rest :core/id :rest0
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-        ])
-      
-      :expand
-      (node :clojure/kernel/quote
-        :body
-        (node :clojure/kernel/app
-          :expr
-          (node :clojure/kernel/extern
-            :name "cons")
-          
-          :args [
-            (node :clojure/kernel/unquote
-              :body
-              (node :clojure/kernel/var
-                :ref (ref-node :first0)))
-            (node :clojure/kernel/unquote
-              :body
-              (node :clojure/kernel/var
-                :ref (ref-node :rest0)))
-          ])))
-
-    ; first(coll)
-    (node :grammar/rule
-      :type
-      :clojure/core/first
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/juxt
-        :boxes [
-          (node :view/expr/keyword :str "first")
-          (node :view/parens
-            :left "["
-            :right "]"
-            
-            :content
-            (node :grammar/attr :core/id :coll1
-              :name
-              :clojure/core/first/coll
-              
-              :options [
-                (node :structure/node
-                  :type :clojure/kernel/expr)
-              ]
-              
-              :optional false))
-        ])
-      
-      :expand
-      (node :clojure/kernel/quote
-        :body
-        (node :clojure/kernel/app
-          :expr
-          (node :clojure/kernel/extern
-            :name "first")
-          
-          :args [
-            (node :clojure/kernel/unquote
-              :body
-              (node :clojure/kernel/var
-                :ref (ref-node :coll1)))
-          ])))
-
-    ; rest(coll)
-    (node :grammar/rule
-      :type
-      :clojure/core/rest
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/juxt
-        :boxes [
-          (node :view/expr/keyword :str "rest")
-          (node :view/parens
-            :left "["
-            :right "]"
-            
-            :content
-            (node :grammar/attr :core/id :coll2
-              :name
-              :clojure/core/rest/coll
-              
-              :options [
-                (node :structure/node
-                  :type :clojure/kernel/expr)
-              ]
-              
-              :optional false))
-        ])
-      
-      :expand
-      (node :clojure/kernel/quote
-        :body
-        (node :clojure/kernel/app
-          :expr
-          (node :clojure/kernel/extern
-            :name "rest")
-          
-          :args [
-            (node :clojure/kernel/unquote
-              :body
-              (node :clojure/kernel/var
-                :ref (ref-node :coll2)))
-          ])))
-
-    ; subscript
-    (node :grammar/rule
-      :type
-      :clojure/core/nth
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/juxt
-        :boxes [
-          (node :grammar/attr :core/id :coll0
-            :name
-            :clojure/core/nth/coll
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-          (node :view/parens
-            :left "["
-            :right "]"
-            
-            :content
-            (node :grammar/attr :core/id :index0
-              :name
-              :clojure/core/nth/index
-            
-              :options [
-                (node :structure/node
-                  :type :clojure/kernel/expr)
-              ]
-            
-              :optional false))
-        ])
-      
-      :expand
-      (node :clojure/kernel/quote
-        :body
-        (node :clojure/kernel/app
-          :expr
-          (node :clojure/kernel/extern
-            :name "nth")
-          
-          :args [
-            (node :clojure/kernel/unquote
-              :body
-              (node :clojure/kernel/var
-                :ref (ref-node :coll0)))
-            (node :clojure/kernel/unquote
-              :body
-              (node :clojure/kernel/var
-                :ref (ref-node :index0)))
-          ])))
-
-    ; Range, with ".."
-    (node :grammar/rule
-      :type
-      :clojure/core/range
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/binary
-        :boxes [
-          (node :grammar/attr :core/id :start0
-            :name
-            :clojure/core/range/start
-          
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-          
-            :optional false)
-          (node :view/expr/keyword :str "..")
-          (node :grammar/attr :core/id :end0
-            :name
-            :clojure/core/range/end
-          
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-          
-            :optional false)
-        ])
-        
-      :expand
-      ; let r = fn r [i end] if i > end then nil else lazy-seq(cons(i, r(i+1)))
-      ; in r(start, end)
-      (node :clojure/kernel/quote
-        :body
-        (node :clojure/kernel/app
-          :expr
-          (node :clojure/kernel/lambda :core/id :r0
-            :params [
-              (node :clojure/kernel/bind :core/id :i0)
-            ]
-            
-            :body
-            (node :clojure/kernel/if
-              :test
-              (node :clojure/core/greater
-                :left
-                (node :clojure/kernel/var
-                  :ref (ref-node :i0))
-                    
-                :right
-                (node :clojure/kernel/unquote
-                  :body
-                  (node :clojure/kernel/var
-                    :ref (ref-node :end0))))
-              
-              :then
-              (node :clojure/kernel/nil)
-
-              :else
-              (node :clojure/kernel/app
-                :expr
-                (node :clojure/kernel/extern
-                  :name "lazy-seq")
-                
-                :args [
-                  ; (node :clojure/kernel/app
-                  ;   :expr
-                  ;   (node :clojure/kernel/extern
-                  ;     :name "cons")
-                  ;   
-                  ;   :args [
-                  (node :clojure/core/cons
-                    :first
-                      (node :clojure/kernel/var
-                        :ref (ref-node :i0))
-                    :rest
-                      (node :clojure/kernel/app
-                        :expr
-                        (node :clojure/kernel/var
-                          :ref (ref-node :r0))
-                    
-                        :args [
-                          (node :clojure/core/plus
-                            :left
-                            (node :clojure/kernel/var
-                              :ref (ref-node :i0))
-                          
-                            :right
-                            (node :clojure/kernel/int
-                              :value 1))
-                        ]))
-                    ; ])
-                ])))
-            
-          :args [
-            (node :clojure/kernel/unquote
-              :body
-              (node :clojure/kernel/var
-                :ref (ref-node :start0)))
-          ])))
-
-    (node :grammar/rule
-      :type
-      :clojure/core/set
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/parens
-        :left "{"
-        :right "}"
-        
-        :content
-        (node :grammar/attr :core/id :coll5
-          :name 
-          :clojure/core/set/coll
-          
-          :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)          
-          ]
-          
-          :optional false))
-        
-        :expand
-        (node :clojure/kernel/quote
-          :body
-          (node :clojure/kernel/app
-            :expr
-            (node :clojure/kernel/extern
-              :name "set")
-              
-            :args [
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var
-                  :ref (ref-node :coll5)))
-            ])))
-
-    ; in (contains?):
-    (node :grammar/rule
-      :type
-      :clojure/core/in
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display  ; TODO: quote it?
-      (node :view/expr/relation
-        :boxes [
-          (node :grammar/attr :core/id :elem6
-            :name 
-            :clojure/core/in/item
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-          (node :view/expr/symbol :str :in)
-          (node :grammar/attr :core/id :coll6
-            :name 
-            :clojure/core/in/set
-            
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-            
-            :optional false)
-        ])
-        
-        :expand
-        (node :clojure/kernel/quote
-          :body
-          (node :clojure/kernel/app
-            :expr 
-            (node :clojure/kernel/extern :name "contains?")
-            
-            :args [
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :elem6)))
-              
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var 
-                  :ref (ref-node :coll6)))
-            ])))
-
-    ; postfix factorial (not really a "core" thing, but interesting?)
-    (node :grammar/rule
-      :type
-      :clojure/core/factorial
-      
-      :supers [ :clojure/kernel/expr ]
-      
-      :display
-      (node :view/expr/juxt
-        :boxes [
-          (node :grammar/attr :core/id :e3
-            :name
-            :clojure/core/factorial/expr
-          
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr)
-            ]
-          
-            :optional false)
-          (node :view/expr/symbol :str "!")
-        ])
-        
-      :expand
-      (node :clojure/kernel/quote
-        :body
-        (node :clojure/kernel/let
-          :bind 
-          (node :clojure/kernel/bind :core/id :fact)
-          
-          :expr
-          (node :clojure/kernel/lambda :core/id :factr
-            :params [
-              (node :clojure/kernel/bind :core/id :n1)
-            ]
-            
-            :body
-            (node :clojure/kernel/if
-              :test
-              (node :clojure/core/greater
-                :left
-                (node :clojure/kernel/var
-                  :ref (ref-node :n1))
-                
-                :right
-                (node :clojure/kernel/int :value 1))
-                
-              :then
-              (node :clojure/core/times
-                :left
-                (node :clojure/kernel/var
-                  :ref (ref-node :n1))
-                  
-                :right
-                (node :clojure/kernel/app
-                  :expr
-                  (node :clojure/kernel/var 
-                    :ref (ref-node :factr))
-                    
-                  :args [
-                    (node :clojure/core/minus
-                      :left 
-                      (node :clojure/kernel/var
-                        :ref (ref-node :n1))
-                      
-                      :right
-                      (node :clojure/kernel/int :value 1))
-                  ]))
-                
-                :else
-                (node :clojure/kernel/int :value 1)))
-          
-          :body
-          (node :clojure/kernel/app
-            :expr
-            (node :clojure/kernel/var
-              :ref (ref-node :fact))
-          
-            :args [
-              (node :clojure/kernel/unquote
-                :body
-                (node :clojure/kernel/var
-                  :ref (ref-node :e3)))
-            ]))))
-      
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/session
+    ;   
+    ;   :supers []
+    ;   
+    ;   :display
+    ;   (node :view/section
+    ;     :items
+    ;     (node :grammar/sequence
+    ;       :name 
+    ;       :clojure/core/session/exchanges
+    ;       
+    ;       :options [
+    ;         (node :structure/node
+    ;           :type :clojure/core/exchange)
+    ;       ]
+    ;       
+    ;       :min 0
+    ;       
+    ;       :separator
+    ;       (node :view/expr/keyword :str " "))))
+    ; 
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/exchange
+    ;   
+    ;   :supers []
+    ;   
+    ;   :display
+    ;   (node :view/section
+    ;     :items [
+    ;       (node :view/sequence
+    ;         :items [
+    ;           (node :view/expr/keyword :str "X:")
+    ;           (node :view/quad)
+    ;           (node :grammar/attr
+    ;             :name
+    ;             :clojure/core/exchange/expr
+    ;             
+    ;             :options [
+    ;               (node :structure/node
+    ;                 :type :clojure/kernel/expr)
+    ;             ]
+    ;             
+    ;             :optional
+    ;             false)
+    ;         ])
+    ; 
+    ;       ; Disabled for now:
+    ;       (node :view/sequence
+    ;         :items [
+    ;           (node :view/expr/keyword :str "K:")
+    ;           (node :view/quad)
+    ;           (node :grammar/attr
+    ;             :name
+    ;             :clojure/core/exchange/kernel
+    ;             
+    ;             :options [
+    ;               (node :structure/node
+    ;                 :type :clojure/kernel/expr)
+    ;             ]
+    ;             
+    ;             :optional
+    ;             false)
+    ;         ])
+    ; 
+    ;       (node :view/sequence
+    ;         :items [
+    ;           (node :view/expr/keyword :str "V:")
+    ;           (node :view/quad)
+    ;           (node :grammar/attr
+    ;             :name
+    ;             :clojure/core/exchange/value
+    ;             
+    ;             :options [
+    ;               (node :structure/node
+    ;                 :type :clojure/kernel/expr)
+    ;               (node :structure/string)  ; for errors?
+    ;             ]
+    ;             
+    ;             :optional
+    ;             false)
+    ;         ])
+    ;     ]))
+    ;   ; (node :view/section
+    ;   ;   :items [
+    ;   ;     (node :view/expr/keyword :str "Expr:") ; TODO: subscript?
+    ;   ;     (node :view/sequence
+    ;   ;       :items [
+    ;   ;         (node :view/quad)
+    ;   ;         (node :grammar/attr
+    ;   ;           :name
+    ;   ;           :clojure/core/exchange/expr
+    ;   ;           
+    ;   ;           :options [
+    ;   ;             (node :structure/node
+    ;   ;               :type :clojure/kernel/expr)
+    ;   ;           ]
+    ;   ;           
+    ;   ;           :optional
+    ;   ;           false)
+    ;   ;       ])
+    ;   ;     (node :view/expr/keyword :str "Kernel:") ; TODO: subscript?
+    ;   ;     (node :view/sequence
+    ;   ;       :items [
+    ;   ;         (node :view/quad)
+    ;   ;         (node :grammar/attr
+    ;   ;           :name
+    ;   ;           :clojure/core/exchange/kernel
+    ;   ;           
+    ;   ;           :options [
+    ;   ;             (node :structure/node
+    ;   ;               :type :clojure/kernel/expr)
+    ;   ;           ]
+    ;   ;           
+    ;   ;           :optional
+    ;   ;           false)
+    ;   ;       ])
+    ;   ;     (node :view/expr/keyword :str "Value:") ; TODO: subscript?
+    ;   ;     (node :view/sequence
+    ;   ;       :items [
+    ;   ;         (node :view/quad)
+    ;   ;         (node :grammar/attr
+    ;   ;           :name
+    ;   ;           :clojure/core/exchange/value
+    ;   ;           
+    ;   ;           :options [
+    ;   ;             (node :structure/node
+    ;   ;               :type :clojure/kernel/expr)
+    ;   ;             (node :structure/string)  ; for errors?
+    ;   ;           ]
+    ;   ;           
+    ;   ;           :optional
+    ;   ;           false)
+    ;   ;       ])
+    ;   ;   ]))
+    ; 
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/not
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/juxt
+    ;     :boxes [
+    ;       (node :view/expr/symbol :str :neg)
+    ;       (node :grammar/attr :core/id :e
+    ;         :name
+    ;         :clojure/core/not/expr
+    ;         
+    ;         :options [
+    ;           (node :structure/node 
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional
+    ;         false)
+    ;     ])
+    ;     
+    ;   :expand
+    ;   (node :clojure/kernel/quote
+    ;     :body
+    ;     (node :clojure/kernel/app
+    ;       :expr
+    ;       (node :clojure/kernel/extern
+    ;         :name "not")
+    ;       
+    ;       :args [
+    ;         (node :clojure/kernel/unquote
+    ;           :body
+    ;           (node :clojure/kernel/var
+    ;             :ref (ref-node :e)))
+    ;       ])))
+    ; 
+    ; ; _unary_ minus
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/unaryminus
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/juxt
+    ;     :boxes [
+    ;       (node :view/expr/symbol :str "-")
+    ;       (node :grammar/attr :core/id :e2
+    ;         :name
+    ;         :clojure/core/unaryminus/expr
+    ;       
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;       
+    ;         :optional false)
+    ;     ])
+    ;     
+    ;   :expand
+    ;   (node :clojure/kernel/quote
+    ;     :body
+    ;     (node :clojure/kernel/app
+    ;       :expr
+    ;       (node :clojure/kernel/extern
+    ;         :name "-")
+    ;       
+    ;       :args [
+    ;         (node :clojure/kernel/unquote
+    ;           :body
+    ;           (node :clojure/kernel/var
+    ;             :ref (ref-node :e2)))
+    ;       ])))
+    ; 
+    ; ; binary AND
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/and
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display  ; TODO: quote it?
+    ;   (node :view/expr/relation
+    ;     :boxes [
+    ;       (node :grammar/attr :core/id :left
+    ;         :name 
+    ;         :clojure/core/and/left
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;       (node :view/expr/keyword :str "and")
+    ;       (node :grammar/attr :core/id :right
+    ;         :name 
+    ;         :clojure/core/and/right
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;     ])
+    ;     
+    ;     :expand
+    ;     (node :clojure/kernel/quote
+    ;       :body
+    ;       (node :clojure/kernel/let
+    ;         :bind 
+    ;         (node :clojure/kernel/bind :core/id :l)
+    ;         
+    ;         :expr
+    ;         (node :clojure/kernel/unquote
+    ;           :body
+    ;           (node :clojure/kernel/var 
+    ;             :ref (ref-node :left)))
+    ;         
+    ;         :body
+    ;         (node :clojure/kernel/if
+    ;           :test
+    ;           (node :clojure/core/not 
+    ;             :expr
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :l)))
+    ;           
+    ;           :then
+    ;           (node :clojure/kernel/var 
+    ;             :ref (ref-node :l))
+    ;           
+    ;           :else
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :right)))))))
+    ;     
+    ; ; TODO: OR
+    ;     
+    ; ; binary +
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/plus
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display  ; TODO: quote it?
+    ;   (node :view/expr/binary
+    ;     :boxes [
+    ;       (node :grammar/attr :core/id :left2
+    ;         :name 
+    ;         :clojure/core/plus/left
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;       (node :view/expr/symbol :str "+")
+    ;       (node :grammar/attr :core/id :right2
+    ;         :name 
+    ;         :clojure/core/plus/right
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;     ])
+    ;     
+    ;     :expand
+    ;     (node :clojure/kernel/quote
+    ;       :body
+    ;       (node :clojure/kernel/app
+    ;         :expr 
+    ;         (node :clojure/kernel/extern :name "+")
+    ;         
+    ;         :args [
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :left2)))
+    ;           
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :right2)))
+    ;         ])))
+    ; 
+    ; ; binary -
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/minus
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display  ; TODO: quote it?
+    ;   (node :view/expr/binary
+    ;     :boxes [
+    ;       (node :grammar/attr :core/id :left3
+    ;         :name 
+    ;         :clojure/core/minus/left
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;       (node :view/expr/symbol :str "-")
+    ;       (node :grammar/attr :core/id :right3
+    ;         :name 
+    ;         :clojure/core/minus/right
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;     ])
+    ;     
+    ;     :expand
+    ;     (node :clojure/kernel/quote
+    ;       :body
+    ;       (node :clojure/kernel/app
+    ;         :expr 
+    ;         (node :clojure/kernel/extern :name "-")
+    ;         
+    ;         :args [
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :left3)))
+    ;           
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :right3)))
+    ;         ])))
+    ; 
+    ; ; binary *
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/times
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display  ; TODO: quote it?
+    ;   (node :view/expr/binary
+    ;     :boxes [
+    ;       (node :grammar/attr :core/id :left4
+    ;         :name 
+    ;         :clojure/core/times/left
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;       (node :view/expr/symbol :str :times)
+    ;       (node :grammar/attr :core/id :right4
+    ;         :name 
+    ;         :clojure/core/times/right
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;     ])
+    ;     
+    ;     :expand
+    ;     (node :clojure/kernel/quote
+    ;       :body
+    ;       (node :clojure/kernel/app
+    ;         :expr 
+    ;         (node :clojure/kernel/extern :name "*")
+    ;         
+    ;         :args [
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :left4)))
+    ;           
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :right4)))
+    ;         ])))
+    ; 
+    ; ; binary >
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/greater
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display  ; TODO: quote it?
+    ;   (node :view/expr/relation
+    ;     :boxes [
+    ;       (node :grammar/attr :core/id :left5
+    ;         :name 
+    ;         :clojure/core/greater/left
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;       (node :view/expr/symbol :str ">")
+    ;       (node :grammar/attr :core/id :right5
+    ;         :name 
+    ;         :clojure/core/greater/right
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;     ])
+    ;     
+    ;     :expand
+    ;     (node :clojure/kernel/quote
+    ;       :body
+    ;       (node :clojure/kernel/app
+    ;         :expr 
+    ;         (node :clojure/kernel/extern :name ">")
+    ;         
+    ;         :args [
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :left5)))
+    ;           
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :right5)))
+    ;         ])))
+    ; 
+    ; ; TODO: >=, <, <=, =, !=
+    ; 
+    ; 
+    ; 
+    ; ;
+    ; ; Sequences
+    ; ;
+    ; 
+    ; ; Sequence (list) constructor:
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/sequence
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display
+    ;   (node :view/sequence
+    ;     :items
+    ;     (node :grammar/sequence :core/id :items1
+    ;       :name 
+    ;       :clojure/core/sequence/items
+    ;       
+    ;       :options [
+    ;         (node :structure/node
+    ;           :type :clojure/kernel/expr)
+    ;       ]
+    ;       
+    ;       :min 0
+    ;       
+    ;       :separator
+    ;       (node :view/sequence
+    ;         :items [
+    ;           (node :view/expr/keyword :str ",")
+    ;           (node :view/thickspace)
+    ;         ])))
+    ;   
+    ;   :expand
+    ;   (node :clojure/kernel/quote
+    ;     :body
+    ;     (node :clojure/kernel/app
+    ;       :expr
+    ;       (node :clojure/kernel/extern
+    ;         :name "list")
+    ;         
+    ;       :args
+    ;       (node :clojure/kernel/unquote
+    ;         :body
+    ;         (node :clojure/kernel/var
+    ;           :ref (ref-node :items1))))))
+    ; 
+    ; ; cons(), as "."
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :clojure/core/cons
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/relation
+    ;     :boxes [
+    ;       (node :grammar/attr :core/id :first0
+    ;         :name 
+    ;         :clojure/core/cons/first
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;       (node :view/expr/symbol :str ".")
+    ;       (node :grammar/attr
+    ;         :name 
+    ;         :clojure/core/cons/rest :core/id :rest0
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;     ])
+    ;   
+    ;   :expand
+    ;   (node :clojure/kernel/quote
+    ;     :body
+    ;     (node :clojure/kernel/app
+    ;       :expr
+    ;       (node :clojure/kernel/extern
+    ;         :name "cons")
+    ;       
+    ;       :args [
+    ;         (node :clojure/kernel/unquote
+    ;           :body
+    ;           (node :clojure/kernel/var
+    ;             :ref (ref-node :first0)))
+    ;         (node :clojure/kernel/unquote
+    ;           :body
+    ;           (node :clojure/kernel/var
+    ;             :ref (ref-node :rest0)))
+    ;       ])))
+    ; 
+    ; ; first(coll)
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/first
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/juxt
+    ;     :boxes [
+    ;       (node :view/expr/keyword :str "first")
+    ;       (node :view/parens
+    ;         :left "["
+    ;         :right "]"
+    ;         
+    ;         :content
+    ;         (node :grammar/attr :core/id :coll1
+    ;           :name
+    ;           :clojure/core/first/coll
+    ;           
+    ;           :options [
+    ;             (node :structure/node
+    ;               :type :clojure/kernel/expr)
+    ;           ]
+    ;           
+    ;           :optional false))
+    ;     ])
+    ;   
+    ;   :expand
+    ;   (node :clojure/kernel/quote
+    ;     :body
+    ;     (node :clojure/kernel/app
+    ;       :expr
+    ;       (node :clojure/kernel/extern
+    ;         :name "first")
+    ;       
+    ;       :args [
+    ;         (node :clojure/kernel/unquote
+    ;           :body
+    ;           (node :clojure/kernel/var
+    ;             :ref (ref-node :coll1)))
+    ;       ])))
+    ; 
+    ; ; rest(coll)
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/rest
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/juxt
+    ;     :boxes [
+    ;       (node :view/expr/keyword :str "rest")
+    ;       (node :view/parens
+    ;         :left "["
+    ;         :right "]"
+    ;         
+    ;         :content
+    ;         (node :grammar/attr :core/id :coll2
+    ;           :name
+    ;           :clojure/core/rest/coll
+    ;           
+    ;           :options [
+    ;             (node :structure/node
+    ;               :type :clojure/kernel/expr)
+    ;           ]
+    ;           
+    ;           :optional false))
+    ;     ])
+    ;   
+    ;   :expand
+    ;   (node :clojure/kernel/quote
+    ;     :body
+    ;     (node :clojure/kernel/app
+    ;       :expr
+    ;       (node :clojure/kernel/extern
+    ;         :name "rest")
+    ;       
+    ;       :args [
+    ;         (node :clojure/kernel/unquote
+    ;           :body
+    ;           (node :clojure/kernel/var
+    ;             :ref (ref-node :coll2)))
+    ;       ])))
+    ; 
+    ; ; subscript
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/nth
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/juxt
+    ;     :boxes [
+    ;       (node :grammar/attr :core/id :coll0
+    ;         :name
+    ;         :clojure/core/nth/coll
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;       (node :view/parens
+    ;         :left "["
+    ;         :right "]"
+    ;         
+    ;         :content
+    ;         (node :grammar/attr :core/id :index0
+    ;           :name
+    ;           :clojure/core/nth/index
+    ;         
+    ;           :options [
+    ;             (node :structure/node
+    ;               :type :clojure/kernel/expr)
+    ;           ]
+    ;         
+    ;           :optional false))
+    ;     ])
+    ;   
+    ;   :expand
+    ;   (node :clojure/kernel/quote
+    ;     :body
+    ;     (node :clojure/kernel/app
+    ;       :expr
+    ;       (node :clojure/kernel/extern
+    ;         :name "nth")
+    ;       
+    ;       :args [
+    ;         (node :clojure/kernel/unquote
+    ;           :body
+    ;           (node :clojure/kernel/var
+    ;             :ref (ref-node :coll0)))
+    ;         (node :clojure/kernel/unquote
+    ;           :body
+    ;           (node :clojure/kernel/var
+    ;             :ref (ref-node :index0)))
+    ;       ])))
+    ; 
+    ; ; Range, with ".."
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/range
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/binary
+    ;     :boxes [
+    ;       (node :grammar/attr :core/id :start0
+    ;         :name
+    ;         :clojure/core/range/start
+    ;       
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;       
+    ;         :optional false)
+    ;       (node :view/expr/keyword :str "..")
+    ;       (node :grammar/attr :core/id :end0
+    ;         :name
+    ;         :clojure/core/range/end
+    ;       
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;       
+    ;         :optional false)
+    ;     ])
+    ;     
+    ;   :expand
+    ;   ; let r = fn r [i end] if i > end then nil else lazy-seq(cons(i, r(i+1)))
+    ;   ; in r(start, end)
+    ;   (node :clojure/kernel/quote
+    ;     :body
+    ;     (node :clojure/kernel/app
+    ;       :expr
+    ;       (node :clojure/kernel/lambda :core/id :r0
+    ;         :params [
+    ;           (node :clojure/kernel/bind :core/id :i0)
+    ;         ]
+    ;         
+    ;         :body
+    ;         (node :clojure/kernel/if
+    ;           :test
+    ;           (node :clojure/core/greater
+    ;             :left
+    ;             (node :clojure/kernel/var
+    ;               :ref (ref-node :i0))
+    ;                 
+    ;             :right
+    ;             (node :clojure/kernel/unquote
+    ;               :body
+    ;               (node :clojure/kernel/var
+    ;                 :ref (ref-node :end0))))
+    ;           
+    ;           :then
+    ;           (node :clojure/kernel/nil)
+    ; 
+    ;           :else
+    ;           (node :clojure/kernel/app
+    ;             :expr
+    ;             (node :clojure/kernel/extern
+    ;               :name "lazy-seq")
+    ;             
+    ;             :args [
+    ;               ; (node :clojure/kernel/app
+    ;               ;   :expr
+    ;               ;   (node :clojure/kernel/extern
+    ;               ;     :name "cons")
+    ;               ;   
+    ;               ;   :args [
+    ;               (node :clojure/core/cons
+    ;                 :first
+    ;                   (node :clojure/kernel/var
+    ;                     :ref (ref-node :i0))
+    ;                 :rest
+    ;                   (node :clojure/kernel/app
+    ;                     :expr
+    ;                     (node :clojure/kernel/var
+    ;                       :ref (ref-node :r0))
+    ;                 
+    ;                     :args [
+    ;                       (node :clojure/core/plus
+    ;                         :left
+    ;                         (node :clojure/kernel/var
+    ;                           :ref (ref-node :i0))
+    ;                       
+    ;                         :right
+    ;                         (node :clojure/kernel/int
+    ;                           :value 1))
+    ;                     ]))
+    ;                 ; ])
+    ;             ])))
+    ;         
+    ;       :args [
+    ;         (node :clojure/kernel/unquote
+    ;           :body
+    ;           (node :clojure/kernel/var
+    ;             :ref (ref-node :start0)))
+    ;       ])))
+    ; 
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/set
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display
+    ;   (node :view/parens
+    ;     :left "{"
+    ;     :right "}"
+    ;     
+    ;     :content
+    ;     (node :grammar/attr :core/id :coll5
+    ;       :name 
+    ;       :clojure/core/set/coll
+    ;       
+    ;       :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)          
+    ;       ]
+    ;       
+    ;       :optional false))
+    ;     
+    ;     :expand
+    ;     (node :clojure/kernel/quote
+    ;       :body
+    ;       (node :clojure/kernel/app
+    ;         :expr
+    ;         (node :clojure/kernel/extern
+    ;           :name "set")
+    ;           
+    ;         :args [
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var
+    ;               :ref (ref-node :coll5)))
+    ;         ])))
+    ; 
+    ; ; in (contains?):
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/in
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display  ; TODO: quote it?
+    ;   (node :view/expr/relation
+    ;     :boxes [
+    ;       (node :grammar/attr :core/id :elem6
+    ;         :name 
+    ;         :clojure/core/in/item
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;       (node :view/expr/symbol :str :in)
+    ;       (node :grammar/attr :core/id :coll6
+    ;         :name 
+    ;         :clojure/core/in/set
+    ;         
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;         
+    ;         :optional false)
+    ;     ])
+    ;     
+    ;     :expand
+    ;     (node :clojure/kernel/quote
+    ;       :body
+    ;       (node :clojure/kernel/app
+    ;         :expr 
+    ;         (node :clojure/kernel/extern :name "contains?")
+    ;         
+    ;         :args [
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :elem6)))
+    ;           
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var 
+    ;               :ref (ref-node :coll6)))
+    ;         ])))
+    ; 
+    ; ; postfix factorial (not really a "core" thing, but interesting?)
+    ; (node :grammar/rule
+    ;   :type
+    ;   :clojure/core/factorial
+    ;   
+    ;   :supers [ :clojure/kernel/expr ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/juxt
+    ;     :boxes [
+    ;       (node :grammar/attr :core/id :e3
+    ;         :name
+    ;         :clojure/core/factorial/expr
+    ;       
+    ;         :options [
+    ;           (node :structure/node
+    ;             :type :clojure/kernel/expr)
+    ;         ]
+    ;       
+    ;         :optional false)
+    ;       (node :view/expr/symbol :str "!")
+    ;     ])
+    ;     
+    ;   :expand
+    ;   (node :clojure/kernel/quote
+    ;     :body
+    ;     (node :clojure/kernel/let
+    ;       :bind 
+    ;       (node :clojure/kernel/bind :core/id :fact)
+    ;       
+    ;       :expr
+    ;       (node :clojure/kernel/lambda :core/id :factr
+    ;         :params [
+    ;           (node :clojure/kernel/bind :core/id :n1)
+    ;         ]
+    ;         
+    ;         :body
+    ;         (node :clojure/kernel/if
+    ;           :test
+    ;           (node :clojure/core/greater
+    ;             :left
+    ;             (node :clojure/kernel/var
+    ;               :ref (ref-node :n1))
+    ;             
+    ;             :right
+    ;             (node :clojure/kernel/int :value 1))
+    ;             
+    ;           :then
+    ;           (node :clojure/core/times
+    ;             :left
+    ;             (node :clojure/kernel/var
+    ;               :ref (ref-node :n1))
+    ;               
+    ;             :right
+    ;             (node :clojure/kernel/app
+    ;               :expr
+    ;               (node :clojure/kernel/var 
+    ;                 :ref (ref-node :factr))
+    ;                 
+    ;               :args [
+    ;                 (node :clojure/core/minus
+    ;                   :left 
+    ;                   (node :clojure/kernel/var
+    ;                     :ref (ref-node :n1))
+    ;                   
+    ;                   :right
+    ;                   (node :clojure/kernel/int :value 1))
+    ;               ]))
+    ;             
+    ;             :else
+    ;             (node :clojure/kernel/int :value 1)))
+    ;       
+    ;       :body
+    ;       (node :clojure/kernel/app
+    ;         :expr
+    ;         (node :clojure/kernel/var
+    ;           :ref (ref-node :fact))
+    ;       
+    ;         :args [
+    ;           (node :clojure/kernel/unquote
+    ;             :body
+    ;             (node :clojure/kernel/var
+    ;               :ref (ref-node :e3)))
+    ;         ]))))
+    ;   
   ])

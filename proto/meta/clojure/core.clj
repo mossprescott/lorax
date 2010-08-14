@@ -10,14 +10,15 @@
 (def core-grammar
   (compose-grammars
     (load-node "meta/clojure/kernel2.mlj")
-    (load-node "meta/clojure/core.mlj")
-    (load-node "meta/clojure/re.mlj")))
+    (load-node "meta/clojure/core.mlj"))) ; HACK
+    ; (load-node "meta/clojure/re.mlj")))
 
 ; (print-node core-grammar)
 ; (print-node (grammar-to-structure core-grammar))
 
 (def core-checker
-  (make-structure-checker (grammar-to-structure core-grammar)))
+  ; (make-structure-checker (grammar-to-structure core-grammar)))
+  (fn [n] {}))  ; HACK: no-op for now
 
 (def core-display
   (grammar-to-display core-grammar))

@@ -7,7 +7,8 @@
 
 (ns meta.check
   (:use (clojure set test)
-        (meta core reduce)))
+        (meta core reduce)
+        (meta.clojure kernel)))
 
 ; Structure language:
 ; Expresses constraints on what types of nodes and values can inhabit the 
@@ -240,60 +241,131 @@
   "Rule node for the given type, or nil"
   [grammar nodeType]
   (let [ matches (for [r (node-children grammar) 
-                    :when (= nodeType (node-attr r :type))] r) ]
+                    :when (= nodeType (node-attr-value r :type))] r) ]
     (condp = (count matches)
       0 nil
       1 (first matches)
       (assert false))))  ; multiple rules for this type; TODO: better error?
 
-(defn- reduceEmbedded
-  [target]
-  (fn [n] 
-    ; Note: at this point, we are reducing a portion of the display AST for 
-    ; some node. _target_ is the source node, and _n_ is the node being reduced,
-    ; which came from somewhere inside the display subtree.
+; (defn- reduceEmbedded
+;   [target]
+;   (fn [n] 
+;     ; Note: at this point, we are reducing a portion of the display AST for 
+;     ; some node. _target_ is the source node, and _n_ is the node being reduced,
+;     ; which came from somewhere inside the display subtree.
+; 
+;     ; (println "reduceEmbedded:")
+;     ; (println "  " (node-type target))
+;     ; (print-node n true)
+;     
+;     (condp = (node-type n)
+;       :grammar/attr
+;       ; (let [v (with-attr-node target (node-attr n :grammar/attr/name))]
+;       ;     (str v))  ; HACK: automatically cast to string for now...
+;       (with-attr-node target (node-attr n :grammar/attr/name) v
+;           (if (not (node? v))
+;             (str v)   ; HACK: automatically cast to string for now...
+;             v))
+;     
+;       :grammar/sequence
+;       (with-attr-seq target (node-attr n :grammar/sequence/name) s
+;         (with-attr n :grammar/sequence/separator sep 
+;           (vec (interpose sep s))
+;           s))
+;     
+;       ; TODO: additional grammar variable types for int, string, name, boolean, 
+;       ; etc., with appropriate display options for each. Also, sequences of any
+;       ; of them.
+;       
+;       nil)))
 
-    ; (println "reduceEmbedded:")
-    ; (println "  " (node-type target))
-    ; (print-node n true)
+(defn- bind-attrs
+  [d attrs]
+  (if-not (seq attrs)
+    d
+    (let [a (first attrs)]
+      (make-node :clojure/kernel/let {
+        :bind
+        (make-node :clojure/kernel/bind (node-id a) {})
     
-    (condp = (node-type n)
-      :grammar/attr
-      ; (let [v (with-attr-node target (node-attr n :grammar/attr/name))]
-      ;     (str v))  ; HACK: automatically cast to string for now...
-      (with-attr-node target (node-attr n :grammar/attr/name) v
-          (if (not (node? v))
-            (str v)   ; HACK: automatically cast to string for now...
-            v))
+        :expr
+        (make-node :clojure/kernel/app {
+          :expr
+          (make-node :clojure/kernel/extern { :name "with-attr-node" })
+        
+          :args 
+          (make-node :clojure/kernel/args [
+            (make-node :clojure/kernel/var { :ref (ref-node :node) })
+            (make-node :clojure/kernel/name { :value (node-attr-value a :name) })
+          ])
+        })
     
-      :grammar/sequence
-      (with-attr-seq target (node-attr n :grammar/sequence/name) s
-        (with-attr n :grammar/sequence/separator sep 
-          (vec (interpose sep s))
-          s))
-    
-      ; TODO: additional grammar variable types for int, string, name, boolean, 
-      ; etc., with appropriate display options for each. Also, sequences of any
-      ; of them.
+        :body
+        (bind-attrs d (rest attrs))
+      }))))
+
+(defn- display-fn
+  [mn]
+  (make-node :clojure/kernel/lambda {
+    :params 
+    (make-node :clojure/kernel/params [
+      (make-node :clojure/kernel/bind :node {})
+    ])
       
-      nil)))
+    :body
+    (bind-attrs (node-attr mn :display) (node-attr-children mn :attrs))
+  }))
+
+(defn- reduce-seq
+  "Reduction function for the :display nodes of seqNode rules. Replaces any 
+  :grammar/seq node(s) with an expanded sequence."
+  [elems]
+  (reduceByType {
+    :grammar/seq
+    (fn [n]
+      (let [val (if-not (has-attr? n :separator)
+                  elems
+                  (interpose (node-attr n :separator) elems))]
+        (make-node (node-attr-value n :type)
+                   val)))
+  }))
 
 (defn grammar-to-display
   "Takes a :grammar/language node and returns a reduction function which
-  performs the presentation reduction described in the grammar."
+  performs the presentation reduction described in the grammar.
+  Note that currently the reduction visits the grammar node each time it is 
+  invoked (that is, for each source node), and then compiles a reduction on the
+  spot -- it would be equally easy to pre-compile a reduction for each rule,
+  and more efficient."
   [grammar]
   (fn [n]
     ; (println "type for display:" (node-type n))
     ; (print-node n true)
     (let [typ (node-type n)]
       (if-let [rule (getGrammarRule grammar typ)]
-        (let [;_ (println "found rule:")
-              ;_ (print-node rule true)
-              display (node-attr rule :grammar/rule/display)
-              displayp (rename-nodes display)
-              [np o] (meta-reduce2 displayp (reduceEmbedded n))]
-          np)
-        nil))))
+        (condp = (node-type rule)
+          :grammar/mapNode
+          (let [;_ (println "found rule:")
+                ;_ (print-node rule true)
+                mdf (display-fn rule)
+                ; _ (println "mdf:")
+                ; _ (print-node mdf true)
+                cl (meta-compile mdf)
+                ; _ (println "cl:" cl)
+                df (eval cl)
+                ; _ (println "df:" df)
+                np (df n)
+                ; _ (print-node np true)
+                ; displayp (rename-nodes display)
+                ; [np o] (meta-reduce2 displayp (reduceEmbedded n))]
+                ]
+            np)
+          
+          :grammar/seqNode
+          ; nil
+          ; (first (meta-reduce2 n (reduce-seq rule)))
+          (meta-reduce (node-attr rule :display) (reduce-seq (node-children n)))
+        nil)))))
 
 ; (defn grammar-to-display1
 ;   "Takes a :grammar/language node and returns a reduction function which
@@ -478,9 +550,10 @@
   :grammar/language
   (fn [n] 
     (make-node :view/section
-      (node-children n)))
+      (interpose (make-node :view/expr/keyword { :str " " })
+                 (node-children n))))
   
-  :grammar/rule
+  :grammar/mapNode
   (fn [n]
     (make-node :view/section [
         (make-node :view/expr/flow [
@@ -509,8 +582,47 @@
               e
             ])
           (make-node :view/sequence [])) ; HACK: empty node
-        (node :view/expr/keyword :str " ")
       ]))
+      
+  :grammar/seqNode
+  (fn [n]
+    (make-node :view/section [
+        (make-node :view/expr/flow [
+            (node-attr n :type)
+            (make-node :view/expr/symbol {
+                :str :to
+              })
+            (node-attr n :supers)
+          ])
+        (make-node :view/sequence [
+            (make-node :view/quad)
+            (make-node :view/scripted {
+                :nucleus
+                (node-attr n :options)
+                
+                :super
+                (make-node :view/chars {
+                    :str (str (node-attr-value n :min) ".." )  ; HACK
+                    :font :cmr10-script
+                  })
+              })
+          ])
+        (make-node :view/sequence [
+            (make-node :view/quad)
+            (node-attr n :display)
+          ])
+      ]))
+
+  :grammar/seq
+  (fn [n]
+    (make-node :view/expr/embed {
+      :content
+      (make-node (node-attr-value n :type) [
+        (make-node :view/expr/var { :str "elem" })
+        (node-attr n :separator)
+        (make-node :view/chars { :str "..." :font :cmr10 })
+      ])
+    }))
       
   :grammar/types
   (fn [n]
@@ -527,6 +639,10 @@
     (make-node :view/expr/prod {
         :str (baseName (node-value n))
       }))
+  
+  :grammar/star  ; a special "type" which may appear anywhere
+  (fn [n]
+    (make-node :view/expr/symbol { :str "*" }))
   
   :grammar/attrs
   (fn [n]
@@ -553,14 +669,32 @@
       (interpose (make-node :view/expr/keyword { :str "|" })
                  (node-children n))))
   
-  :grammar/ref
-  (fn [n]
-    (make-node :view/expr/unbed {
-        :content
-        (node-attr n :ref)
-        ; (make-node :view/expr/var { :str (baseName (ref-node-id (node-attr n :ref))) })  ; HACK: will be handled by the name reduction
-      }))
+  ; :grammar/ref
+  ; (fn [n]
+  ;   (make-node :view/expr/unbed {
+  ;       :content
+  ;       (node-attr n :ref)
+  ;       ; (make-node :view/expr/var { :str (baseName (ref-node-id (node-attr n :ref))) })  ; HACK: will be handled by the name reduction
+  ;     }))
   
+  :grammar/node
+  (fn [n]
+    (make-node :view/expr/prod { 
+        :str (baseName (node-attr-value n :type))
+      }))  ; TODO
+  
+  :grammar/int
+  (fn [n]
+    (make-node :view/expr/keyword { :str "int" }))
+
+  :grammar/string
+  (fn [n]
+    (make-node :view/expr/keyword { :str "string" }))
+
+  :grammar/nameValue
+  (fn [n]
+    (make-node :view/expr/keyword { :str "name" }))
+
   ; ; Tricky: a single sequence node lives where a vector of nodes is expected,
   ; ; so it has to be reduced to a vector of some kind or all hell breaks loose
   ; :grammar/sequence
@@ -624,6 +758,15 @@
           :content
           (node-attr n :body)
         }))
+    :clojure/kernel/unquote
+    (fn [n]
+      (make-node :view/expr/unbed {
+          :content
+          (node-attr n :body)
+        }))
+    :clojure/kernel/var
+    (fn [n]
+      (node-attr n :ref))
   })
 
 ;
@@ -632,9 +775,9 @@
 
 (deftest simple
   (let [f (fn [n env] [(node-type n) env])
-        n1 (node :foo )
-        n2 (node :bar :attr n1) 
-        n3 (node :baz :attr [ n1 n2 ])]
+        n1 (make-node :foo)
+        n2 (make-node :bar { :attr n1 }) 
+        n3 (make-node :baz [ n1 n2 ])]
     (is (= (visitNode n1 f nil)
             [:foo]))
     (is (= (set (visitNode n2 f nil))
