@@ -164,6 +164,11 @@
   ;       [np o] (meta-reduce-one2 n f true)]
   ;     [np (valuesubmap o origIds)]))
 
+(defn meta-reduce
+  "Reduce, returning only the resulting node and no map of ids."
+  [n f]
+  (let [[np o] (meta-reduce2 n f)]
+    np))
 
 (defn reduceByType
   "Reduction fxn built from a map of node types to fxns."
