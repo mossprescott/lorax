@@ -96,17 +96,16 @@
 ;
 ; Node type, using the new deftype construct of Clojure 1.2.
 ;
-(deftype nodetype [type id value]
+(deftype nodetype [typ id value]
   Object
   (^boolean equals [^nodetype this ^Object obj]
-    ; (println "?" this obj (instance? nodetype obj))
     (let [^nodetype other obj]
-      (and ; (instance? nodetype obj)  ; This doesn't work for some reason. Namespace issues?
-           (= (.type this) (.type other))
+      (and (= (type this) (type obj))
+           (= (.typ this) (.typ other))
            ; (= (.id this) (.id obj))  ; HACK: ignore ids for now
            (= (.value this) (.value other)))))
   (toString [^Object this]
-    (str "(make-node " (.type this) " " (.id this) " " (.value this) ")")))
+    (str "(make-node " (.typ this) " " (.id this) " " (.value this) ")")))
 
 ; (println (.getName nodetype))
 ; (doseq [m (concat (.getDeclaredFields nodetype)
@@ -119,23 +118,25 @@
   a vector (i.e. a seq-node), any primitive value is wrapped in a node
   with the standard type (e.g. :core/string), and any un-qualified attribute 
   name is prefixed with the node type name."
+  ([typ]
+    (make-node typ (genid) {}))
   ([typ val]
     (make-node typ (genid) val))
   ([typ id val]
     (assert-pred keyword? typ)
     (assert-pred keyword? id)
     (assert-pred #(or (map? %) (vector? %) (seq? %) (node-value? %)) val)
+    (if (seq? val) (dorun val))
     (let [v (cond 
               (map? val)
               (mapfor [ [k v] val ] (childname typ k) (wrap-value v)) 
       
-              (or (coll? val))
+              (coll? val)
               (vec (map wrap-value val))
       
               true
               val)]
       (nodetype. typ id v))))
-      ; [typ id v])))
 
       
 (defn node? 
@@ -153,7 +154,7 @@
   Build a new node with the given type and children, and a freshly generated 
   id. If a :core/id child is provided, it overrides the generated id."
   [t & children]
-  (do 
+  (do
     (assert-pred even? (count children))
     (let [m (mapfor [ [k v] (partition 2 children) ]
                 (childname t k) 
@@ -183,7 +184,7 @@
   [#^nodetype n]
   (do
     (assert-pred node? n)
-    (.type n)))
+    (.typ n)))
     ; (n 0)))
 
 (defn node-id 
@@ -460,39 +461,6 @@
       true
       ; (assert false))))
       (println (str indent "??? " n)))))
-        
-      ; (node? n)
-      ; (do
-      ;   (println (str indent "(node " (node-type n))) 
-      ;   (let [ indent (str "  " indent) ]
-      ;     (if (or allIds (not (.startsWith (str (node-id n)) ":_")))
-      ;       (println (str indent ":core/id " (node-id n))))
-      ;     (doseq [ k (keys n) :when (not (#{:core/type :core/id} k)) ]
-      ;       (let [ kstr (short-attr-name n k)
-      ;               v (node-attr n k)]
-      ;         (do
-      ;           (cond
-      ;             (node? v)
-      ;             (do
-      ;               (println (str indent kstr))
-      ;               (print-node v allIds indent))
-      ;     
-      ;             (vector? v)
-      ;             (do
-      ;               (println (str indent kstr " ["))
-      ;               (dorun
-      ;                 (map #(if (node? %) 
-      ;                         (print-node % allIds (str indent "  ")) 
-      ;                         (println (str indent "  " %))) 
-      ;                     v))
-      ;               (println (str indent "]")))
-      ;     
-      ;             (string? v)
-      ;             (println (str indent kstr " \"" v "\""))
-      ;         
-      ;             true
-      ;             (println (str indent kstr " " v)))))))
-      ;   (println (str indent ")"))))))
 
 
 ; File I/O:
