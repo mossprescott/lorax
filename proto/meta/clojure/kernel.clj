@@ -193,7 +193,7 @@
 
 
 ; ; Hand-written reduction for the :clojure/kernel language; supplanted by the
-; ; grammar in kernel2.mlj
+; ; grammar in kernel.mlj
 ; (def kernelPresRules {
 ;   :clojure/kernel/bind
 ;   (fn [n] 

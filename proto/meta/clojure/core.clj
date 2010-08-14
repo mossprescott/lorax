@@ -9,7 +9,7 @@
 
 (def core-grammar
   (compose-grammars
-    (load-node "meta/clojure/kernel2.mlj")
+    (load-node "meta/clojure/kernel.mlj")
     (load-node "meta/clojure/core.mlj"))) ; HACK
     ; (load-node "meta/clojure/re.mlj")))
 

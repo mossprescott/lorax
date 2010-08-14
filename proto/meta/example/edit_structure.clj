@@ -19,7 +19,6 @@
     
 ; (loadOne "meta/structure.mlj")
 ; (loadOne "meta/clojure/kernel.mlj")
-; (loadOne "meta/clojure/kernel2.mlj")
 
 
 (defn loadGrammar
@@ -40,7 +39,7 @@
       )))
 
 ; Grammar-language version of the kernel syntax, reduced to :structure lang.:
-; (loadGrammar "meta/clojure/kernel2.mlj")
+; (loadGrammar "meta/clojure/kernel.mlj")
 
 ; Easier? Just a couple of simpler nodes:
 ; (loadGrammar "meta/core.mlj")
@@ -113,7 +112,7 @@
     
 ; (loadGrammar2 "meta/edit/view.mlj")  ; this one looks funny because the display reductions are bogus
 ; (loadGrammar2 "meta/edit/expr.mlj")  ; this one has slightly less bogus display reductions
-; (loadGrammar2 "meta/clojure/kernel2.mlj")  ; this one's for real
+; (loadGrammar2 "meta/clojure/kernel.mlj")  ; this one's for real
 (loadGrammar2 "meta/clojure/core.mlj")  ; this one is real too
 
 ;(loadGrammar2 "meta/grammar.mlj")

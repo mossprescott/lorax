@@ -6,7 +6,7 @@
         (meta.clojure core kernel)))
 
 (def kernel-grammar
-  (load-node "meta/clojure/kernel2.mlj"))
+  (load-node "meta/clojure/kernel.mlj"))
   
 (def kernel-structure
   (grammar-to-structure kernel-grammar))

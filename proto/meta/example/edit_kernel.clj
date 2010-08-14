@@ -208,16 +208,16 @@
 
 ; (print-node (meta-reduce p3 kernelPresRules))
 
-(def struc (first (load-nodes "meta/clojure/kernel.mlj")))
-(def checker (make-structure-checker struc))
-(def errors (checker p3))
+; (def struc (first (load-nodes "meta/clojure/kernel.mlj")))
+; (def checker (make-structure-checker struc))
+; (def errors (checker p3))
 
 ; (doseq [[k v] errors] (println k "->" (apply str (interpose "; " v))))
 
 ; (makeKernelFrame p3 "clojure/kernel" errors)
 
 (let [cgr (load-node "meta/core.mlj")
-      kgr (load-node "meta/clojure/kernel2.mlj")
+      kgr (load-node "meta/clojure/kernel.mlj")
       clgr (load-node "meta/clojure/core.mlj")
       gr (compose-grammars cgr kgr clgr)
       struc (grammar-to-structure gr)
