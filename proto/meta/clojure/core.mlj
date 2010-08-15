@@ -407,6 +407,91 @@
       })
     })
 
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/fraction)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :fraction_num {
+          :name
+          (make-node :grammar/name :clojure/core/fraction/num)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+        (make-node :grammar/attr :fraction_denom {
+          :name
+          (make-node :grammar/name :clojure/core/fraction/denom)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/over {
+          :top
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :fraction_num)
+            })
+          })
+          
+          :weight 1
+          
+          :bottom
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :fraction_denom)
+            })
+          })
+        })
+      })
+  
+      :expand
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :clojure/kernel/app {
+          :expr
+          (make-node :clojure/kernel/extern { :name "/" })
+          
+          :args
+          (make-node :clojure/kernel/args [
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :fraction_num)
+              })
+            })
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :fraction_denom)
+              })
+            })
+          ])
+        })
+      })
+    })
+
     ; ; binary AND
     ; (node :grammar/rule
     ;   :type

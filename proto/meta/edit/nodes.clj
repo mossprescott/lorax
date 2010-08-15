@@ -459,6 +459,10 @@
 (def RADICALS [ "\u0070" "\u0071" "\u0072" "\u0073" "\u0074" ])
 
 ; TODO: pick the right radical (0-3, probably; 4 is the ugly vertical one)
+; TODO: "power"
+
+(def RADICAL_LINE_WEIGHT 1)
+(def RADICAL_SPACE 1)
 
 (defmethod size :view/radical
   [n #^Graphics2D g]
@@ -467,7 +471,7 @@
         ^Rectangle2D rr (string-bounds (RADICALS 0) :cmex10 g)
         rh (- (.getMinY rr))]  ; adjust for cmex descent wackiness
     [ (+ xw (.getWidth rr)) 
-      rh 
+      (max rh (+ RADICAL_LINE_WEIGHT RADICAL_SPACE xh RADICAL_SPACE ))
       xb]))  ; TODO: baseline from expr
     
 (defmethod layout :view/radical
@@ -475,8 +479,10 @@
   (let [x (node-attr n :radicand)
         [xw xh xb] (size x g)
         ^Rectangle2D rr (string-bounds (RADICALS 0) :cmex10 g)
-        rh (- (.getMinY rr))]  ; adjust for cmex descent wackiness
-    [ [x (.getWidth rr) (/ (- xh rh) 2) xw xh] ]))
+        rh (- (.getMinY rr))  ; adjust for cmex descent wackiness
+        xx (.getWidth rr)
+        xy (max (+ RADICAL_LINE_WEIGHT RADICAL_SPACE) (/ (- rh xh) 2))]
+    [ [x xx xy xw xh] ]))
     
 (defmethod draw :view/radical
   [n #^Graphics2D g debug?]
@@ -489,6 +495,50 @@
       (.drawString (str (RADICALS 0)) 0 0)
       (.draw (Line2D$Float. (.getWidth rr) 0
                             (+ (.getWidth rr) xw) 0)))))
+
+;
+; Over (i.e. fraction):
+;
+
+(def OVER_MARGIN 2)
+(def OVER_SPACE 2)
+
+(defmethod size :view/over
+  [n #^Graphics2D g]
+  (let [t (node-attr n :top)
+        wt (node-attr-value n :weight)
+        b (node-attr n :bottom)
+        [tw th tb] (size t g)
+        [bw bh bb] (size b g)]
+    [ (+ OVER_MARGIN (max tw bw) OVER_MARGIN) 
+      (+ th OVER_SPACE wt OVER_SPACE bh)
+      nil]))
+    
+(defmethod layout :view/over
+  [n #^Graphics2D g]
+  (let [t (node-attr n :top)
+        wt (node-attr-value n :weight)
+        b (node-attr n :bottom)
+        [tw th tb] (size t g)
+        [bw bh bb] (size b g)]
+    [ [t (+ OVER_MARGIN (/ (max 0 (- bw tw)) 2)) 0 tw th]
+      [b (+ OVER_MARGIN (/ (max 0 (- tw bw)) 2)) (+ th OVER_SPACE wt OVER_SPACE) bw bh] ]))
+    
+(defmethod draw :view/over
+  [n #^Graphics2D g debug?]
+  (let [wt (node-attr-value n :weight)]
+    (if (> wt 0)
+      (let [t (node-attr n :top)
+            b (node-attr n :bottom)
+            [tw th tb] (size t g)
+            [bw bh bb] (size b g)
+            x1 0
+            y1 (+ th OVER_SPACE -0.5)
+            x2 (+ OVER_MARGIN (max tw bw) OVER_MARGIN)
+            y2 y1]
+        (doto g
+          (.setColor (node-color n))
+          (.draw (Line2D$Float. x1 y1 x2 y2)))))))
 
 
 ;

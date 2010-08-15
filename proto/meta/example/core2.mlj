@@ -29,6 +29,20 @@
     })
   })
   
+  (make-node :clojure/core/times {
+    :left
+    (make-node :clojure/core/fraction {
+      :num
+      (make-node :clojure/kernel/int { :value 1 })
+
+      :denom
+      (make-node :clojure/kernel/int { :value 3 })
+    })
+    
+    :right
+    (make-node :clojure/kernel/int { :value 100 })
+  })
+  
   (make-node :clojure/core/and {
     :left
     (make-node :clojure/kernel/true)

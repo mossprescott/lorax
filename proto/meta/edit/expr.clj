@@ -163,8 +163,8 @@
 
 (def EMBED_COLORS (cycle [
   (node :view/rgb :red 1.0 :green 1.0 :blue 1.0)  ; white
-  (node :view/rgb :red 0.8 :green 0.8 :blue 1.0)  ; blue
-  (node :view/rgb :red 0.8 :green 1.0 :blue 0.8)  ; green
+  (node :view/rgb :red 0.9 :green 0.9 :blue 1.0)  ; blue
+  (node :view/rgb :red 0.9 :green 1.0 :blue 0.9)  ; green
   (node :view/rgb :red 0.8 :green 1.0 :blue 1.0)  ; cyan
   (node :view/rgb :red 1.0 :green 1.0 :blue 0.8)  ; yellow
   (node :view/rgb :red 1.0 :green 0.8 :blue 1.0)  ; magenta
@@ -172,8 +172,8 @@
 
 (def EMBED_BORDER_COLORS (cycle [
   (node :view/rgb :red 1.0 :green 1.0 :blue 1.0)  ; white
-  (node :view/rgb :red 0.3 :green 0.3 :blue 0.6)  ; blue
-  (node :view/rgb :red 0.3 :green 0.6 :blue 0.3)  ; green
+  (node :view/rgb :red 0.5 :green 0.5 :blue 0.8)  ; blue
+  (node :view/rgb :red 0.5 :green 0.8 :blue 0.5)  ; green
   (node :view/rgb :red 0.3 :green 0.6 :blue 0.6)  ; cyan
   (node :view/rgb :red 0.6 :green 0.6 :blue 0.3)  ; yellow
   (node :view/rgb :red 0.6 :green 0.3 :blue 0.6)  ; magenta

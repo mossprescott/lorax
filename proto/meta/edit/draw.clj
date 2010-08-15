@@ -100,7 +100,7 @@
             (.setStroke (BasicStroke. 1))
             (.draw (Line2D$Float. 0.5 (+ y 0.5) w (+ y 0.5)))))))))
 
-; This is way out of hand. basically, it's a recursive search of the tree, building
+; This is way out of hand. Basically, it's a recursive search of the tree, building
 ; a list of containing nodes 
 (defn findHitNodes
   "Given a node and (relative) coords x and y, returns a list of ids of nodes containing the 
