@@ -268,44 +268,145 @@
       })
     })
 
-    ; ; _unary_ minus
-    ; (node :grammar/rule
-    ;   :type
-    ;   :clojure/core/unaryminus
-    ;   
-    ;   :supers [ :clojure/kernel/expr ]
-    ;   
-    ;   :display
-    ;   (node :view/expr/juxt
-    ;     :boxes [
-    ;       (node :view/expr/symbol :str "-")
-    ;       (node :grammar/attr :core/id :e2
-    ;         :name
-    ;         :clojure/core/unaryminus/expr
-    ;       
-    ;         :options [
-    ;           (node :structure/node
-    ;             :type :clojure/kernel/expr)
-    ;         ]
-    ;       
-    ;         :optional false)
-    ;     ])
-    ;     
-    ;   :expand
-    ;   (node :clojure/kernel/quote
-    ;     :body
-    ;     (node :clojure/kernel/app
-    ;       :expr
-    ;       (node :clojure/kernel/extern
-    ;         :name "-")
-    ;       
-    ;       :args [
-    ;         (node :clojure/kernel/unquote
-    ;           :body
-    ;           (node :clojure/kernel/var
-    ;             :ref (ref-node :e2)))
-    ;       ])))
-    ; 
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/sqrt)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :sqrt_expr {
+          :name
+          (make-node :grammar/name :clojure/core/sqrt/expr)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/radical {
+          :radicand
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :sqrt_expr)
+            })
+          })
+        })
+      })
+  
+      :expand
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :clojure/kernel/app {
+          :expr
+          (make-node :clojure/kernel/extern { :name "Math/sqrt" })
+          
+          :args
+          (make-node :clojure/kernel/args [
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :sqrt_expr)
+              })
+            })
+          ])
+        })
+      })
+    })
+
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/times)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :times_left {
+          :name
+          (make-node :grammar/name :clojure/core/times/left)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+        (make-node :grammar/attr :times_right {
+          :name
+          (make-node :grammar/name :clojure/core/times/right)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/binary [
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :times_left)
+            })
+          })
+          (make-node :view/expr/symbol { :str :times })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :times_right)
+            })
+          })
+        ])
+      })
+  
+      :expand
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :clojure/kernel/app {
+          :expr
+          (make-node :clojure/kernel/extern { :name "*" })
+          
+          :args
+          (make-node :clojure/kernel/args [
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :times_left)
+              })
+            })
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :times_right)
+              })
+            })
+          ])
+        })
+      })
+    })
+
     ; ; binary AND
     ; (node :grammar/rule
     ;   :type

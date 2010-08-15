@@ -451,6 +451,46 @@
           (.draw (Line2D$Float. x2 i x2 y2))
           (.draw (Line2D$Float. i y2 x2 y2)))))))
 
+
+;
+; Radical:
+;
+
+(def RADICALS [ "\u0070" "\u0071" "\u0072" "\u0073" "\u0074" ])
+
+; TODO: pick the right radical (0-3, probably; 4 is the ugly vertical one)
+
+(defmethod size :view/radical
+  [n #^Graphics2D g]
+  (let [x (node-attr n :radicand)
+        [xw xh xb] (size x g)
+        ^Rectangle2D rr (string-bounds (RADICALS 0) :cmex10 g)
+        rh (- (.getMinY rr))]  ; adjust for cmex descent wackiness
+    [ (+ xw (.getWidth rr)) 
+      rh 
+      xb]))  ; TODO: baseline from expr
+    
+(defmethod layout :view/radical
+  [n #^Graphics2D g]
+  (let [x (node-attr n :radicand)
+        [xw xh xb] (size x g)
+        ^Rectangle2D rr (string-bounds (RADICALS 0) :cmex10 g)
+        rh (- (.getMinY rr))]  ; adjust for cmex descent wackiness
+    [ [x (.getWidth rr) (/ (- xh rh) 2) xw xh] ]))
+    
+(defmethod draw :view/radical
+  [n #^Graphics2D g debug?]
+  (let [x (node-attr n :radicand)
+        ^Rectangle2D rr (string-bounds (RADICALS 0) :cmex10 g)
+        [[x xx xy xw xh]] (layout n g)]
+    (doto g
+      (.setColor (node-color n))
+      (.setFont (FONTS :cmex10))
+      (.drawString (str (RADICALS 0)) 0 0)
+      (.draw (Line2D$Float. (.getWidth rr) 0
+                            (+ (.getWidth rr) xw) 0)))))
+
+
 ;
 ; Handling of unrecognized nodes (or non-nodes), which allows the rest of the 
 ; program to be rendered.

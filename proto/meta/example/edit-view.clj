@@ -43,7 +43,7 @@
                         (for [i (range from to)]
                           (node :view/chars
                             :str (str (char i))
-                            :font :cmsy10)))))
+                            :font font)))))
       (node :view/quad)
       (node :view/chars
         :str (str "0x" (Integer/toHexString (dec to)))
@@ -124,6 +124,27 @@
         (charSeq 0xd0 0xe0 :cmsy10)
         (charSeq 0xe0 0xf0 :cmsy10)
         (charSeq 0xf0 0x100 :cmsy10)
+      
+        (node :view/chars :str " " :font :cmr10)  ; HACK: need a vspace node?
+        (node :view/chars :str "cmex10 font table:" :font :times)
+        (node :view/chars :str " " :font :cmr10)  ; HACK: need a vspace node?
+        
+        (charSeq 0x00 0x10 :cmex10)
+        (charSeq 0x10 0x20 :cmex10)
+        (charSeq 0x20 0x30 :cmex10)
+        (charSeq 0x30 0x40 :cmex10)
+        (charSeq 0x40 0x50 :cmex10)
+        (charSeq 0x50 0x60 :cmex10)
+        (charSeq 0x60 0x70 :cmex10)
+        (charSeq 0x70 0x80 :cmex10)
+        (charSeq 0x80 0x90 :cmex10)
+        (charSeq 0x90 0xa0 :cmex10)
+        (charSeq 0xa0 0xb0 :cmex10)
+        (charSeq 0xb0 0xc0 :cmex10)
+        (charSeq 0xc0 0xd0 :cmex10)
+        (charSeq 0xd0 0xe0 :cmex10)
+        (charSeq 0xe0 0xf0 :cmex10)
+        (charSeq 0xf0 0x100 :cmex10)
       
         ; (node :view/chars
         ;   :str (apply str (map char (range 0x10 0x20)))

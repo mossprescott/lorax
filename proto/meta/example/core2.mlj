@@ -1,27 +1,41 @@
 (use 'meta.core)
 
 (make-node :clojure/core/program [
-     ; Half-assed comment:
-    (make-node :clojure/kernel/string { :value "Examples.using.the.core.syntax..."})
-     
-    (make-node :clojure/core/not {
-      :expr
-      (make-node :clojure/kernel/true)
-    })
-    
-    (make-node :clojure/core/and {
-      :left
-      (make-node :clojure/kernel/true)
-      
-      :right
-      (make-node :clojure/kernel/false)
-    })
-    
-    (make-node :clojure/core/unaryminus {
-      :expr
-      (make-node :clojure/kernel/int { :value 137 })
-    })
+   ; Half-assed comment:
+  (make-node :clojure/kernel/string { :value "Examples.using.the.core.syntax..."})
+   
+  (make-node :clojure/core/not {
+    :expr
+    (make-node :clojure/kernel/true)
+  })
+  
+  (make-node :clojure/core/unaryminus {
+    :expr
+    (make-node :clojure/kernel/int { :value 137 })
+  })
 
+  (make-node :clojure/core/sqrt {
+    :expr
+    (make-node :clojure/kernel/int { :value 4 })
+  })
+  
+  (make-node :clojure/core/sqrt {
+    :expr
+    (make-node :clojure/core/times {
+      :left
+      (make-node :clojure/kernel/int { :value 4 })
+      :right
+      (make-node :clojure/kernel/int { :value 9 })
+    })
+  })
+  
+  (make-node :clojure/core/and {
+    :left
+    (make-node :clojure/kernel/true)
+    
+    :right
+    (make-node :clojure/kernel/false)
+  })
   
   (node :clojure/core/greater
     :left
