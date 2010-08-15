@@ -155,7 +155,12 @@
     (make-node :clojure/kernel/false {})
     
     (integer? r)
-    (make-node :clojure/kernel/int { :value r })
+    (if (< r 0)
+      (make-node :clojure/core/unaryminus {
+        :expr
+        (make-node :clojure/kernel/int { :value (- r) })
+      })
+      (make-node :clojure/kernel/int { :value r }))
       
     (string? r)
     (make-node :clojure/kernel/string { :value r })

@@ -1,31 +1,50 @@
-; More examples using the :clojure/core language
+(use 'meta.core)
 
-(foo)
-
-(node :clojure/core/program
-  :exprs [
-    (node :clojure/core/greater
+(make-node :clojure/core/program [
+     ; Half-assed comment:
+    (make-node :clojure/kernel/string { :value "Examples.using.the.core.syntax..."})
+     
+    (make-node :clojure/core/not {
+      :expr
+      (make-node :clojure/kernel/true)
+    })
+    
+    (make-node :clojure/core/and {
       :left
-      (node :clojure/core/times
-        :left 
-        (node :clojure/kernel/int :value 11)
-        
-        :right
-        (node :clojure/kernel/int :value 4))
+      (make-node :clojure/kernel/true)
       
       :right
-      (node :clojure/kernel/int :value 42))
-
-    (node :clojure/core/factorial
+      (make-node :clojure/kernel/false)
+    })
+    
+    (make-node :clojure/core/unaryminus {
       :expr
+      (make-node :clojure/kernel/int { :value 137 })
+    })
+
+  
+  (node :clojure/core/greater
+    :left
+    (node :clojure/core/times
+      :left 
+      (node :clojure/kernel/int :value 11)
+      
+      :right
       (node :clojure/kernel/int :value 4))
+    
+    :right
+    (node :clojure/kernel/int :value 42))
 
-    (node :clojure/core/factorial
-      :expr
-      (node :clojure/core/times
-        :left
-        (node :clojure/kernel/int :value 2)
-        
-        :right
-        (node :clojure/kernel/int :value 10)))
+  (node :clojure/core/factorial
+    :expr
+    (node :clojure/kernel/int :value 4))
+
+  (node :clojure/core/factorial
+    :expr
+    (node :clojure/core/times
+      :left
+      (node :clojure/kernel/int :value 2)
+      
+      :right
+      (node :clojure/kernel/int :value 10)))
   ])

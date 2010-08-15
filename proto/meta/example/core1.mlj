@@ -93,22 +93,5 @@
         ]) 
       })
     })
-    
-    ; not kernel!
-    (make-node :clojure/core/not {
-      :expr
-      (make-node :clojure/kernel/true)
-    })
-    (make-node :clojure/core/and {
-      :left
-      (make-node :clojure/kernel/true)
-      
-      :right
-      (make-node :clojure/kernel/false)
-    })
-    (make-node :clojure/core/unaryminus {
-      :expr
-      (make-node :clojure/kernel/int { :value 137 })
-    })
 
   ])

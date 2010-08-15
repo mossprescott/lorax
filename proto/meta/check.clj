@@ -305,7 +305,7 @@
       }))))
 
 (defn- display-fn
-  [mn]
+  [mn attr]
   (make-node :clojure/kernel/lambda {
     :params 
     (make-node :clojure/kernel/params [
@@ -313,7 +313,7 @@
     ])
       
     :body
-    (bind-attrs (node-attr mn :display) (node-attr-children mn :attrs))
+    (bind-attrs (node-attr mn attr) (node-attr-children mn :attrs))
   }))
 
 (defn- reduce-seq
@@ -330,42 +330,49 @@
                    val)))
   }))
 
-(defn grammar-to-display
+(defn reduce-with-grammar
   "Takes a :grammar/language node and returns a reduction function which
-  performs the presentation reduction described in the grammar.
+  performs one of the reductions described in the grammar.
   Note that currently the reduction visits the grammar node each time it is 
   invoked (that is, for each source node), and then compiles a reduction on the
   spot -- it would be equally easy to pre-compile a reduction for each rule,
   and more efficient."
-  [grammar]
+  [grammar attr]
   (fn [n]
     ; (println "type for display:" (node-type n))
     ; (print-node n true)
     (let [typ (node-type n)]
       (if-let [rule (getGrammarRule grammar typ)]
-        (condp = (node-type rule)
-          :grammar/mapNode
-          (let [;_ (println "found rule:")
-                ;_ (print-node rule true)
-                mdf (display-fn rule)
-                ; _ (println "mdf:")
-                ; _ (print-node mdf true)
-                cl (meta-compile mdf)
-                ; _ (println "cl:" cl)
-                df (eval cl)
-                ; _ (println "df:" df)
-                np (df n)
-                ; _ (print-node np true)
-                ; displayp (rename-nodes display)
-                ; [np o] (meta-reduce2 displayp (reduceEmbedded n))]
-                ]
-            np)
+        (if (has-attr? rule attr)
+          (condp = (node-type rule)
+            :grammar/mapNode
+            (let [;_ (println "found rule:")
+                  ;_ (print-node rule true)
+                  mdf (display-fn rule attr)
+                  ; _ (println "mdf:")
+                  ; _ (print-node mdf true)
+                  cl (meta-compile mdf)
+                  ; _ (println "cl:" cl)
+                  df (eval cl)
+                  ; _ (println "df:" df)
+                  np (df n)
+                  ; _ (print-node np true)
+                  ]
+              np)
           
-          :grammar/seqNode
-          ; nil
-          ; (first (meta-reduce2 n (reduce-seq rule)))
-          (meta-reduce (node-attr rule :display) (reduce-seq (node-children n)))
-        nil)))))
+            :grammar/seqNode
+            ; nil
+            ; (first (meta-reduce2 n (reduce-seq rule)))
+            (meta-reduce (node-attr rule attr) (reduce-seq (node-children n)))
+            
+            true
+            (assert false)))))))
+
+(defn grammar-to-display
+  "Takes a :grammar/language node and returns a reduction function which
+  performs the presentation reduction described in the grammar."
+  [grammar]
+  (reduce-with-grammar grammar :display))
 
 ; (defn grammar-to-display1
 ;   "Takes a :grammar/language node and returns a reduction function which
@@ -575,10 +582,10 @@
             (node-attr n :display)
           ])
         (with-attr n :expand e
-          (node :view/sequence [
-              (node :view/quad)
-              (node :view/expr/symbol :str :to)
-              (node :view/thickspace)
+          (make-node :view/sequence [
+              (make-node :view/quad)
+              (make-node :view/expr/symbol { :str :to })
+              (make-node :view/thickspace)
               e
             ])
           (make-node :view/sequence [])) ; HACK: empty node
