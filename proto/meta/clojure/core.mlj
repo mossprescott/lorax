@@ -8,31 +8,6 @@
 (use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
 
 (make-node :grammar/language [
-  
-    ; ; HACK: ":kernel"-language program node (was using this in my example)
-    ; (node :grammar/rule
-    ;   :type 
-    ;   :clojure/kernel/program
-    ;   
-    ;   :supers []
-    ;   
-    ;   :display
-    ;   (node :view/section
-    ;     :items
-    ;     (node :grammar/sequence
-    ;       :name
-    ;       :clojure/kernel/program/exprs
-    ;     
-    ;       :options [
-    ;         (node :structure/node
-    ;           :type :clojure/kernel/expr)
-    ;       ]
-    ;       
-    ;       :min 0
-    ;       
-    ;       :separator
-    ;       (node :view/expr/keyword :str " "))))
-
     (make-node :grammar/seqNode {
       :type 
       (make-node :grammar/type :clojure/core/program)
@@ -42,7 +17,9 @@
 
       :options 
       (make-node :grammar/options [
-        ; TODO
+        (make-node :grammar/node {
+          :type :clojure/kernel/expr
+        })
       ])
       
       :min 0
@@ -57,48 +34,124 @@
       })
     })
 
-      ; (node :view/section
-      ;   :items
-      ;   (node :grammar/sequence
-      ;     :name
-      ;     :clojure/core/program/exprs
-      ;   
-      ;     :options [
-      ;       (node :structure/node
-      ;         :type :clojure/kernel/expr)
-      ;     ]
-      ;     
-      ;     :min 0
-      ;     
-      ;     :separator
-      ;     (node :view/expr/keyword :str " "))
-      ; 
-      ; ; TODO: reduction to :clojure/kernel
-      ; ))
+    (make-node :grammar/seqNode {
+      :type 
+      (make-node :grammar/type :clojure/core/session)
+      
+      :supers 
+      (make-node :grammar/types [])
 
-    ; (node :grammar/rule
-    ;   :type
-    ;   :clojure/core/session
-    ;   
-    ;   :supers []
-    ;   
-    ;   :display
-    ;   (node :view/section
-    ;     :items
-    ;     (node :grammar/sequence
-    ;       :name 
-    ;       :clojure/core/session/exchanges
-    ;       
-    ;       :options [
-    ;         (node :structure/node
-    ;           :type :clojure/core/exchange)
-    ;       ]
-    ;       
-    ;       :min 0
-    ;       
-    ;       :separator
-    ;       (node :view/expr/keyword :str " "))))
-    ; 
+      :options 
+      (make-node :grammar/options [
+        (make-node :grammar/node {
+          :type :clojure/core/exchange
+        })
+      ])
+      
+      :min 0
+          
+      :display
+      (make-node :grammar/seq {
+        :type 
+        (make-node :grammar/type :view/section)
+        
+        :separator
+        (make-node :view/expr/keyword { :str " " })
+      })
+    })
+
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/exchange)
+      
+      :supers 
+      (make-node :grammar/types [
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :exchange_expr {
+          :name
+          (make-node :grammar/name :clojure/core/exchange/expr)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type
+                :clojure/kernel/expr
+              })
+          ])
+          
+          :optional false
+        }) 
+        (make-node :grammar/attr :exchange_kernel {
+          :name
+          (make-node :grammar/name :clojure/core/exchange/kernel)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type
+                :clojure/kernel/expr
+              })
+          ])
+          
+          :optional false
+        }) 
+        (make-node :grammar/attr :exchange_value {
+          :name
+          (make-node :grammar/name :clojure/core/exchange/value)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+          
+          :optional false
+        }) 
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/section [
+          (make-node :view/sequence [
+            (make-node :view/expr/mono { :str "$" })
+            (make-node :view/quad)
+            (make-node :clojure/kernel/unquote {
+              :body 
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :exchange_expr)
+              })
+            })
+          ])
+          (make-node :view/sequence [
+            (make-node :view/expr/mono { :str ">" })
+            (make-node :view/quad)
+            (make-node :clojure/kernel/unquote {
+              :body 
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :exchange_kernel)
+              })
+            })
+          ])
+          (make-node :view/sequence [
+            (make-node :view/expr/mono { :str " " })
+            (make-node :view/quad)
+            (make-node :clojure/kernel/unquote {
+              :body 
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :exchange_value)
+              })
+            })
+          ])
+        ])
+      })
+    })
+
+
     ; (node :grammar/rule
     ;   :type
     ;   :clojure/core/exchange

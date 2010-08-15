@@ -155,10 +155,13 @@
     (make-node :clojure/kernel/false {})
     
     (integer? r)
-    (make-node :clojure/kernel/int r)
+    (make-node :clojure/kernel/int { :value r })
       
     (string? r)
-    (make-node :clojure/kernel/string r)
+    (make-node :clojure/kernel/string { :value r })
+      
+    (keyword? r)
+    (make-node :clojure/kernel/name { :value r })
       
     (seq? r)
     (make-node :clojure/core/sequence

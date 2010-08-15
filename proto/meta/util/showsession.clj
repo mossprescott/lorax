@@ -6,13 +6,13 @@
         (meta.edit expr draw)
         (meta.clojure kernel core run)))
 
-(def name-display
-  ; (let [f (reduceByType nameRules)]
-  ;   (fn [n] 
-  ;     (do 
-  ;       (println (node-type n)) 
-  ;       (f n)))))
-  (reduceByType nameRules))
+; (def name-display
+;   ; (let [f (reduceByType nameRules)]
+;   ;   (fn [n] 
+;   ;     (do 
+;   ;       (println (node-type n)) 
+;   ;       (f n)))))
+;   (reduceByType nameRules))
 
 (defn show-errors
   [errors]
@@ -23,10 +23,11 @@
 (defn show
   [f]
   (let [pr (load-node f)
-        sess (run-program pr core-expansions)
+        sess (run-program pr expand-core)
         errors (core-checker sess)
         _ (show-errors errors)
-        display #(meta-reduce2 % (apply-until name-display core-display))]
+        ; display #(meta-reduce2 % (apply-until name-display core-display))]
+        display (compose-reductions name-to-expr #(meta-reduce2 % core-display))]
     (makeSyntaxFrame sess f display errors)))
 
 (doseq [f *command-line-args*]

@@ -1,5 +1,5 @@
-; Program taking a seq of :core/program files on the command line and 
-; evaluating each expr, displaying the result as a session.
+; Program taking a seq of :core/program files on the command line and simply 
+; showing the contents.
 
 (ns meta.util.showprogram
   (:use (meta core check reduce name)
