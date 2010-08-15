@@ -245,6 +245,7 @@
         })
       })
     })
+    
     (make-node :grammar/mapNode {
         :type 
         (make-node :grammar/type :clojure/kernel/bind)
@@ -262,7 +263,7 @@
         (make-node :clojure/kernel/quote {
           :body
           (make-node :view/expr/var { 
-            :str "x" 
+            :str "?" 
           })
         })
       })
@@ -652,7 +653,7 @@
           
           :options
           (make-node :grammar/options [ ; TODO
-            ; (make-node :grammar/node {
+            ; (make-node :grammar/ref {
             ;   :type :clojure/kernel/bind
             ; })
           ])
@@ -661,14 +662,9 @@
         })
       ])
     
-      ; Note: not used -- the name reduction will take care of it
       :display
-      (make-node :clojure/kernel/quote {
-        :body
-        ; (make-node :clojure/kernel/var {
-        ;   :ref (ref-node :var_ref)
-        ; })
-        (make-node :view/expr/var { :str "y" }) ; HACK!
+      (make-node :clojure/kernel/var {
+        :ref (ref-node :var_ref)
       })
     })
         
