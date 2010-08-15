@@ -42,6 +42,9 @@
     :grammar/attr
     (fn [n] 
       (node-attr n :name))
+      
+    :clojure/kernel/bind
+    (fn [n] n)
   })
 
 ; Map of node types to fxns which yield a (string) name for the given node,
@@ -50,6 +53,10 @@
     :grammar/name
     (fn [n]
       (baseName (node-value n)))
+
+    :clojure/kernel/bind
+    (fn [n]
+      (baseName (node-id n)))  ; HACK: look for an optional attr, or assign a random name (x, x', ...?)
   })
 
 
@@ -66,11 +73,13 @@
                     [{} nil]))
                 [{} nil]))
         id-to-name (reduce merge {} (visitNode root vf nil))
-        ; _ (println "id-to-name:" id-to-name)
+        ; _ (println "id-to-name:" id-to-name) ; HACK
         rf (fn [n]
               (if (ref-node? n)
                 (if-let [name (id-to-name (ref-node-id n))]
+                  ; (do (println "ref:" name (ref-node-id n)) ; HACK
                   (make-node :view/expr/var { :str name }))
+                  ; ) ; HACK
                 (if-let [nf (rules (node-type n))]
                   (make-node :view/expr/var { :str (nf n) }))))
         ]
