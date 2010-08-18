@@ -330,13 +330,18 @@
   Returns a sequence of the result values for each node, in no particular order,
   (but more or less in-order).
   
+  If called with just two args [n, f], then f is a function taking only a node, 
+  and the 'env' value is ignored.
+  
   TODO: should be lazy?"
-  [#^nodetype n f env]
-  (let [ [result newEnv] (f n env)]
-    (apply concat
-      [result]
-      (for [c (node-children n)]
-        (visitNode c f newEnv)))))
+  ([#^nodetype n f]
+    (visitNode n (fn [n _] [(f n) nil]) nil))
+  ([#^nodetype n f env]
+    (let [ [result newEnv] (f n env)]
+      (apply concat
+        [result]
+        (for [c (node-children n)]
+          (visitNode c f newEnv))))))
 
 (defn deep-node-ids
   "Seq of all ids found in the entire tree."
@@ -375,7 +380,7 @@
   ; Would it be easier to build this as a reduction? That would require an 
   ; awkward dep. on reduce.clj (or moving this function there)
   [#^nodetype n]
-  (let [ old-to-new-id (mapfor [ i (deep-node-ids n) ] i (genid)) ]
+  (let [ old-to-new-id (mapfor [ i (deep-node-ids n) ] i (genid (subs (str i "__") 1))) ]
     (letfn [(map-id 
               [i] 
               (get old-to-new-id i i))
@@ -396,7 +401,7 @@
                 (ref-node? n)
                 (ref-node (map-id (ref-node-id n)))
                 
-                (node?)
+                (node? n)
                 (make-node (node-type n) 
                            (map-id (node-id n))
                            (node-value n))))]
