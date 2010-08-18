@@ -119,6 +119,7 @@
     
       ; otherwise recursively visit the children:
       `(make-node ~(node-type n)
+                  ~(node-id n)
                   ~(mapfor [k (node-attrs n)] k (meta-compile-later (node-attr n k)))))
       ; (zipmap 
       ;   (keys n) 
@@ -127,10 +128,12 @@
       
     (seq-node? n)
     `(make-node ~(node-type n)
+                ~(node-id n)
                 ~(vec (map meta-compile-later (node-children n))))
     
     (node? n)
     `(make-node ~(node-type n)
+                ~(node-id n)
                 ~(node-value n))
     
     true
