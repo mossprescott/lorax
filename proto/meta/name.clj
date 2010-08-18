@@ -5,36 +5,24 @@
 	(:use (clojure test)
 	      (meta core reduce)))
 
-(defn- simple-name
-  [kw]
-  (subs (str kw) 1))
-
 (defn- baseName
   "Remove any prefix from every name, to make things easy to read (but possibly 
   ambiguous). See check.clj"
   [kw]
   (let [#^String s (subs (str kw) 1)
-        idx (.lastIndexOf s (int \/))]  ; a clean way to do this in Clojure?
-    (if (= idx -1)
-        s
-        (subs s (inc idx)))))
-
-; (def nameRules {
-;     :clojure/kernel/bind
-;     (fn [n]
-;       ; (do (println "bind" (node-id n))
-;       (make-node :view/expr/var {
-;           :str (simple-name (node-id n))
-;         }))
-;       ; )
-;       
-;     :clojure/kernel/var
-;     (fn [n]
-;       (let [r (node-attr n :ref)]
-;         (make-node :view/expr/var {
-;             :str (simple-name (ref-node-id r))
-;           })))
-;   })
+        slashIdx (.lastIndexOf s (int \/))  ; is there a clean way to do this in Clojure?
+        underIdx (.indexOf s (int \_))  ; maybe in contrib?
+        startIdx (if (= slashIdx -1) 0 (inc slashIdx))
+        endIdx (if (= underIdx -1) (.length s) underIdx)]
+    ; (println s startIdx endIdx)
+    (subs s startIdx endIdx)))
+  ; (let [#^String s (subs (str kw) 1)
+  ;       slashIdx (.lastIndexOf s (int \/))  ; is there a clean way to do this in Clojure?
+  ;       underIdx (.lastIndexOf s (int \_))  ; maybe in contrib?
+  ;       idx (max slashIdx underIdx)]
+  ;   (if (= idx -1)
+  ;       s
+  ;       (subs s (inc idx)))))
 
 ; Map of node types to fxns which yield a node which represents the first 
 ; node's name:
@@ -60,28 +48,46 @@
   })
 
 
+(defn- primed
+  [name num]
+  (let [n (make-node :view/expr/var { :str name })]
+    (if (= num 0)
+      n
+      (make-node :view/scripted {
+        :nucleus
+        n
+        
+        :super
+        (make-node :view/sequence 
+          (repeat num (make-node :view/expr/prime)))
+      }))))
+
 (defn reduce-names
   "Reduce nodes which introduce 'bindings' and nodes that refer to them,
   given a fn producing a name (a simple string, for now)."
   ; TODO: uniquify names that are re-used (primes?)
   [root findRules rules]
-  (let [vf (fn [n env] 
+  (let [vf (fn [n] 
               (if-let [fr (findRules (node-type n))]
                 (let [nn (fr n)]
                   (if-let [nr (rules (node-type nn))]
-                    [{(node-id n) (nr nn)} nil]
-                    [{} nil]))
-                [{} nil]))
-        id-to-name (reduce merge {} (visitNode root vf nil))
-        ; _ (println "id-to-name:" id-to-name) ; HACK
+                    [ (node-id n) (node-id nn) (nr nn) ]))))
+        ts (filter #(not (nil? %)) (visitNode root vf))
+        ; _ (println "ts:" ts)
+        id-to-name-and-num (loop [ts (seq ts) m {} counts {}]
+                              (if-not ts
+                                m
+                                (let [ [nodeId nameNodeId name] (first ts) 
+                                       count (inc (get counts name -1))]
+                                  (recur (next ts) 
+                                          (-> m (assoc nodeId [name count]) (assoc nameNodeId [name count]))
+                                          (assoc counts name count)))))
+        ; id-to-name (reduce merge {} )  ; Note: (merge m nil) -> m
+        ; _ (println "id-to-name-and-num:" id-to-name-and-num) ; HACK
         rf (fn [n]
-              (if (ref-node? n)
-                (if-let [name (id-to-name (ref-node-id n))]
-                  ; (do (println "ref:" name (ref-node-id n)) ; HACK
-                  (make-node :view/expr/var { :str name }))
-                  ; ) ; HACK
-                (if-let [nf (rules (node-type n))]
-                  (make-node :view/expr/var { :str (nf n) }))))
+              (let [id (if (ref-node? n) (ref-node-id n) (node-id n))]
+                (if-let [ [name num] (id-to-name-and-num id)]
+                  (primed name num))))
         ]
     (meta-reduce2 root rf)))
 
