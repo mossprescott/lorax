@@ -33,7 +33,7 @@
 
 (def clojure-grammar 
   ; (load-grammar "meta/core.mlj" "meta/clojure/kernel.mlj" "meta/clojure/core.mlj"))
-  (load-grammar "meta/clojure/kernel.mlj"))
+  (load-grammar "meta/clojure/kernel.mlj" "meta/clojure/core.mlj"))
   
 (def clojure-display
   (grammar-to-display clojure-grammar))
