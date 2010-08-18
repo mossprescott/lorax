@@ -54,6 +54,8 @@
           [ :view/expr/relation :view/expr/flow ]
           
           [ :view/expr/flow     :view/expr/flow ]
+          
+          ; TODO: radical with super/sub
         }
         parenNode 
           (fn [n]
@@ -161,6 +163,22 @@
 
 ; HACK: for now, the value is just the meta-level int
 
+; Map/fn from mode to next smaller mode:
+(def scripted {
+  :D :T, :d :t,
+  :T :S, :t :s,
+  :S :SS, :s :ss,
+  :SS :SS, :ss :ss
+})
+
+; Map/fn from mode to cramped mode in same size:
+(def cramped {
+  :D :d, :d :d, 
+  :T :t, :t :t,
+  :S :s, :s :s,
+  :SS :ss, :ss :ss
+})
+
 (def EMBED_COLORS (cycle [
   (node :view/rgb :red 1.0 :green 1.0 :blue 1.0)  ; white
   (node :view/rgb :red 0.9 :green 0.9 :blue 1.0)  ; blue
@@ -190,130 +208,125 @@
   [n]
   (let [rules {
           :view/expr/juxt
-          (fn [n]
-            (make-node :view/sequence
-              (node-children n)))
+          (fn [n [mode level]]
+            [ (make-node :view/sequence
+                (node-children n))
+              [mode level] ])
 
           :view/expr/binary
-          (fn [n]
-            (make-node :view/sequence
-              (vec (interpose (node :view/thinspace) 
-                              (node-children n)))))
+          (fn [n [mode level]]
+            [ (make-node :view/sequence
+                (vec (interpose (node :view/thinspace) 
+                                (node-children n))))
+              [mode level] ])
   
           :view/expr/relation
-          (fn [n]
-            (make-node :view/sequence
-              (vec (interpose (node :view/mediumspace) 
-                              (node-children n)))))
+          (fn [n [mode level]]
+            [ (make-node :view/sequence
+                (vec (interpose (node :view/mediumspace) 
+                                (node-children n))))
+              [mode level] ])
 
           :view/expr/flow
-          (fn [n]
-            (make-node :view/sequence
-              (vec (interpose (node :view/thickspace) 
-                              (node-children n)))))
+          (fn [n [mode level]]
+            [ (make-node :view/sequence
+                (vec (interpose (node :view/thickspace) 
+                                (node-children n))))
+              [mode level] ])
 
           :view/expr/keyword
-          (fn keyword [n]
-            (node :view/chars
-              :str (as-string (node-attr n :str))
-              :font :cmbx10))
+          (fn [n [mode level]]
+            [ (make-node :view/chars {
+                :str (as-string (node-attr n :str))
+                :font :cmbx10
+              })
+              [mode level] ])
 
           :view/expr/symbol
-          (fn [n]
+          (fn [n [mode level]]
             (let [sname (node-attr-value n :str)]
-              (assert-pred #(contains? SYMBOLS %) sname)
+              (assert-pred #(contains? SYMBOLS %) sname)  ; TODO: don't assert? instead reduce to what?
               (let [ [c f] (SYMBOLS sname) ]
-                (node :view/chars
-                  :str (make-node :core/string c)
-                  :font (make-node :core/name f)))))
+                [ (make-node :view/chars {
+                    :str (make-node :core/string c)
+                    :font (make-node :core/name f)
+                  })
+                  [mode level] ])))
 
           ; TODO: handle primes and subscripts somehow?
           :view/expr/var
-          (fn [n]
-            (node :view/chars
-              :str (as-string (node-attr n :str))
-              :font :cmmi10))
-              ; :font :timesItalic))  ;; HACK
-
+          (fn [n [mode level]]
+            [ (make-node :view/chars {
+                :str (as-string (node-attr n :str))
+                :font :cmmi10
+                ; :font :timesItalic  ;; HACK
+              })
+              [mode level] ])
+              
           :view/expr/int
-          (fn [n]
-            (node :view/chars
-              :str (as-string (node-attr n :str))
-              :font :cmr10))
+          (fn [n [mode level]]
+            [ (make-node :view/chars {
+                :str (as-string (node-attr n :str))
+                :font (if (= mode :T) :cmr10 :cmr10-script)  ; HACK
+              })
+              [mode level] ])
 
           :view/expr/string
-          (fn [n]
+          (fn [n [mode level]]
             (let [val (node-attr n :str)
                   s (as-string val)]
-              (make-node :view/sequence [
-                (make-node :view/chars {
-                  :str "\u005c"  ; Note: open and close quote chars for :cmr
-                  :font :cmr10
-                })
-                (make-node :view/chars {
-                  :str s
-                  :font :cmr10
-                  :view/drawable/color (node :view/rgb :red 0 :green 0.5 :blue 0)
-                })
-                (make-node :view/chars {
-                  :str "\""  ; Note: open and close quote chars for :cmr
-                  :font :cmr10
-                })
-              ])))
+              [ (make-node :view/sequence [
+                  (make-node :view/chars {
+                    :str "\u005c"  ; Note: open and close quote chars for :cmr
+                    :font :cmr10
+                  })
+                  (make-node :view/chars {
+                    :str s
+                    :font :cmr10
+                    :view/drawable/color (node :view/rgb :red 0 :green 0.5 :blue 0)
+                  })
+                  (make-node :view/chars {
+                    :str "\""  ; Note: open and close quote chars for :cmr
+                    :font :cmr10
+                  })
+                ])
+                [mode level] ]))
 
           :view/expr/mono
-          (fn [n]
-            (node :view/chars
-              :str (as-string (node-attr n :str))
-              :font :courier))
+          (fn [n [mode level]]
+            [ (make-node :view/chars {
+                :str (as-string (node-attr n :str))
+                :font :courier
+              })
+              [mode level] ])
   
           :view/expr/prod
-          (fn [n]
-            (node :view/chars
-              :str (as-string (node-attr n :str))
-              :font :courierItalic))
+          (fn [n [mode level]]
+            [ (make-node :view/chars {
+                :str (as-string (node-attr n :str))
+                :font :courierItalic
+              })
+              [mode level] ])
+  
+          :view/expr/prime
+          (fn [n [mode level]]
+            [ (make-node :view/expr/symbol { :str :prime })
+              [mode level] ])
   
           :view/expr/missing
-          (fn [n]
-            (node :view/chars
-              :str "?"
-              :font :cmr10
-              :view/drawable/color (synthetic-color-node)))
-
-          ; ; TODO: use bg instead of border (requires an inherited attr.)
-          ;          :view/expr/later
-          ;          (fn [n]
-          ;            (node :view/border
-          ;              :weight 1
-          ;              :margin 2
-          ;              :view/drawable/colors [
-          ;                (node :view/gray :brightness 0.5)
-          ;                (node :view/gray :brightness 0.9)
-          ;              ]
-          ;      
-          ;              :item 
-          ;              (with-attr-node n :view/expr/later/node)))
-
-          ; ; TODO: use bg instead of border (requires an inherited attr.)
-          ;          :view/expr/sooner
-          ;          (fn [n]
-          ;            (node :view/border
-          ;              :weight 1
-          ;              :margin 2
-          ;              :view/drawable/colors [
-          ;                (node :view/gray :brightness 0.9)
-          ;                (node :view/gray :brightness 0.5)
-          ;              ]
-          ;      
-          ;              :item 
-          ;              (with-attr-node n :view/expr/later/node)))
-
+          (fn [n [mode level]]
+            [ (make-node :view/chars {
+                :str "?"
+                :font :cmr10
+                :view/drawable/color (synthetic-color-node)
+              })
+              [mode level] ])
 
           ; HACK: this is easier than actually implementing growable parens for now, but this
           ; node should really be handled in nodes.clj with custom rendering
           :view/parens
-          (fn [n]
-            (make-node :view/sequence [
+          (fn [n [mode level]]
+            [ (make-node :view/sequence [
                 (node :view/chars
                   :str (node-attr n :left)
                   :font :times; :cmr10
@@ -323,48 +336,95 @@
                   :str (node-attr n :right)
                   :font :times; :cmr10
                   :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
-              ]))
-        }
-      f (fn [n level]
-          (let [typ (node-type n)]
-            (cond
-              (= typ :view/expr/embed)
+              ])
+              [mode level] ])
+              
+          :view/expr/embed
+          (fn [n [mode level]]
+            [(node :view/border
+                :weight 1
+                :margin 3
+          
+                :view/drawable/colors [ (nth EMBED_BORDER_COLORS (inc level)) ]
+          
+                :fill
+                (nth EMBED_COLORS (inc level))
+            
+                :item
+                (node-attr n :content))
+              [mode (inc level)] ])
+              
+          :view/expr/unbed
+          (fn [n [mode level]]
+            (let [_ (print-node n) _ (println "[m l]" [mode level])
+                  level (if (< level 1) 
+                          (do (println "warning: embedding error at node " (node-id n)) 1) 
+                          level)]
               [(node :view/border
                   :weight 1
                   :margin 3
-              
-                  :view/drawable/colors [ (nth EMBED_BORDER_COLORS (inc level)) ]
-              
+            
+                  :view/drawable/colors [ (nth EMBED_BORDER_COLORS level) ]
+            
                   :fill
-                  (nth EMBED_COLORS (inc level))
-                
+                  (nth EMBED_COLORS (dec level))
+              
                   :item
                   (node-attr n :content))
-                (inc level)]
-            
-              (= typ :view/expr/unbed)
-              (let [level (if (< level 1) 
-                            (do (println "warning: embedding error at node " (node-id n)) 1) 
-                            level)]
-                [(node :view/border
-                    :weight 1
-                    :margin 3
-              
-                    :view/drawable/colors [ (nth EMBED_BORDER_COLORS level) ]
-              
-                    :fill
-                    (nth EMBED_COLORS (dec level))
+                [mode (dec level)] ]))
                 
-                    :item
-                    (node-attr n :content))
-                  (dec level)])
-              
-                (contains? rules typ)
-                [((rules typ) n) level]
-            
-              true
-              [nil level])))
-      [np o v] (reduce-plus n f 0)]
+            :view/over
+            (fn [n [mode level]]
+              (let [np (if (= (node-type (node-attr n :top)) :view/expr/temp-scripted)   ; HACK! to prevent infinite recursion
+                          nil
+                          (make-node :view/over {
+                              :top
+                              (make-node :view/expr/temp-scripted {
+                                :body
+                                (node-attr n :top)
+                              })
+                  
+                              :weight
+                              (node-attr n :weight)
+                  
+                              :bottom
+                              (make-node :view/expr/temp-scripted {
+                                :body
+                                (node-attr n :bottom)
+                              })
+                            }))]
+                  [ np [mode level] ]))  ; TODO: ???
+                  
+            :view/scripted
+            (fn [n [mode level]]
+              (let [np (if (= (node-type (node-attr n :super)) :view/expr/temp-scripted)   ; HACK! to prevent infinite recursion
+                          nil
+                          (make-node :view/scripted {
+                            :nucleus
+                            (node-attr n :nucleus)
+                            
+                            :super
+                            (make-node :view/expr/temp-scripted {
+                              :body
+                              (node-attr n :super)
+                            })
+                          }))]
+                [ np [mode level] ]))
+
+          ; Handle temporary node by simple extracting the body and 
+          ; adjusting the mode:
+          :view/expr/temp-scripted
+          (fn [n [mode level]]
+            [ (node-attr n :body) [(scripted mode) level] ])
+        }
+      f (fn [n [mode level]]
+          (if-let [r (rules (node-type n))]
+            ; (let [x  ; HACK
+            (r n [mode level])
+            ; _ (println "n, x:" (node-type n) x)]  ; HACK
+            ; x)  ; HACK
+            [nil [mode level]]))
+      [np o v] (reduce-plus n f [ :T 0 ])]
     [np o]))
 
 

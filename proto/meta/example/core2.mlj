@@ -43,6 +43,23 @@
     (make-node :clojure/kernel/int { :value 100 })
   })
   
+  (make-node :clojure/core/square {
+    :expr
+    (make-node :clojure/core/times {
+      :left
+      (make-node :clojure/kernel/int { :value 2 })
+      
+      :right
+      (make-node :clojure/core/sqrt {
+        :expr
+        (make-node :clojure/core/square {
+          :expr
+          (make-node :clojure/kernel/int { :value 3 })
+        })
+      })
+    })
+  })
+
   (make-node :clojure/core/and {
     :left
     (make-node :clojure/kernel/true)

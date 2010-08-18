@@ -86,8 +86,8 @@
 ; jsMath's Computer Modern fonts:
 ;
 
-(def DISPLAY_SIZE 14);18)
-(def SCRIPT_SIZE (* DISPLAY_SIZE 0.7))
+(def DISPLAY_SIZE 14) ; 18)
+(def SCRIPT_SIZE 11)  ; Note: Knuth says 0.7x, which is more like 9.8
 (def SCRIPT_SCRIPT_SIZE (* DISPLAY_SIZE 0.5))
 
 (def FONTS {
@@ -100,6 +100,7 @@
 
   ; math italics
   :cmmi10 (Font. "jsMath-cmmi10" Font/PLAIN DISPLAY_SIZE)
+  :cmmi10-script (Font. "jsMath-cmmi10" Font/PLAIN SCRIPT_SIZE)
 
   ; math roman
   :cmr10 (Font. "jsMath-cmr10" Font/PLAIN DISPLAY_SIZE)
@@ -107,11 +108,13 @@
 
   ; bold extended (keywords)
   :cmbx10 (Font. "jsMath-cmbx10" Font/PLAIN DISPLAY_SIZE)
+  :cmbx10-script (Font. "jsMath-cmbx10" Font/PLAIN SCRIPT_SIZE)
 
   ; math symbol
   ; For some reason, glyphs do not appear for any char < 0x2x,
   ; although the jsMath site claims they are present.
   :cmsy10 (Font. "jsMath-cmsy10" Font/PLAIN DISPLAY_SIZE)
+  :cmsy10-script (Font. "jsMath-cmsy10" Font/PLAIN SCRIPT_SIZE)
   
   ;
   ; Other fonts, for special purposes:

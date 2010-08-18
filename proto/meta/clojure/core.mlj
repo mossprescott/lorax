@@ -492,6 +492,80 @@
       })
     })
 
+    ; "square" expr: using simple multiplication, so it works on integers, 
+    ; ratios, etc., unlike Java's pow() fn, which always gives you a double
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/square)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :square_expr {
+          :name
+          (make-node :grammar/name :clojure/core/square/expr)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+      ])
+    
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/scripted {
+          :nucleus
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :square_expr)
+            })
+          })
+          
+          :super
+          (make-node :view/expr/int { :str "2" })
+        })
+      })
+      
+      :expand
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :clojure/kernel/let {
+          :bind
+          (make-node :clojure/kernel/bind :n_square {})
+          
+          :expr
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :square_expr)
+            })
+          })
+          
+          :body
+          (make-node :clojure/core/times {
+            :left
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :n_square)
+            })
+            
+            :right
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :n_square)
+            })
+          })
+        })
+      })
+    })
+
     ; ; binary AND
     ; (node :grammar/rule
     ;   :type
