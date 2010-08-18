@@ -306,19 +306,27 @@
 
 (defn- display-fn
   [mn attr]
-  (make-node :clojure/kernel/lambda {
-    :params 
-    (make-node :clojure/kernel/params [
-      (make-node :clojure/kernel/bind :node {})
-    ])
+  ; (let [red (node-attr mn attr)]  ; Note: rename the reduction's nodes, because they may appear mult. times in the reduced program.
+  (let [red (node-attr mn attr)
+        ; _ (println "red:") _ (print-node red true)
+        redp (rename-nodes red)  ; Note: rename the reduction's nodes, because they may appear mult. times in the reduced program.
+        ; _ (println "redp:") _ (print-node redp true)
+        ]
+    (make-node :clojure/kernel/lambda {
+      :params 
+      (make-node :clojure/kernel/params [
+        (make-node :clojure/kernel/bind :node {})
+      ])
       
-    :body
-    (bind-attrs (node-attr mn attr) (node-attr-children mn :attrs))
-  }))
+      :body
+      (bind-attrs redp (node-attr-children mn :attrs))
+    })))
 
 (defn- reduce-seq
   "Reduction function for the :display nodes of seqNode rules. Replaces any 
-  :grammar/seq node(s) with an expanded sequence."
+  :grammar/seq node(s) with an expanded sequence.
+  This isn't a nice general-purpose evaluation like we do for map-nodes, but it
+  works."
   [elems]
   (reduceByType {
     :grammar/seq
@@ -346,17 +354,20 @@
         (if (has-attr? rule attr)
           (condp = (node-type rule)
             :grammar/mapNode
-            (let [;_ (println "found rule:")
-                  ;_ (print-node rule true)
+            (let [; _ (println "found rule:")  ; HACK
+                  ; _ (print-node rule true)  ; HACK
                   mdf (display-fn rule attr)
-                  ; _ (println "mdf:")
-                  ; _ (print-node mdf true)
+                  ; _ (println "mdf:")  ; HACK
+                  ; _ (print-node mdf true)  ; HACK
                   cl (meta-compile mdf)
-                  ; _ (println "cl:" cl)
+                  ; _ (when (= :clojure/core/square (node-attr-value rule :type)) 
+                  ;     (print-node mdf true)
+                  ;     (println "cl:" cl))  ; HACK
+                  ; _ (println "cl:" cl)  ; HACK
                   df (eval cl)
-                  ; _ (println "df:" df)
+                  ; _ (println "df:" df)  ; HACK
                   np (df n)
-                  ; _ (print-node np true)
+                  ; _ (print-node np true)  ; HACK
                   ]
               np)
           
