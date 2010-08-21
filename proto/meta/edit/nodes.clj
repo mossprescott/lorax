@@ -12,6 +12,9 @@
 	            Color 
 	            Font 
 	            Graphics2D))
+	(:import (java.awt.font 
+	            FontRenderContext
+	            GlyphVector))
 	(:import (java.awt.geom 
 	            Line2D$Float 
 	            Rectangle2D
@@ -86,9 +89,14 @@
 ; jsMath's Computer Modern fonts:
 ;
 
-(def DISPLAY_SIZE 14) ; 18)
+(def DISPLAY_SIZE 18)
+(def TEXT_SIZE 14)
 (def SCRIPT_SIZE 11)  ; Note: Knuth says 0.7x, which is more like 9.8
 (def SCRIPT_SCRIPT_SIZE (* DISPLAY_SIZE 0.5))
+
+; (def TEXT_SIZE 12)
+; (def SCRIPT_SIZE 10)  ; Note: Knuth says 0.7x, which is more like 9.8
+; (def SCRIPT_SCRIPT_SIZE (* DISPLAY_SIZE 0.5))
 
 (def FONTS {
   ;
@@ -96,24 +104,25 @@
   ;
   
   ; extended symbols
-  :cmex10 (Font. "jsMath-cmex10" Font/PLAIN DISPLAY_SIZE)
+  :cmex10 (Font. "jsMath-cmex10" Font/PLAIN TEXT_SIZE)
 
   ; math italics
-  :cmmi10 (Font. "jsMath-cmmi10" Font/PLAIN DISPLAY_SIZE)
+  :cmmi10 (Font. "jsMath-cmmi10" Font/PLAIN TEXT_SIZE)
   :cmmi10-script (Font. "jsMath-cmmi10" Font/PLAIN SCRIPT_SIZE)
 
   ; math roman
-  :cmr10 (Font. "jsMath-cmr10" Font/PLAIN DISPLAY_SIZE)
+  :cmr10 (Font. "jsMath-cmr10" Font/PLAIN TEXT_SIZE)
   :cmr10-script (Font. "jsMath-cmr10" Font/PLAIN SCRIPT_SIZE)
+  :cmr10-scriptscript (Font. "jsMath-cmr10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
 
   ; bold extended (keywords)
-  :cmbx10 (Font. "jsMath-cmbx10" Font/PLAIN DISPLAY_SIZE)
+  :cmbx10 (Font. "jsMath-cmbx10" Font/PLAIN TEXT_SIZE)
   :cmbx10-script (Font. "jsMath-cmbx10" Font/PLAIN SCRIPT_SIZE)
 
   ; math symbol
   ; For some reason, glyphs do not appear for any char < 0x2x,
   ; although the jsMath site claims they are present.
-  :cmsy10 (Font. "jsMath-cmsy10" Font/PLAIN DISPLAY_SIZE)
+  :cmsy10 (Font. "jsMath-cmsy10" Font/PLAIN TEXT_SIZE)
   :cmsy10-script (Font. "jsMath-cmsy10" Font/PLAIN SCRIPT_SIZE)
   
   ;
@@ -124,12 +133,12 @@
   
   ; Times, a unicode font...
   ; Unfortunately the spacing is quite different than the jsMath fonts
-  :times (Font. "Times New Roman" Font/PLAIN DISPLAY_SIZE)
-  :timesItalic (Font. "Times New Roman" Font/ITALIC DISPLAY_SIZE)
+  :times (Font. "Times New Roman" Font/PLAIN TEXT_SIZE)
+  :timesItalic (Font. "Times New Roman" Font/ITALIC TEXT_SIZE)
   
   ; used for monospace in a few places
-  :courier (Font. "Courier New" Font/PLAIN DISPLAY_SIZE)
-  :courierItalic (Font. "Courier New" Font/ITALIC DISPLAY_SIZE)
+  :courier (Font. "Courier New" Font/PLAIN TEXT_SIZE)
+  :courierItalic (Font. "Courier New" Font/ITALIC TEXT_SIZE)
 })
 
 ;
@@ -459,30 +468,68 @@
 ; Radical:
 ;
 
-(def RADICALS [ "\u0070" "\u0071" "\u0072" "\u0073" "\u0074" ])
+(def RADICALS [ "\u0070" "\u0071" "\u0072" "\u0073" ])  ; Note: \u0074 is the vertical one used to build really huge radicals
 
-; TODO: pick the right radical (0-3, probably; 4 is the ugly vertical one)
 ; TODO: "power"
 
 (def RADICAL_LINE_WEIGHT 1)
-(def RADICAL_SPACE 1)
+(def RADICAL_SPACE 1)  ; above and below the radicand
+
+
+(def glyph-bounds
+  ; Encapsulate size calculation for strings and memoize it to save the cost 
+  ; repeated FontMetrics calculations. This becomes important only when various
+  ; other bottlenecks are eliminated.
+  (memoize2
+    (fn [^String s ^Font f ^Graphics2D g]
+      (let [^FontRenderContext frc (.getFontRenderContext g)
+            ^GlyphVector gv (.createGlyphVector f frc s)
+            ^Rectangle2D rr (.getGlyphPixelBounds gv 0 frc 0 0)]
+        rr))))
+
+(defn- pick-glyph
+  ; Picks the first str from the provided list which is at least as high as h,
+  ; or else the last one.
+  ; Returns [ str, ^Rectangle2D bounds ] for the chosen glyph.
+  [h strs f ^Graphics2D g]
+  (loop [strs (seq strs)]
+    (let [s (first strs)
+          ^Rectangle2D rr (glyph-bounds s f g)]
+      (if (or (nil? (next strs))
+              (>= (.getHeight rr) h))
+        [s rr]
+        (recur (next strs))))))
+
+(defn- pick-radical
+  [n ^Graphics2D g]
+  (let [x (node-attr n :radicand)
+        [xw xh xb] (size x g)]
+    (pick-glyph (+ RADICAL_SPACE xh RADICAL_SPACE) RADICALS (FONTS :cmex10) g)))
+    ; (loop [i 0]
+    ;   (let [rstr (str (RADICALS i))
+    ;         ^Rectangle2D rr (glyph-bounds rstr (FONTS :cmex10) g)]
+    ;     (if (or (= i (dec (count RADICALS)))
+    ;             (>= (.getHeight rr) (+ RADICAL_SPACE xh RADICAL_SPACE)))
+    ;       [rstr rr]
+    ;       (recur (inc i)))))))
 
 (defmethod size :view/radical
   [n #^Graphics2D g]
   (let [x (node-attr n :radicand)
         [xw xh xb] (size x g)
-        ^Rectangle2D rr (string-bounds (RADICALS 0) :cmex10 g)
-        rh (- (.getMinY rr))]  ; adjust for cmex descent wackiness
+        [rst ^Rectangle2D rr] (pick-radical n g)
+        rh (.getHeight rr)
+        xy (max (+ RADICAL_LINE_WEIGHT RADICAL_SPACE) (/ (- rh xh) 2))]
     [ (+ xw (.getWidth rr)) 
       (max rh (+ RADICAL_LINE_WEIGHT RADICAL_SPACE xh RADICAL_SPACE ))
-      xb]))  ; TODO: baseline from expr
+      (if xb (+ xy xb))]))  ; TODO: baseline from expr
     
 (defmethod layout :view/radical
   [n #^Graphics2D g]
   (let [x (node-attr n :radicand)
         [xw xh xb] (size x g)
-        ^Rectangle2D rr (string-bounds (RADICALS 0) :cmex10 g)
-        rh (- (.getMinY rr))  ; adjust for cmex descent wackiness
+        [rst ^Rectangle2D rr] (pick-radical n g)
+        rh (.getHeight rr)
         xx (.getWidth rr)
         xy (max (+ RADICAL_LINE_WEIGHT RADICAL_SPACE) (/ (- rh xh) 2))]
     [ [x xx xy xw xh] ]))
@@ -490,14 +537,15 @@
 (defmethod draw :view/radical
   [n #^Graphics2D g debug?]
   (let [x (node-attr n :radicand)
-        ^Rectangle2D rr (string-bounds (RADICALS 0) :cmex10 g)
+        [^String rst ^Rectangle2D rr] (pick-radical n g)
         [[x xx xy xw xh]] (layout n g)]
     (doto g
       (.setColor (node-color n))
       (.setFont (FONTS :cmex10))
-      (.drawString (str (RADICALS 0)) 0 0)
-      (.draw (Line2D$Float. (.getWidth rr) 0
-                            (+ (.getWidth rr) xw) 0)))))
+      (.drawString rst 0 0)
+      (.setStroke (BasicStroke. 1))  ; Note: should take the weight from the font somehow
+      (.draw (Line2D$Float. (+ 0.5 (int (.getWidth rr))) -0.5
+                            (+ 0.5 (int (+ (.getWidth rr) xw))) -0.5)))))
 
 ;
 ; Over (i.e. fraction):
@@ -541,6 +589,7 @@
             y2 y1]
         (doto g
           (.setColor (node-color n))
+          (.setStroke (BasicStroke. wt))
           (.draw (Line2D$Float. x1 y1 x2 y2)))))))
 
 
