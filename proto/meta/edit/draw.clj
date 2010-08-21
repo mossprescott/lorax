@@ -5,7 +5,7 @@
   (:use (clojure test)
         (meta core reduce path)
         (meta.clojure kernel)
-        (meta.edit nodes expr))
+        (meta.edit nodes expr select))
   (:import 
     (javax.swing
       ImageIcon 
@@ -61,8 +61,8 @@
 (def PRINT_ALL false)
 
 (def MARGIN 10)
-(def SELECTED_COLOR 
-  (Color. (float 1.0) (float 0.7) (float 0.85)))
+; (def SELECTED_COLOR 
+;   (Color. (float 1.0) (float 0.7) (float 0.85)))
 (def BACKGROUND_COLOR
   Color/WHITE)
   ;(Color. (float 0.7) (float 0.7) (float 0.7)))
@@ -73,49 +73,66 @@
 
 (defn draw-node
   "Recursively draw nodes, using nodes/draw and nodes/layout."
-  [n ^Graphics2D g df]
+  [n ^Graphics2D g ctx df]
   (if (not (node? n))
     (println "not a node: " n)
     (do
       ; the node's content:
       (df n g)
       ; the node's children:
-      (doseq [ [child x y w h] (layout n g) ]
-        (let [ gp (doto (.create g) (.translate x y)) ]
-          (draw-node child gp df)))))) ; no clipping for now  
+      (doseq [ [child x y w h] (layout n g ctx) ]
+        (let [ gp (doto (.create g) (.translate x y)) ]  ; TODO: eliminate extra graphics creation?
+          (draw-node child gp ctx df)))))) ; no clipping for now  
           ; (draw-node child (.create g x y w h) df)))  ; clipping
 
+(defn find-child-rects
+  "Find locations of the nearest descendents of node n which represent nodes
+  of the source program."
+  [n g o ctx]
+  (apply concat 
+    (for [ [c x y w h] (layout n g ctx) ]
+      (if (resolveOne (node-id c) o)
+        [ [x y w h] ]
+        (for [ [xx yy ww hh] (find-child-rects c g o ctx)]
+          [(+ x xx) (+ y yy) ww hh])))))
+
 (defn draw-all
+  "Draw the program by making a series of traversals, painting the nodes and 
+  other visual elements in layers, effectively. Because the layout calculations
+  are memoized in the drawing context, this isn't _too_ silly.
+  Nodes are always drawn on top of their ancestors.
+  Note: a simple hack (drawing the :view/border nodes in the lowest layer) 
+  puts the the background colors underneath everything else.
+  Params:
+  selected - set of ids of selected source nodes"
   [root g debug? selected errors o]
-  (do
-    ; borders:
-    (draw-node root g
-      (fn [n g]
-        (if (= :view/border (node-type n))
-          (draw n g debug?))))
-    ; selection hilite (behind the content):
-    (draw-node root g
-      (fn [n ^Graphics2D g]
-        (do
+  (let [ctx (make-draw-context)]
+    (do
+      ; borders:
+      (draw-node root g ctx
+        (fn [n g]
+          (if (= :view/border (node-type n))
+            (draw n g ctx debug?))))
+      ; selection hilite (behind the content):
+      (draw-node root g ctx
+        (fn [n ^Graphics2D g]
           (if (selected (resolveOne (node-id n) o))
-            (let [ [w h b] (size n g) ]
-              (doto g
-                (.setColor SELECTED_COLOR)
-                (.setStroke (BasicStroke. 2))
-                (.draw (Rectangle2D$Float. -2 -2 (+ w 4) (+ h 4))))))))) ; TODO: align to pixels?
-    ; node content:
-    (draw-node root g
-      (fn [n g]
-        (if (not= :view/border (node-type n))
-          (draw n g debug?))))))
-;       ; error indicator: 
-;       (if (errors (resolveOne (node-id n) o))
-;         (let [ [w h b] (size n g)
-;                 y (if b (+ b 4) h) ]
-;           (doto g
-;             (.setColor Color/RED)
-;             (.setStroke (BasicStroke. 1))
-;             (.draw (Line2D$Float. 0.5 (+ y 0.5) w (+ y 0.5)))))))))
+            (let [ [w h b] (size n g ctx) 
+                   cs (find-child-rects n g o ctx)]
+              (draw-selection-hilite g w h cs)))))
+      ; node content:
+      (draw-node root g ctx
+        (fn [n g]
+          (if (not= :view/border (node-type n))
+            (draw n g ctx debug?)))))))
+  ;       ; error indicator: 
+  ;       (if (errors (resolveOne (node-id n) o))
+  ;         (let [ [w h b] (size n g)
+  ;                 y (if b (+ b 4) h) ]
+  ;           (doto g
+  ;             (.setColor Color/RED)
+  ;             (.setStroke (BasicStroke. 1))
+  ;             (.draw (Line2D$Float. 0.5 (+ y 0.5) w (+ y 0.5)))))))))
 
 ; (defn drawNode
 ;   "Recursively draw nodes, using nodes/draw and nodes/layout."
@@ -152,11 +169,12 @@
   "Given a node and (relative) coords x and y, returns a list of ids of nodes containing the 
   point, with the innermost node (if any) first."
   [n g x y]
-  (let [find (fn find [n g x y lst]
-                (let [ [w h b] (size n g) ]
+  (let [ctx (make-draw-context)
+        find (fn find [n g x y lst]
+                (let [ [w h b] (size n g ctx) ]
                   (if (and (>= x 0) (>= y 0) (< x w) (< y h))
                     (let [lstp (conj lst (node-id n)) ]
-                      (loop [nlst (layout n g)]
+                      (loop [nlst (layout n g ctx)]
                         (if (empty? nlst) 
                           lstp
                           (let [ [n nx ny nw nh] (first nlst) ]
@@ -190,12 +208,13 @@
                   ;                                   (.getGraphics this))) ; HACK
                   ;         (println "size" (size (node :view/sequence :items [ (node :view/chars :str "abc" :font :cmr10) (node :view/chars :str "a" :font :cmmi10) ]) 
                   ;                                   (.getGraphics this))) ; HACK
-                  (print "draw-allode: ")
+                  (print "draw-all: ")
                   (time (draw-all @nref (doto (.create g) (.translate MARGIN MARGIN)) @dref @sref errors @oref))))
               (getPreferredSize []
                 (let [this #^JComponent this
                       g (.getGraphics this)
-                      [w h b] (size @nref g)]
+                      ctx (make-draw-context)
+                      [w h b] (size @nref g ctx)]
                   (Dimension. (+ MARGIN w MARGIN) (+ MARGIN h MARGIN))))) ]
       ; (.addMouseListener c 
       ;   (proxy [ MouseAdapter ] []

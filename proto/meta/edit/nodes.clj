@@ -168,6 +168,7 @@
       (color cn))
     DEFAULT_COLOR))
 
+
 ;
 ; Multi-methods for layout and drawing:
 ;
@@ -176,22 +177,67 @@
   [n]
   (if (node? n) (node-type n)))
 
-(defmulti size 
+(defmulti size-impl
   "Multi-method calculating the size (in pixels) of a drawable.
-  Takes [node g] and returns a vector of floats [width height baseline].
+  Takes [node g ctx] and returns a vector of floats [width height baseline].
   If the node should not be positioned relative to the baseline, it is nil."
-  (fn [n gfx] (node-type-or-nil n)))
+  (fn [n gfx ctx] 
+    ; (println "size-impl:" (node-id n))  ; HACK
+    (node-type-or-nil n)))
 
-(defmulti layout
+(defmulti layout-impl
   "Returns a list of vectors [node x y w h] giving the bounds of each child
   (if any), relative to node's upper left corner."
-  (fn [n gfx] (node-type-or-nil n)))
+  (fn [n gfx ctx] 
+    ; (println "layout-impl:" (node-id n))  ; HACK
+    (node-type-or-nil n)))
 
-(defmulti draw 
+(defmulti draw-impl
   "Multi-method drawing just the visible portions of a node (that is, 
   not the children), assuming the upper-left corner is located at the origin."
-  (fn [n gfx debug?] (node-type-or-nil n)))
+  (fn [n gfx ctx debug?] (node-type-or-nil n)))
 
+
+;
+; Drawing context: memoizes size and layout calculations for efficiency
+;
+(defn make-draw-context
+  []
+  [(atom {}) (atom {})])
+
+; TODO: handle non-node
+(defn size
+  [n g ctx]
+  (let [ [sizes layouts] ctx
+         id (node-id n) 
+         ;_ (println "size-in-context:" id)  ; HACK
+         ]
+    (if-let [e (find @sizes id)]
+      (val e)
+      (let [ret (size-impl n g ctx)]
+        (swap! sizes assoc id ret)
+        ret))))
+
+; TODO: handle non-node
+(defn layout
+  [n g ctx]
+  (let [ [sizes layouts] ctx
+         id (node-id n) 
+         ; _ (println "layout-in-context:" id)  ; HACK
+         ]
+    (if-let [e (find @layouts id)]
+      (val e)
+      (let [ret (layout-impl n g ctx)]
+        (swap! layouts assoc id ret)
+        ret))))
+
+(defn draw
+  [n g ctx debug?]
+  (draw-impl n g ctx debug?))
+
+;
+; String size calculation:
+;
 
 (defn memoize2
   "Returns a memoized version of a referentially transparent function, using 
@@ -210,10 +256,28 @@
   ; Encapsulate size calculation for strings and memoize it to save the cost 
   ; repeated FontMetrics calculations. This becomes important only when various
   ; other bottlenecks are eliminated.
+  ; This variant returns the size of the string's "bounding box," which is 
+  ; tall enough for any possible ascender and/or descender, and wide anough for 
+  ; the actual characters present. 
   (memoize2
     (fn [s f #^Graphics2D g]
       (let [fm (.getFontMetrics g (FONTS f))]
         (.getStringBounds fm s g)))))
+
+(def glyph-bounds
+  ; Encapsulate size calculation for strings and memoize it to save the cost 
+  ; repeated GlyphVector calculations. This becomes important only when various
+  ; other bottlenecks are eliminated.
+  ; This variant returns the "glyph pixel bounds," for the given characters, 
+  ; which surrounds all the pixels that would be touched if the string were 
+  ; rendered at position 0, 0. It would be more accurate to use the actual 
+  ; (sub-pixel) drawing position, but then not referentially transparent, right?
+  (memoize2
+    (fn [^String s ^Font f ^Graphics2D g]
+      (let [^FontRenderContext frc (.getFontRenderContext g)
+            ^GlyphVector gv (.createGlyphVector f frc s)
+            ^Rectangle2D rr (.getGlyphPixelBounds gv 0 frc 0 0)]
+        rr))))
 
 ;
 ; Chars:
@@ -228,8 +292,8 @@
     (node? str-attr) (subs (str (node-type str-attr)) 1)  ; HACK
     true (str str-attr)))
 
-(defmethod size :view/chars
-  [n #^Graphics2D g]
+(defmethod size-impl :view/chars
+  [n #^Graphics2D g ctx]
   (let [s (as-string (node-attr n :str))
         f (node-attr-value n :font)
         ; fm (.getFontMetrics g (FONTS f))
@@ -243,11 +307,11 @@
           (.getHeight bounds))
         (- (.getMinY bounds))]))
 
-(defmethod layout :view/chars [n #^Graphics2D g] [])
+(defmethod layout-impl :view/chars [n #^Graphics2D g ctx] [])
 
-(defmethod draw :view/chars
-  [n #^Graphics2D g debug?]
-  (let [ [w h b] (size n g)
+(defmethod draw-impl :view/chars
+  [n #^Graphics2D g ctx debug?]
+  (let [ [w h b] (size n g ctx)
           font (FONTS (node-attr-value n :font))
           #^String s (as-string (node-attr-value n :str))
           angle 0.0 ];(.getItalicAngle font) ]
@@ -276,71 +340,70 @@
     (doto g 
       (.setColor (node-color n))
       (.setFont font)
-      (.drawString s (float 0) (float b))
-      )))
+      (.drawString s (float 0) (float b)))))
 
 ;
 ; Space:
 ;
 (def QUAD_WIDTH (* 1.0 DISPLAY_SIZE))  ; HACK: this is the quad width for cmmi
 
-(defmethod size :view/thinspace [n & more] 
+(defmethod size-impl :view/thinspace [n & more] 
   (let [ quadWidth QUAD_WIDTH ]
   [(* quadWidth (float 1/6)) 0 0]))  ; see Knuth, p167
-(defmethod layout :view/thinspace [n & more] [])
-(defmethod draw :view/thinspace [n & more] nil)
+(defmethod layout-impl :view/thinspace [n & more] [])
+(defmethod draw-impl :view/thinspace [n & more] nil)
 
-(defmethod size :view/mediumspace [n & more]
+(defmethod size-impl :view/mediumspace [n & more]
   (let [ quadWidth QUAD_WIDTH ]
   [(* quadWidth (float 2/9)) 0 0]))  ; see Knuth, p167
-(defmethod layout :view/mediumspace [n & more] [])
-(defmethod draw :view/mediumspace [n & more] nil)
+(defmethod layout-impl :view/mediumspace [n & more] [])
+(defmethod draw-impl :view/mediumspace [n & more] nil)
 
-(defmethod size :view/thickspace [n & more]
+(defmethod size-impl :view/thickspace [n & more]
   (let [ quadWidth QUAD_WIDTH ]
   [(* quadWidth (float 5/18)) 0 0]))  ; see Knuth, p167
-(defmethod layout :view/thickspace [n & more] [])
-(defmethod draw :view/thickspace [n & more] nil)
+(defmethod layout-impl :view/thickspace [n & more] [])
+(defmethod draw-impl :view/thickspace [n & more] nil)
 
-(defmethod size :view/quad [n & more]
+(defmethod size-impl :view/quad [n & more]
   ; TODO: calculate from the "current" font?
   [ QUAD_WIDTH 0 0 ])
-(defmethod layout :view/quad [n & more] [])
-(defmethod draw :view/quad [n & more] nil)
+(defmethod layout-impl :view/quad [n & more] [])
+(defmethod draw-impl :view/quad [n & more] nil)
 
 ;
 ; Scripted:
 ;
 
-(defmethod size :view/scripted
-  [n #^Graphics2D g]
+(defmethod size-impl :view/scripted
+  [n #^Graphics2D g ctx]
   (let [nucl (node-attr n :nucleus)
-        [_ _ nb] (size nucl g)
-        [[nucl nx ny nw nh] [sup sx sy sw sh]] (layout n g)]
+        [_ _ nb] (size nucl g ctx)
+        [[nucl nx ny nw nh] [sup sx sy sw sh]] (layout n g ctx)]
     [(+ sx sw) (+ ny nh) (+ ny nb)]))
 
-(defmethod layout :view/scripted 
-  [n #^Graphics2D g]
+(defmethod layout-impl :view/scripted 
+  [n #^Graphics2D g ctx]
   (let [nucl (node-attr n :nucleus)
         sup (node-attr n :super)
-        [nx ny nb] (size nucl g)
-        [sx sy sb] (size sup g)]
+        [nx ny nb] (size nucl g ctx)
+        [sx sy sb] (size sup g ctx)]
     [ [nucl 0 (/ sy 3) nx ny] [sup (+ 1 nx) 0 sx sy] ]))  ; HACK
 
-(defmethod draw :view/scripted [n & more])
+(defmethod draw-impl :view/scripted [n & more])
 
 
 ;
 ; Sequence (horizontal list):
 ;
 
-(defmethod size :view/sequence
+(defmethod size-impl :view/sequence
   ; height is the larger of max ascent + max descent, or max height
-  [n #^Graphics2D g]
+  [n #^Graphics2D g ctx]
   (let [items (node-children n)]
     (if (empty? items)
       [0 0 0]
-      (let [szs (map #(size % g) items)
+      (let [szs (map #(size % g ctx) items)
             maxAsc (apply max 0 (for [ [w h b] szs :when b ] b))
             maxDesc (apply max 0 (for [ [w h b] szs :when b ] (- h b)))
             maxHeight (apply max 0 (for [ [w h b] szs ] h))
@@ -351,10 +414,10 @@
             b (if (= maxAsc 0) nil (+ top maxAsc))]
         [ w h b ]))))
 
-(defmethod layout :view/sequence
+(defmethod layout-impl :view/sequence
   ; Align baselines, and vertically center any nodes without baselines.
-  [n #^Graphics2D g] 
-  (let [ [w h b] (size n g)]
+  [n #^Graphics2D g ctx] 
+  (let [ [w h b] (size n g ctx)]
     (loop [ items (node-children n) 
             x 0 
             result [] ]
@@ -362,33 +425,33 @@
           result
           (let [d (first items)
                 ds (rest items)
-                [dw dh db] (size d g)
+                [dw dh db] (size d g ctx)
                 y (if (and b db) 
                     (- b db)        ; use baseline
                     (/ (- h dh) 2)) ; center
                 resultp (conj result [ d x y dw dh ])]
               (recur ds (+ x dw) resultp))))))
 
-(defmethod draw :view/sequence [n #^Graphics2D g debug?] [])
+(defmethod draw-impl :view/sequence [n #^Graphics2D g ctx debug?] [])
 
 ;
 ; Section (vertical list):
 ;
 (def LINE_SPACING 5)  ;; TODO: remove? make any spacing explicit?
 
-(defmethod size :view/section
-  [ n #^Graphics2D g]
+(defmethod size-impl :view/section
+  [ n #^Graphics2D g ctx]
   (let [items (node-children n)
-        szs (map #(size % g) items)]
+        szs (map #(size % g ctx) items)]
     ; (println "n") (print-node n) ; HACK
     ; (println "szs" szs) ; HACK
     [ (apply max 0 (for [ [w h b] szs ] w))
       (- (reduce #(+ %1 (second %2) LINE_SPACING) 0 szs) LINE_SPACING)
       nil ])) 
 
-(defmethod layout :view/section
-  [n #^Graphics2D g] 
-  (let [ [w h b] (size n g)]
+(defmethod layout-impl :view/section
+  [n #^Graphics2D g ctx] 
+  (let [ [w h b] (size n g ctx)]
     (loop [ items (node-children n) 
             y 0 
             result [] ]
@@ -396,41 +459,41 @@
           result
           (let [d (first items)
                 ds (rest items)
-                [dw dh db] (size d g)
+                [dw dh db] (size d g ctx)
                 resultp (conj result [ d 0 y dw dh ])]
       ;       ; (println "d ds" d ds)
               (recur ds (+ y dh LINE_SPACING) resultp))))))
 
-(defmethod draw :view/section [n #^Graphics2D g debug?] [])
+(defmethod draw-impl :view/section [n #^Graphics2D g ctx debug?] [])
 
 
 ;
 ; Border:
 ;
 
-(defmethod size :view/border
-  [n #^Graphics2D g]
+(defmethod size-impl :view/border
+  [n #^Graphics2D g ctx]
   (let [i (node-attr n :item)
         weight (node-attr-value n :weight)
         margin (node-attr-value n :margin)
-        [w h b] (size i g)]
+        [w h b] (size i g ctx)]
     [ (+ weight margin w margin weight) 
       (+ weight margin h margin weight) 
       (if b 
         (+ weight margin b) 
         nil)]))
     
-(defmethod layout :view/border
-  [n #^Graphics2D g]
+(defmethod layout-impl :view/border
+  [n #^Graphics2D g ctx]
   (let [i (node-attr n :item)
         weight (node-attr-value n :weight)
         margin (node-attr-value n :margin)
-        [w h b] (size i g)]
+        [w h b] (size i g ctx)]
     [ [i (+ weight margin) (+ weight margin) w h] ]))
     
-(defmethod draw :view/border
-  [n #^Graphics2D g debug?]
-  (let [ [w h b] (size n g) 
+(defmethod draw-impl :view/border
+  [n #^Graphics2D g ctx debug?]
+  (let [ [w h b] (size n g ctx) 
           weight (node-attr-value n :weight) 
           i (if (odd? weight) 0.5 0)  ; an adjustment to make it align to pixels usually
           x2 (+ i (int w))
@@ -475,18 +538,6 @@
 (def RADICAL_LINE_WEIGHT 1)
 (def RADICAL_SPACE 1)  ; above and below the radicand
 
-
-(def glyph-bounds
-  ; Encapsulate size calculation for strings and memoize it to save the cost 
-  ; repeated FontMetrics calculations. This becomes important only when various
-  ; other bottlenecks are eliminated.
-  (memoize2
-    (fn [^String s ^Font f ^Graphics2D g]
-      (let [^FontRenderContext frc (.getFontRenderContext g)
-            ^GlyphVector gv (.createGlyphVector f frc s)
-            ^Rectangle2D rr (.getGlyphPixelBounds gv 0 frc 0 0)]
-        rr))))
-
 (defn- pick-glyph
   ; Picks the first str from the provided list which is at least as high as h,
   ; or else the last one.
@@ -501,9 +552,9 @@
         (recur (next strs))))))
 
 (defn- pick-radical
-  [n ^Graphics2D g]
+  [n g ctx]
   (let [x (node-attr n :radicand)
-        [xw xh xb] (size x g)]
+        [xw xh xb] (size x g ctx)]
     (pick-glyph (+ RADICAL_SPACE xh RADICAL_SPACE) RADICALS (FONTS :cmex10) g)))
     ; (loop [i 0]
     ;   (let [rstr (str (RADICALS i))
@@ -513,32 +564,32 @@
     ;       [rstr rr]
     ;       (recur (inc i)))))))
 
-(defmethod size :view/radical
-  [n #^Graphics2D g]
+(defmethod size-impl :view/radical
+  [n #^Graphics2D g ctx]
   (let [x (node-attr n :radicand)
-        [xw xh xb] (size x g)
-        [rst ^Rectangle2D rr] (pick-radical n g)
+        [xw xh xb] (size x g ctx)
+        [rst ^Rectangle2D rr] (pick-radical n g ctx)
         rh (.getHeight rr)
         xy (max (+ RADICAL_LINE_WEIGHT RADICAL_SPACE) (/ (- rh xh) 2))]
     [ (+ xw (.getWidth rr)) 
       (max rh (+ RADICAL_LINE_WEIGHT RADICAL_SPACE xh RADICAL_SPACE ))
-      (if xb (+ xy xb))]))  ; TODO: baseline from expr
+      (if xb (+ xy xb))]))
     
-(defmethod layout :view/radical
-  [n #^Graphics2D g]
+(defmethod layout-impl :view/radical
+  [n #^Graphics2D g ctx]
   (let [x (node-attr n :radicand)
-        [xw xh xb] (size x g)
-        [rst ^Rectangle2D rr] (pick-radical n g)
+        [xw xh xb] (size x g ctx)
+        [rst ^Rectangle2D rr] (pick-radical n g ctx)
         rh (.getHeight rr)
         xx (.getWidth rr)
         xy (max (+ RADICAL_LINE_WEIGHT RADICAL_SPACE) (/ (- rh xh) 2))]
     [ [x xx xy xw xh] ]))
     
-(defmethod draw :view/radical
-  [n #^Graphics2D g debug?]
+(defmethod draw-impl :view/radical
+  [n #^Graphics2D g ctx debug?]
   (let [x (node-attr n :radicand)
-        [^String rst ^Rectangle2D rr] (pick-radical n g)
-        [[x xx xy xw xh]] (layout n g)]
+        [^String rst ^Rectangle2D rr] (pick-radical n g ctx)
+        [[x xx xy xw xh]] (layout n g ctx)]
     (doto g
       (.setColor (node-color n))
       (.setFont (FONTS :cmex10))
@@ -554,35 +605,35 @@
 (def OVER_MARGIN 2)
 (def OVER_SPACE 2)
 
-(defmethod size :view/over
-  [n #^Graphics2D g]
+(defmethod size-impl :view/over
+  [n #^Graphics2D g ctx]
   (let [t (node-attr n :top)
         wt (node-attr-value n :weight)
         b (node-attr n :bottom)
-        [tw th tb] (size t g)
-        [bw bh bb] (size b g)]
+        [tw th tb] (size t g ctx)
+        [bw bh bb] (size b g ctx)]
     [ (+ OVER_MARGIN (max tw bw) OVER_MARGIN) 
       (+ th OVER_SPACE wt OVER_SPACE bh)
       nil]))
     
-(defmethod layout :view/over
-  [n #^Graphics2D g]
+(defmethod layout-impl :view/over
+  [n #^Graphics2D g ctx]
   (let [t (node-attr n :top)
         wt (node-attr-value n :weight)
         b (node-attr n :bottom)
-        [tw th tb] (size t g)
-        [bw bh bb] (size b g)]
+        [tw th tb] (size t g ctx)
+        [bw bh bb] (size b g ctx)]
     [ [t (+ OVER_MARGIN (/ (max 0 (- bw tw)) 2)) 0 tw th]
       [b (+ OVER_MARGIN (/ (max 0 (- tw bw)) 2)) (+ th OVER_SPACE wt OVER_SPACE) bw bh] ]))
     
-(defmethod draw :view/over
-  [n #^Graphics2D g debug?]
+(defmethod draw-impl :view/over
+  [n #^Graphics2D g ctx debug?]
   (let [wt (node-attr-value n :weight)]
     (if (> wt 0)
       (let [t (node-attr n :top)
             b (node-attr n :bottom)
-            [tw th tb] (size t g)
-            [bw bh bb] (size b g)
+            [tw th tb] (size t g ctx)
+            [bw bh bb] (size b g ctx)
             x1 0
             y1 (+ th OVER_SPACE -0.5)
             x2 (+ OVER_MARGIN (max tw bw) OVER_MARGIN)
@@ -597,9 +648,9 @@
 ; Handling of unrecognized nodes (or non-nodes), which allows the rest of the 
 ; program to be rendered.
 ;
-(defmethod size :default   [n & more] [0 0 nil])
-(defmethod layout :default [n & more] [])
-(defmethod draw :default   [n & more]
+(defmethod size-impl :default   [n & more] [0 0 nil])
+(defmethod layout-impl :default [n & more] [])
+(defmethod draw-impl :default   [n & more]
   (println "Unrecognized:" n))
 
 
