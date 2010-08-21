@@ -74,19 +74,23 @@
                     [ (node-id n) (node-id nn) (nr nn) ]))))
         ts (filter #(not (nil? %)) (visitNode root vf))
         ; _ (println "ts:" ts)
-        id-to-name-and-num (loop [ts (seq ts) m {} counts {}]
-                              (if-not ts
-                                m
-                                (let [ [nodeId nameNodeId name] (first ts) 
-                                       count (inc (get counts name -1))]
-                                  (recur (next ts) 
-                                          (-> m (assoc nodeId [name count]) (assoc nameNodeId [name count]))
-                                          (assoc counts name count)))))
+        [ node-id-to-name-and-num name-id-to-name-and-num ]
+                (loop [ts (seq ts) nodes {} names {} counts {}]
+                  (if-not ts
+                    [nodes names]
+                    (let [ [nodeId nameNodeId name] (first ts) 
+                           count (inc (get counts name -1))]
+                      (recur (next ts) 
+                              (assoc nodes nodeId [name count]) 
+                              (assoc names nameNodeId [name count])
+                              (assoc counts name count)))))
         ; id-to-name (reduce merge {} )  ; Note: (merge m nil) -> m
         ; _ (println "id-to-name-and-num:" id-to-name-and-num) ; HACK
         rf (fn [n]
-              (let [id (if (ref-node? n) (ref-node-id n) (node-id n))]
-                (if-let [ [name num] (id-to-name-and-num id)]
+              (if (ref-node? n)
+                (if-let [ [name num] (node-id-to-name-and-num (ref-node-id n))]
+                  (primed name num))
+                (if-let [ [name num] (name-id-to-name-and-num (node-id n))]
                   (primed name num))))
         ]
     (meta-reduce2 root rf)))
