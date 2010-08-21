@@ -71,34 +71,80 @@
 
 (def resolveOne) ; forward decl.
 
-(defn drawNode
+(defn draw-node
   "Recursively draw nodes, using nodes/draw and nodes/layout."
-  [n #^Graphics2D g debug? selected errors o]
+  [n ^Graphics2D g df]
   (if (not (node? n))
     (println "not a node: " n)
     (do
-      ; selection hilite (behind the content):
-      (if (selected (resolveOne (node-id n) o))
-        (let [ [w h b] (size n g) ]
-          (doto g
-            (.setColor SELECTED_COLOR)
-            (.setStroke (BasicStroke. 2))
-            (.draw (Rectangle2D$Float. -2 -2 (+ w 4) (+ h 4)))))) ; TODO: align to pixels?
       ; the node's content:
-      (draw n g debug?)
+      (df n g)
       ; the node's children:
       (doseq [ [child x y w h] (layout n g) ]
         (let [ gp (doto (.create g) (.translate x y)) ]
-          (drawNode child gp debug? selected errors o))) ; no clipping for now  
-          ; (drawNode child (.create g x y w h) debug? selected)))  ; clipping
-      ; error indicator: 
-      (if (errors (resolveOne (node-id n) o))
-        (let [ [w h b] (size n g)
-                y (if b (+ b 4) h) ]
-          (doto g
-            (.setColor Color/RED)
-            (.setStroke (BasicStroke. 1))
-            (.draw (Line2D$Float. 0.5 (+ y 0.5) w (+ y 0.5)))))))))
+          (draw-node child gp df)))))) ; no clipping for now  
+          ; (draw-node child (.create g x y w h) df)))  ; clipping
+
+(defn draw-all
+  [root g debug? selected errors o]
+  (do
+    ; borders:
+    (draw-node root g
+      (fn [n g]
+        (if (= :view/border (node-type n))
+          (draw n g debug?))))
+    ; selection hilite (behind the content):
+    (draw-node root g
+      (fn [n ^Graphics2D g]
+        (do
+          (if (selected (resolveOne (node-id n) o))
+            (let [ [w h b] (size n g) ]
+              (doto g
+                (.setColor SELECTED_COLOR)
+                (.setStroke (BasicStroke. 2))
+                (.draw (Rectangle2D$Float. -2 -2 (+ w 4) (+ h 4))))))))) ; TODO: align to pixels?
+    ; node content:
+    (draw-node root g
+      (fn [n g]
+        (if (not= :view/border (node-type n))
+          (draw n g debug?))))))
+;       ; error indicator: 
+;       (if (errors (resolveOne (node-id n) o))
+;         (let [ [w h b] (size n g)
+;                 y (if b (+ b 4) h) ]
+;           (doto g
+;             (.setColor Color/RED)
+;             (.setStroke (BasicStroke. 1))
+;             (.draw (Line2D$Float. 0.5 (+ y 0.5) w (+ y 0.5)))))))))
+
+; (defn drawNode
+;   "Recursively draw nodes, using nodes/draw and nodes/layout."
+;   [n #^Graphics2D g debug? selected errors o]
+;   (if (not (node? n))
+;     (println "not a node: " n)
+;     (do
+;       ; selection hilite (behind the content):
+;       (if (selected (resolveOne (node-id n) o))
+;         (let [ [w h b] (size n g) ]
+;           (doto g
+;             (.setColor SELECTED_COLOR)
+;             (.setStroke (BasicStroke. 2))
+;             (.draw (Rectangle2D$Float. -2 -2 (+ w 4) (+ h 4)))))) ; TODO: align to pixels?
+;       ; the node's content:
+;       (draw n g debug?)
+;       ; the node's children:
+;       (doseq [ [child x y w h] (layout n g) ]
+;         (let [ gp (doto (.create g) (.translate x y)) ]
+;           (drawNode child gp debug? selected errors o))) ; no clipping for now  
+;           ; (drawNode child (.create g x y w h) debug? selected)))  ; clipping
+;       ; error indicator: 
+;       (if (errors (resolveOne (node-id n) o))
+;         (let [ [w h b] (size n g)
+;                 y (if b (+ b 4) h) ]
+;           (doto g
+;             (.setColor Color/RED)
+;             (.setStroke (BasicStroke. 1))
+;             (.draw (Line2D$Float. 0.5 (+ y 0.5) w (+ y 0.5)))))))))
 
 ; This is way out of hand. Basically, it's a recursive search of the tree, building
 ; a list of containing nodes 
@@ -126,8 +172,8 @@
   and drawing a hilite box behind every node whose id appears in the set sref."
   [nref dref sref errors oref]
   (let [ c (proxy [ JComponent ] []
-              (paintComponent [#^Graphics2D g]
-                (let [this #^JComponent this]
+              (paintComponent [^Graphics2D g]
+                (let [this ^JComponent this]
                   (doto g
                     (.setColor BACKGROUND_COLOR)
                     (.fillRect 0 0 (.getWidth this) (.getHeight this))
@@ -144,8 +190,8 @@
                   ;                                   (.getGraphics this))) ; HACK
                   ;         (println "size" (size (node :view/sequence :items [ (node :view/chars :str "abc" :font :cmr10) (node :view/chars :str "a" :font :cmmi10) ]) 
                   ;                                   (.getGraphics this))) ; HACK
-                  (print "drawNode: ")
-                  (time (drawNode @nref (doto (.create g) (.translate MARGIN MARGIN)) @dref @sref errors @oref))))
+                  (print "draw-allode: ")
+                  (time (draw-all @nref (doto (.create g) (.translate MARGIN MARGIN)) @dref @sref errors @oref))))
               (getPreferredSize []
                 (let [this #^JComponent this
                       g (.getGraphics this)
