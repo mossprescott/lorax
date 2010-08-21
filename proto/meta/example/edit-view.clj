@@ -105,6 +105,100 @@
         ])
       
         (node :view/chars :str " " :font :cmr10)  ; HACK: need a vspace node?
+
+        (make-node :view/sequence [
+
+          (make-node :view/radical {
+            :radicand
+            (make-node :view/sequence [
+              (make-node :view/quad)
+            ])
+          })
+      
+          (make-node :view/quad)
+
+          (make-node :view/radical {
+            :radicand
+            (make-node :view/sequence [
+              (make-node :view/chars { :str "3" :font :cmr10 })
+              (make-node :view/chars { :str "\u00c2" :font :cmsy10})
+              (make-node :view/chars { :str "p" :font :cmmi10 })
+            ])
+          })
+      
+          (make-node :view/quad)
+
+          (make-node :view/over {
+            :top
+            (make-node :view/sequence [
+              (make-node :view/chars { :str "3" :font :cmr10 })
+              (make-node :view/chars { :str "\u00c2" :font :cmsy10})
+              (make-node :view/chars { :str "p" :font :cmmi10 })
+            ])
+
+            :weight 1
+
+            :bottom
+            (make-node :view/sequence [
+              (make-node :view/chars { :str "7" :font :cmr10 })
+            ])
+          })
+      
+          (make-node :view/quad)
+
+          (make-node :view/radical {
+            :radicand
+            (make-node :view/over {
+              :top
+              (make-node :view/sequence [
+                (make-node :view/chars { :str "3" :font :cmr10 })
+                (make-node :view/chars { :str "\u00c2" :font :cmsy10})
+                (make-node :view/chars { :str "p" :font :cmmi10 })
+              ])
+
+              :weight 1
+
+              :bottom
+              (make-node :view/sequence [
+                (make-node :view/chars { :str "7" :font :cmr10 })
+              ])
+            })
+          })
+        ])
+        
+        (node :view/chars :str " " :font :cmr10)  ; HACK: need a vspace node?
+
+        (make-node :view/sequence [
+          (make-node :view/chars { :str "1" :font :cmr10 })
+          (make-node :view/thinspace)
+          (make-node :view/chars { :str "+" :font :cmr10})
+          (make-node :view/thinspace)
+          (make-node :view/over {
+            :top
+            (make-node :view/chars { :str "1" :font :cmr10 })
+
+            :weight 1
+
+            :bottom
+            (make-node :view/sequence [
+              (make-node :view/chars { :str "3" :font :cmr10-script })
+              (make-node :view/thinspace)
+              (make-node :view/chars { :str "+" :font :cmr10-script})
+              (make-node :view/thinspace)
+              (make-node :view/over {
+                :top
+                (make-node :view/chars { :str "1" :font :cmr10-scriptscript })
+
+                :weight 1
+
+                :bottom
+                (make-node :view/chars { :str "2" :font :cmr10-scriptscript })
+              })
+            ])
+          })
+        ])
+
+        (node :view/chars :str " " :font :cmr10)  ; HACK: need a vspace node?
         (node :view/chars :str "cmsy10 font table:" :font :times)
         (node :view/chars :str " " :font :cmr10)  ; HACK: need a vspace node?
         
