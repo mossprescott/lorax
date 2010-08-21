@@ -152,7 +152,7 @@
 
                 ; Comment to disable:
                 :kernel
-                xp
+                (rename-nodes xp)
                 
                 :value
                 r
