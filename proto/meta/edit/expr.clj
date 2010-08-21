@@ -356,7 +356,7 @@
               
           :view/expr/unbed
           (fn [n [mode level]]
-            (let [_ (print-node n) _ (println "[m l]" [mode level])
+            (let [; _ (print-node n) _ (println "[m l]" [mode level])
                   level (if (< level 1) 
                           (do (println "warning: embedding error at node " (node-id n)) 1) 
                           level)]
