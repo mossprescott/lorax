@@ -619,10 +619,11 @@
                 (node-attr n :options)
                 
                 :super
-                (make-node :view/chars {
-                    :str (str (node-attr-value n :min) ".." )  ; HACK
-                    :font :cmr10-script
-                  })
+                (make-node :view/expr/juxt [
+                  (node-attr n :min)
+                  (make-node :view/expr/keyword { :str ".." })
+                  ; TODO: max?
+                ])
               })
           ])
         (make-node :view/sequence [
@@ -647,7 +648,7 @@
     (make-node :view/expr/juxt
       (vec (interpose
               (make-node :view/sequence [
-                  (make-node :view/expr/keyword { :str ", " })
+                  (make-node :view/expr/keyword { :str "," })
                   (make-node :view/thinspace {})
                 ])
               (node-children n)))))
@@ -684,7 +685,7 @@
   :grammar/options
   (fn [n] 
     (make-node :view/expr/binary
-      (interpose (make-node :view/expr/keyword { :str "|" })
+      (interpose (make-node :view/expr/symbol { :str "|" })
                  (node-children n))))
   
   ; :grammar/ref
@@ -712,6 +713,11 @@
   :grammar/nameValue
   (fn [n]
     (make-node :view/expr/keyword { :str "name" }))
+
+  ; HACK? used in seqNode/min
+  :grammar/count
+  (fn [n]
+    (make-node :view/expr/int { :str (str (node-value n)) }))
 
   ; ; Tricky: a single sequence node lives where a vector of nodes is expected,
   ; ; so it has to be reduced to a vector of some kind or all hell breaks loose
