@@ -5,14 +5,13 @@
 
 
 (def px
-  (node :view/expr/juxt 
-    :boxes [                  
-      (node :view/expr/int :str "3")
-      (node :view/expr/symbol :str :times)
-      (node :view/expr/var :str "a")
+  (make-node :view/expr/juxt [
+      (make-node :view/expr/int { :str "3" })
+      (make-node :view/expr/symbol { :str :times })
+      (make-node :view/expr/var { :str "a" })
     ]))
 (print-node px true)
-(let [ [pxr o] (meta-reduce2 px exprToView)] 
+(let [ [pxr o] (exprToView px)] 
   (print-node pxr true)
   (println "o: " o))
 
