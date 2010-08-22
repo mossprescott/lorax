@@ -4,6 +4,8 @@
 
 (use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
 
+; TODO: update to the current :grammar language
+
 (make-node :grammar/language [
   
     (make-node :grammar/mapNode {

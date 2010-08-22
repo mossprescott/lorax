@@ -4,6 +4,8 @@
 
 (use 'meta.core)  ; ignored by load-nodes, but hopefully makes this legal Clojure
 
+; TODO: update to the current :grammar language
+
 (node :grammar/language
   ;
   ; Horizontal layout:
