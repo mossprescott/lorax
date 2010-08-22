@@ -18,11 +18,15 @@
       :options 
       (make-node :grammar/options [
         (make-node :grammar/node {
+          :type :clojure/core/doc
+        })
+        (make-node :grammar/node {
           :type :clojure/kernel/expr
         })
       ])
       
-      :min 0
+      :min
+      (make-node :grammar/count 0)
           
       :display
       (make-node :grammar/seq {
@@ -48,7 +52,8 @@
         })
       ])
       
-      :min 0
+      :min 
+      (make-node :grammar/count 0)
           
       :display
       (make-node :grammar/seq {
@@ -151,6 +156,94 @@
       })
     })
 
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/doc)
+      
+      :supers 
+      (make-node :grammar/types [])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :doc_string {
+          :name
+          (make-node :grammar/name :clojure/core/doc/string)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/string)
+          ])
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/mono { ; HACK
+          :str
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/app {
+              :expr
+              (make-node :clojure/kernel/extern { :name "node-value" })
+              
+              :args
+              (make-node :clojure/kernel/args [
+                (make-node :clojure/kernel/var {
+                  :ref (ref-node :doc_string)
+                })
+              ])
+            })
+          })
+          
+          :font :times
+        })
+      })
+    })
+
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/comment)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :comment_expr {
+          :name
+          (make-node :grammar/name :clojure/core/comment/expr)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/juxt [
+          (make-node :view/expr/keyword { :str "//" })
+          (make-node :view/thickspace)
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :comment_expr)
+            })
+          })
+        ])
+      })
+  
+      :expand
+      (make-node :clojure/kernel/nil)
+    })
+  
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/core/not)

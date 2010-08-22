@@ -132,31 +132,33 @@
   [n exp]
   (make-node :clojure/core/session
     (vec (for [x (node-children n)]
-            (let [ ; _ (println "x:" x)
-                   [xp o] (try (meta-reduce2 x exp)
-                               (catch Throwable x
-                                      (println x)
-                                      (make-node :clojure/kernel/nil))) ; HACK
+            (if (#{ :clojure/core/doc :clojure/core/comment } (node-type x))
+              x
+              (let [ ; _ (println "x:" x)
+                     [xp o] (try (meta-reduce2 x exp)
+                                 (catch Throwable x
+                                        (println x)
+                                        (make-node :clojure/kernel/nil))) ; HACK
                   
-                  ; _ (println "xp:" xp)
-                  ; _ (println "cxp:" (meta-compile x))
-                  r (try (meta-eval xp) 
-                         (catch Throwable x 
-                                (println x)
-                                (make-node :clojure/kernel/nil))) ; HACK
-                  ; _ (println "r:" r)
-                  ]
-              (make-node :clojure/core/exchange {
-                :expr
-                x
+                    ; _ (println "xp:" xp)
+                    ; _ (println "cxp:" (meta-compile x))
+                    r (try (meta-eval xp) 
+                           (catch Throwable x 
+                                  (println x)
+                                  (make-node :clojure/kernel/nil))) ; HACK
+                    ; _ (println "r:" r)
+                    ]
+                (make-node :clojure/core/exchange {
+                  :expr
+                  x
 
-                ; Comment to disable:
-                :kernel
-                (rename-nodes xp)
+                  ; Comment to disable:
+                  :kernel
+                  (rename-nodes xp)
                 
-                :value
-                r
-              }))))))
+                  :value
+                  r
+                })))))))
 
 ; (def x1
 ;   (make-node :clojure/core/program [
