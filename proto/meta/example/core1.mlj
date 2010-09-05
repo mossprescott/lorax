@@ -1,8 +1,7 @@
 (use 'meta.core)
 
 (make-node :clojure/core/program [
-    ; Half-assed comment:
-    (make-node :clojure/kernel/string { :value "Simple.examples.using.only.the.kernel.syntax..."})
+    (make-node :clojure/core/doc { :string "Simple examples using only the kernel syntax..."})
   
     (make-node :clojure/kernel/nil)
     (make-node :clojure/kernel/true)
@@ -11,8 +10,8 @@
     (make-node :clojure/kernel/string { :value "abc"})
     (make-node :clojure/kernel/name { :value :thing })
     (make-node :clojure/kernel/if {
-      :test
-      (make-node :clojure/kernel/true)
+      ; :test
+      ; (make-node :clojure/kernel/true)
       
       :then
       (make-node :clojure/kernel/int { :value 1 })
