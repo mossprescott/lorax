@@ -59,9 +59,9 @@
   If the parent is a seq-node, then attr must be an index between 0 and the 
   number of nodes currently present, and the new node is inserted in that 
   position.
-  Before the node is inserted, any sub-nodes whose ids appear in the original
+  [TODO: Before the node is inserted, any sub-nodes whose ids appear in the original
   tree are first re-named, following the usual approach of renaming only bound 
-  ids."
+  ids.]"
   [root id attr newNode]
   (cond
     (not (contains? (set (deep-node-ids root))
@@ -91,6 +91,23 @@
                   true ]))]
       (first (reduce-plus root f false)))))
 
+
+(defn swap-nodes
+  "Change the positions of two nodes appearing anywhere in the tree, given their ids."
+  [root id1 id2]
+  (let [n1 (find-node root id1)
+        n2 (find-node root id2)
+        parentIdAndAttr (fn [id] 
+                          (first (filter #(not (nil? %))
+                            (for [n (visitNode root)]
+                              (first (for [a (node-attrs n) :when (= id (node-id (node-attr n a)))] 
+                                        [(node-id n) a]))))))
+        [parentId1 attr1] (parentIdAndAttr id1)
+        [parentId2 attr2] (parentIdAndAttr id2)]
+    (-> root (delete-node id1)
+              (delete-node id2)
+              (insert-node parentId2 attr2 n1)
+              (insert-node parentId1 attr1 n2))))
 
 ; Tests
 (deftest delete1

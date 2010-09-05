@@ -475,14 +475,16 @@
                           ;(.repaint panel)
                           (inspectorUpdate)))
                           
+        sourceIdsInViewOrder (fn [] (map #(resolveOne % @oref)  ; TODO: filter out nils?
+                                         (deep-node-ids @nref)))
+        
         selectionButton (fn [f #^String iconPath]
                           (doto (JButton. (ImageIcon. iconPath))
                             (.addActionListener
                               (proxy [ActionListener] []
                                 (actionPerformed [evt]
                                   (if (seq @sref)
-                                    (let [sourceIdsInViewOrder (map #(resolveOne % @oref) (deep-node-ids @nref))
-                                          id (f (first @sref) @rootA sourceIdsInViewOrder)]
+                                    (let [id (f (first @sref) @rootA (sourceIdsInViewOrder))]
                                       (if id
                                         (updateSelection id)))))))))
 
@@ -499,8 +501,8 @@
                           
         delete (doto (JButton. "Delete"))
         add (doto (JButton. "Add") (.setEnabled false))
-        swapPrevious (doto (JButton. "<-") (.setEnabled false))
-        swapNext (doto (JButton. "->") (.setEnabled false))
+        swapPrevious (doto (JButton. "<-"))
+        swapNext (doto (JButton. "->"))
         editToolBar (doto (JToolBar.)
                         (.add (JLabel. "Edit:"))
                         (.add delete)
@@ -529,16 +531,34 @@
                 (.add inspector "South")
                 (.setSize 500 750)
                 (.setVisible true))]
+    
+    ; set up a watcher to redisplay after any edit:
+    (add-watch rootA :redisplay
+      (fn [k r old new]
+        (println "Reducing for changed source")
+        (let [ [n o] (display @rootA (.isSelected parens)) ]
+          (dosync 
+            (ref-set nref n)
+            (ref-set oref o)))))
 
     (.addActionListener delete
       (proxy [ActionListener] []
         (actionPerformed [evt]
-          (swap! rootA delete-node (first @sref))
-          (let [ [n o] (display @rootA (.isSelected parens)) ]
-            (dosync 
-              (ref-set nref n)
-              (ref-set oref o)))
-          (.repaint panel))))
+          (swap! rootA delete-node (first @sref)))))
+
+    (.addActionListener swapPrevious
+      (proxy [ActionListener] []
+        (actionPerformed [evt]
+          (let [id (first @sref)]
+            (if-let [prevId (leftIdOrNil id @rootA (sourceIdsInViewOrder))]
+              (swap! rootA swap-nodes id prevId))))))
+
+    (.addActionListener swapNext
+      (proxy [ActionListener] []
+        (actionPerformed [evt]
+          (let [id (first @sref)]
+            (if-let [nextId (rightIdOrNil id @rootA (sourceIdsInViewOrder))]
+              (swap! rootA swap-nodes nextId id))))))
 
     (.addActionListener parens 
       (proxy [ActionListener] []
