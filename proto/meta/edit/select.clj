@@ -1,3 +1,6 @@
+; Rendering for the selection hilite, which is drawn into an offscreen image
+; to get a fancy anti-aliased clipping effect.
+
 (ns meta.edit.select
   (:import 
     (java.awt 
@@ -10,8 +13,9 @@
       Transparency
       AlphaComposite
       GradientPaint
-      GraphicsConfiguration
-      Image)
+      GraphicsConfiguration)
+    (java.awt.image
+      BufferedImage)
     (java.awt.geom 
       Line2D 
       Line2D$Float
@@ -52,7 +56,7 @@
 
 (defn fancy-hilite
   [^Graphics2D g w h cs]
-  (let [^Image img (make-image g (+ w 5) (+ h 5))
+  (let [^BufferedImage img (make-image g (+ w 5) (+ h 5))
         ^Graphics2D g2 (.createGraphics img)
         x0 -2 y0 -2
         w0 (+ w 4) h0 (+ h 4)
@@ -78,7 +82,7 @@
       ; Now clear the inner areas:
       (.setComposite AlphaComposite/Clear))
     (doseq [ [cx cy cw ch] cs ]
-      (.fillRoundRect g2 cx cy cw ch INNER_RADIUS_X INNER_RADIUS_Y))
+      (.fillRoundRect g2 cx cy (inc cw) (inc ch) INNER_RADIUS_X INNER_RADIUS_Y))
       
       ; Now set the outline again in case any of it was punched out:
     (doto g2
