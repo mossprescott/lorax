@@ -333,8 +333,12 @@
   If called with just two args [n, f], then f is a function taking only a node, 
   and the 'env' value is ignored.
   
+  With one arg [n], a sequence of all the nodes are simply returned.
+  
   TODO: should be lazy?"
-  ([#^nodetype n f]
+  ([n]
+    (visitNode n (fn [n] n)))
+  ([n f]
     (visitNode n (fn [n _] [(f n) nil]) nil))
   ([#^nodetype n f env]
     (let [ [result newEnv] (f n env)]
@@ -357,6 +361,7 @@
 
 
 (defn find-node
+  "Returns the node with the given id, or nil if not found."
   [#^nodetype n id]
   (first (for [n (visitNode n #(vec [%1 %2]) nil) :when (= (node-id n) id)] n)))
 
