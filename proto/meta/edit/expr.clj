@@ -110,8 +110,6 @@
     (first (meta-reduce2 n (reduceByType rules)))))
 
 
-(def PRIME ["\u0030" :cmsy10])
-
 (def SYMBOLS {
   "=" [ "=" :cmr10 ]
   
@@ -172,11 +170,18 @@
 })
 
 ; Map/fn from mode to cramped mode in same size:
-(def cramped {
-  :D :d, :d :d, 
-  :T :t, :t :t,
-  :S :s, :s :s,
-  :SS :ss, :ss :ss
+; (def cramped {
+;   :D :d, :d :d, 
+;   :T :t, :t :t,
+;   :S :s, :s :s,
+;   :SS :ss, :ss :ss
+; })
+
+(def FONTS_BY_STYLE_AND_MODE {
+  :keyword { :T :cmbx10, :S :cmbx10-script, :SS :cmbx10-scriptscript }
+  :symbol { :T :cmsy10, :S :cmsy10-script, :SS :cmsy10-scriptscript }
+  :var { :T :cmmi10, :S :cmmi10-script, :SS :cmmi10-scriptscript }
+  :int { :T :cmr10, :S :cmr10-script, :SS :cmr10-scriptscript }
 })
 
 (def EMBED_COLORS (cycle [
@@ -238,7 +243,7 @@
           (fn [n [mode level]]
             [ (make-node :view/chars {
                 :str (as-string (node-attr n :str))
-                :font :cmbx10
+                :font (-> FONTS_BY_STYLE_AND_MODE :keyword mode)
               })
               [mode level] ])
 
@@ -246,10 +251,11 @@
           (fn [n [mode level]]
             (let [sname (node-attr-value n :str)]
               (assert-pred #(contains? SYMBOLS %) sname)  ; TODO: don't assert? instead reduce to what?
-              (let [ [c f] (SYMBOLS sname) ]
+              (let [ [c f] (SYMBOLS sname)
+                     fp (if (= f :cmsy10) (-> FONTS_BY_STYLE_AND_MODE :symbol mode) f)]  ; HACK
                 [ (make-node :view/chars {
                     :str (make-node :core/string c)
-                    :font (make-node :core/name f)
+                    :font (make-node :core/name fp)
                   })
                   [mode level] ])))
 
@@ -258,7 +264,7 @@
           (fn [n [mode level]]
             [ (make-node :view/chars {
                 :str (as-string (node-attr n :str))
-                :font :cmmi10
+                :font (-> FONTS_BY_STYLE_AND_MODE :var mode)
                 ; :font :timesItalic  ;; HACK
               })
               [mode level] ])
@@ -267,7 +273,7 @@
           (fn [n [mode level]]
             [ (make-node :view/chars {
                 :str (as-string (node-attr n :str))
-                :font (if (= mode :T) :cmr10 :cmr10-script)  ; HACK
+                :font (-> FONTS_BY_STYLE_AND_MODE :int mode)
               })
               [mode level] ])
 
