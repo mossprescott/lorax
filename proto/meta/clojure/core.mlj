@@ -179,13 +179,14 @@
       :display
       (make-node :clojure/kernel/quote {
         :body
-        (make-node :view/expr/mono { ; HACK
+        ; (make-node :view/expr/mono { ; HACK
+        (make-node :view/chars {  ; Note: this is the right reduction, but doesn't render properly via the meta-expr reduction
           :str
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/app {
               :expr
-              (make-node :clojure/kernel/extern { :name "node-value" })
+              (make-node :clojure/kernel/extern { :name "meta.core/node-value" })
               
               :args
               (make-node :clojure/kernel/args [
@@ -197,6 +198,9 @@
           })
           
           :font :times
+          
+          :view/drawable/color
+          (make-node :view/rgb { :red 0 :green 0.5 :blue 0 })
         })
       })
     })

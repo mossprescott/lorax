@@ -109,7 +109,7 @@
               (make-node :clojure/kernel/args [
                 (make-node :clojure/kernel/app {
                   :expr
-                  (make-node :clojure/kernel/extern { :name "node-value" })
+                  (make-node :clojure/kernel/extern { :name "meta.core/node-value" })
                       
                   :args 
                   (make-node :clojure/kernel/args [
@@ -159,7 +159,7 @@
             :body
             (make-node :clojure/kernel/app {
               :expr
-              (make-node :clojure/kernel/extern { :name "node-value" })
+              (make-node :clojure/kernel/extern { :name "meta.core/node-value" })
                       
               :args 
               (make-node :clojure/kernel/args [
@@ -227,7 +227,7 @@
                   (make-node :clojure/kernel/args [
                     (make-node :clojure/kernel/app {
                       :expr
-                      (make-node :clojure/kernel/extern { :name "node-value" })
+                      (make-node :clojure/kernel/extern { :name "meta.core/node-value" })
           
                       :args 
                       (make-node :clojure/kernel/args [

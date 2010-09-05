@@ -291,7 +291,7 @@
         :expr
         (make-node :clojure/kernel/app {
           :expr
-          (make-node :clojure/kernel/extern { :name "with-attr-node" })
+          (make-node :clojure/kernel/extern { :name "meta.reduce/with-attr-node" })  ; Note: needs qualification only on _second_ use!
         
           :args 
           (make-node :clojure/kernel/args [
