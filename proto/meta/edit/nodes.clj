@@ -531,12 +531,10 @@
 
 
 ;
-; Radical:
+; Radical (currently square root only):
 ;
 
 (def RADICALS [ "\u0070" "\u0071" "\u0072" "\u0073" ])  ; Note: \u0074 is the vertical one used to build really huge radicals
-
-; TODO: "power"
 
 (def RADICAL_LINE_WEIGHT 1)
 (def RADICAL_SPACE 1)  ; above and below the radicand
@@ -559,13 +557,6 @@
   (let [x (node-attr n :radicand)
         [xw xh xb] (size x g ctx)]
     (pick-glyph (+ RADICAL_SPACE xh RADICAL_SPACE) RADICALS (FONTS :cmex10) g)))
-    ; (loop [i 0]
-    ;   (let [rstr (str (RADICALS i))
-    ;         ^Rectangle2D rr (glyph-bounds rstr (FONTS :cmex10) g)]
-    ;     (if (or (= i (dec (count RADICALS)))
-    ;             (>= (.getHeight rr) (+ RADICAL_SPACE xh RADICAL_SPACE)))
-    ;       [rstr rr]
-    ;       (recur (inc i)))))))
 
 (defmethod size-impl :view/radical
   [n #^Graphics2D g ctx]
@@ -600,6 +591,68 @@
       (.setStroke (BasicStroke. 1))  ; Note: should take the weight from the font somehow
       (.draw (Line2D$Float. (+ 0.5 (int (.getWidth rr))) -0.5
                             (+ 0.5 (int (+ (.getWidth rr) xw))) -0.5)))))
+
+;
+; Delimiters:
+;
+
+(def DELIMS {
+  ; All from cmex10
+  ; Note how randomly these are sprinkled around the font. JSMath's symbol 
+  ; table has them in a much more rational order, so I must be missing something.
+  "(" [ "\u00c0" "\u00b0" "\u00d2" "\u00ef" ]  ; growable: 30, 42, 31
+  ")" [ "\u00c1" "\u00d1" "\u00d3" "\u0021" ]  ; growable: 40, 43, 41
+
+  ; TODO: [, ], {, }, <, >, floor, ciel, |
+  })
+
+(def DELIM_SPACE 1)
+
+(defmethod size-impl :view/delimited
+  [n #^Graphics2D g ctx]
+  (let [l (node-attr-value n :left)
+        x (node-attr n :content)
+        r (node-attr-value n :right)
+        [xw xh xb] (size x g ctx)
+        [lst ^Rectangle2D lr] (pick-glyph xh (DELIMS l) (FONTS :cmex10) g)
+        [rst ^Rectangle2D rr] (pick-glyph xh (DELIMS r) (FONTS :cmex10) g)
+        dh (max (.getHeight lr) (.getHeight rr))
+        xy (/ (- dh xh) 2)]
+    [ (+ (.getWidth lr) DELIM_SPACE xw DELIM_SPACE (.getWidth rr)) 
+      (max (.getHeight lr) xh (.getHeight rr))
+      (if xb (+ xy xb))]))
+    
+(defmethod layout-impl :view/delimited
+  [n #^Graphics2D g ctx]
+  (let [l (node-attr-value n :left)
+        x (node-attr n :content)
+        r (node-attr-value n :right)
+        [xw xh xb] (size x g ctx)
+        [lst ^Rectangle2D lr] (pick-glyph xh (DELIMS l) (FONTS :cmex10) g)
+        [rst ^Rectangle2D rr] (pick-glyph xh (DELIMS r) (FONTS :cmex10) g)
+        dh (max (.getHeight lr) (.getHeight rr))
+        xx (+ (.getWidth lr) DELIM_SPACE)
+        xy (/ (- dh xh) 2)]
+    [ [x xx xy xw xh] ]))
+    
+(defmethod draw-impl :view/delimited
+  [n #^Graphics2D g ctx debug?]
+  (let [l (node-attr-value n :left)
+        x (node-attr n :content)
+        r (node-attr-value n :right)
+        [xw xh xb] (size x g ctx)
+        [^String lst ^Rectangle2D lr] (pick-glyph xh (DELIMS l) (FONTS :cmex10) g)
+        [^String rst ^Rectangle2D rr] (pick-glyph xh (DELIMS r) (FONTS :cmex10) g)
+        [h w b] (size n g ctx)]
+    (doto g
+      (.setColor (node-color n))
+      (.setFont (FONTS :cmex10))
+      (.drawString lst 
+                   (float 0) 
+                   (float (/ (- h (.getHeight lr) 2))))
+      (.drawString rst 
+                   (float (+ (.getWidth lr) DELIM_SPACE xw DELIM_SPACE))
+                   (float (/ (- h (.getHeight rr) 2)))))))
 
 ;
 ; Over (i.e. fraction):

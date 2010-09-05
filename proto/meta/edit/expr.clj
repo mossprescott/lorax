@@ -21,7 +21,7 @@
 ; :view/expr/int
 
 ; :view/expr/scripted
-; - /nucleus, /super?, /sup?
+; - /nucleus, /super, /sub?
 
 
 (defn- synthetic-color-node
@@ -34,7 +34,7 @@
   - binary or relation inside binary, relation, flow, or juxt
   - any compound expression which is the nucleus of a :scripted
   Note: this results in a mixed-language program, with both expr- and view-
-  language nodes, since it introduces :view/parens nodes but does not reduce
+  language nodes, since it introduces :view/delimited nodes but does not reduce
   anything."
   [n]
   (let [ wrappableEmbeddings #{ 
@@ -55,11 +55,11 @@
           
           [ :view/expr/flow     :view/expr/flow ]
           
-          ; TODO: radical with super/sub
+          ; TODO: radical with super/sub?
         }
         parenNode 
           (fn [n]
-            (make-node :view/parens {
+            (make-node :view/delimited {
                 :left "("
                 :right ")"
                 :view/drawable/color (synthetic-color-node)
@@ -328,22 +328,22 @@
               })
               [mode level] ])
 
-          ; HACK: this is easier than actually implementing growable parens for now, but this
-          ; node should really be handled in nodes.clj with custom rendering
-          :view/parens
-          (fn [n [mode level]]
-            [ (make-node :view/sequence [
-                (node :view/chars
-                  :str (node-attr n :left)
-                  :font :times; :cmr10
-                  :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
-                (node-attr n :content)
-                (node :view/chars
-                  :str (node-attr n :right)
-                  :font :times; :cmr10
-                  :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
-              ])
-              [mode level] ])
+          ; ; HACK: this is easier than actually implementing growable parens for now, but this
+          ; ; node should really be handled in nodes.clj with custom rendering
+          ; :view/parens
+          ; (fn [n [mode level]]
+          ;   [ (make-node :view/sequence [
+          ;       (node :view/chars
+          ;         :str (node-attr n :left)
+          ;         :font :times; :cmr10
+          ;         :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
+          ;       (node-attr n :content)
+          ;       (node :view/chars
+          ;         :str (node-attr n :right)
+          ;         :font :times; :cmr10
+          ;         :view/drawable/color (with-attr n :view/drawable/color c c (black-node)))
+          ;     ])
+          ;     [mode level] ])
               
           :view/expr/embed
           (fn [n [mode level]]

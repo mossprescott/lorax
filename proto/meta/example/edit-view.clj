@@ -80,7 +80,8 @@
               (node :view/chars 
                 :str "("
                 :font :cmr10
-                :view/drawable/color (node :view/gray :brightness 0.5))
+                ; :view/drawable/color (node :view/gray :brightness 0.5))
+                )
               (node :view/chars 
                 :str "x"
                 :font :cmmi10)
@@ -95,7 +96,8 @@
               (node :view/chars 
                 :str ")"
                 :font :cmr10
-                :view/drawable/color (node :view/gray :brightness 0.5))
+                ; :view/drawable/color (node :view/gray :brightness 0.5))
+                )
             ])
             
             :super
@@ -106,12 +108,62 @@
       
         (node :view/chars :str " " :font :cmr10)  ; HACK: need a vspace node?
 
+        (make-node :view/delimited {
+          :left "("
+          :right ")"
+        
+          :content
+          (make-node :view/sequence [
+            (make-node :view/scripted {
+              :nucleus
+              (make-node :view/delimited {
+                :left "("
+                :right ")"
+          
+                :content
+                (make-node :view/sequence [
+                  (make-node :view/chars {
+                    :str "1"
+                    :font :cmr10
+                  })
+                  (node :view/thinspace)
+                  (node :view/chars 
+                    :str "+"
+                    :font :cmbx10)
+                  (node :view/thinspace)
+                  (make-node :view/chars {
+                    :str "2"
+                    :font :cmr10
+                  })
+                ])
+              })
+          
+              :super
+              (make-node :view/chars {
+                :str "3"
+                :font :cmr10-script
+              })
+            })
+            (node :view/thinspace)
+            (node :view/chars 
+              :str "+"
+              :font :cmbx10)
+            (node :view/thinspace)
+            (make-node :view/chars {
+              :str "4"
+              :font :cmr10
+            })
+          ])
+        })
+        
+        (node :view/chars :str " " :font :cmr10)  ; HACK: need a vspace node?
+
         (make-node :view/sequence [
 
           (make-node :view/radical {
             :radicand
             (make-node :view/sequence [
-              (make-node :view/quad)
+              (make-node :view/thickspace)
             ])
           })
       
