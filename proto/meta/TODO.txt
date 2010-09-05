@@ -1,21 +1,18 @@
-Fix grammar/structure checking:
-- fix grammar display
-- fix sequence attr
+Fix grammar checking
 
-Fix grammar-based reduction:
-- 
+Add loop/recur
+
+Eliminate float as a value?
+- use Fortress-like construction (123*10^-1)
+- so an "int" is really a sequence of bits
+- and string is sequence of char (raising, again, the question of why characters
+aren't addressable as nodes themselves)
 
 selection:
 - selection of string, int
 - disable the buttons
 - select :missing nodes
 - ordering of :view/scripted attributes (the only one so far that isn't implicitly ordered)
-
-
-
-Better name reduction
-
-Make display also a quoted expression, so you can write arbitrary code...
 
 regex
 - reduction to compiled pattern? compile-time vs. run-time?
