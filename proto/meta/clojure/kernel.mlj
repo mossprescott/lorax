@@ -419,7 +419,7 @@
             })
           })
           (make-node :view/thinspace)
-          (make-node :view/parens {
+          (make-node :view/delimited {
             :left "("
             :right ")"
             :content 
