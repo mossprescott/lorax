@@ -3,7 +3,7 @@
 
 (ns meta.edit.draw
   (:use (clojure test)
-        (meta core reduce path)
+        (meta core edit reduce path)
         (meta.clojure kernel)
         (meta.edit nodes expr select))
   (:import 
@@ -186,9 +186,16 @@
       (find n g x y ())))
   
 (defn makePanel
-  "Makes a component which draws the node in nref, with the debug flag in dref,
-  and drawing a hilite box behind every node whose id appears in the set sref."
-  [nref dref sref errors oref]
+  "A component which draws a tree of nodes in the :view language. When any of 
+  element atoms changes, the panel is repainted (via add-watch).
+  
+  Params:
+  root - atom with a program in the :view language
+  debug - atom with a flag indicating whether rendering debug info should be drawn
+  selectedIds - atom with a set of ids of 'selected' _source_ nodes to be rendered with special hilite
+  errorIds - atom with a set of ids of _source_ nodes with errors, which get another indicator
+  "
+  [rootA debugA selectedIdsA errorIdsA originsA]
   (let [ c (proxy [ JComponent ] []
               (paintComponent [^Graphics2D g]
                 (let [this ^JComponent this]
@@ -209,13 +216,26 @@
                   ;         (println "size" (size (node :view/sequence :items [ (node :view/chars :str "abc" :font :cmr10) (node :view/chars :str "a" :font :cmmi10) ]) 
                   ;                                   (.getGraphics this))) ; HACK
                   (print "draw-all: ")
-                  (time (draw-all @nref (doto (.create g) (.translate MARGIN MARGIN)) @dref @sref errors @oref))))
+                  (time (draw-all @rootA 
+                                  (doto (.create g) (.translate MARGIN MARGIN)) 
+                                  @debugA @selectedIdsA @errorIdsA @originsA))))
               (getPreferredSize []
                 (let [this #^JComponent this
                       g (.getGraphics this)
                       ctx (make-draw-context)
-                      [w h b] (size @nref g ctx)]
-                  (Dimension. (+ MARGIN w MARGIN) (+ MARGIN h MARGIN))))) ]
+                      [w h b] (size @rootA g ctx)]
+                  (Dimension. (+ MARGIN w MARGIN) (+ MARGIN h MARGIN)))))
+          watch (fn [r msg]
+                  (add-watch r c
+                            (fn [key r old new]
+                              (println "Repainting for changed" msg)
+                              (.repaint c))))]
+    (watch rootA "root")
+    (watch debugA "debug flag")
+    (watch selectedIdsA "selection")
+    (watch errorIdsA "errors")
+    (watch originsA "origins")
+    
       ; (.addMouseListener c 
       ;   (proxy [ MouseAdapter ] []
       ;     (mouseClicked [#^MouseEvent evt]
@@ -227,7 +247,7 @@
       ;         ; (println "hit:" s)
       ;         (dosync (ref-set sref ss)))
       ;       (.repaint c))))
-      c))
+    c))
       
 
 (defn makeInspectorPanel
@@ -412,10 +432,17 @@
           (node-id cn))))))
 
 (defn makeSyntaxFrame 
-  "primary: reduction to the 'expr' language
+  "
+  Params:
+  rootA: atom with the source program
+  primaryA
+  checkerA
+  
+  primary: reduction to the 'expr' language  
   errors: map of (source program) ids to seq of errors"
-  [n title primary errors]
-  (let [debugFlag (ref false)
+  [root title primary errors]
+  (let [rootA (atom root)
+        debugFlag (ref false)
         ; lastReduction (apply-until [reduceAny (reduceByType exprRules)])
         display (fn [n p] 
                   (let [ _ (if PRINT_ALL (do (print "source: ") (print-node n true)) )
@@ -431,12 +458,12 @@
                     ; (print-node nppp true)  ; HACK
                     ; (println "foo")  ; HACK
                     [npppp [opp op o]]))
-        [np o] (display n PARENS_DEFAULT) 
+        [np o] (display @rootA PARENS_DEFAULT) 
         nref (ref np)  ; contains the reduced program
         oref (ref o)   ; contains a list of maps of reduced program node ids to pre-reduction ids
-        sref (ref #{}) ; contains a set of selected node (reduced program) ids
+        sref (ref #{}) ; contains a set of selected node (source program) ids
         snref (ref nil) ; the actual selected node
-        panel #^JComponent (makePanel nref debugFlag sref (set (keys errors)) oref)
+        panel #^JComponent (makePanel nref debugFlag sref (atom (set (keys errors))) oref)
         scroll (JScrollPane. panel)
         
         [#^JComponent inspector inspectorUpdate] (makeInspectorPanel snref)
@@ -444,8 +471,8 @@
         updateSelection (fn [sourceId]
                           (dosync 
                             (ref-set sref #{sourceId})
-                            (ref-set snref (find-node n sourceId))
-                          (.repaint panel)
+                            (ref-set snref (find-node @rootA sourceId))
+                          ;(.repaint panel)
                           (inspectorUpdate)))
                           
         selectionButton (fn [f #^String iconPath]
@@ -455,7 +482,7 @@
                                 (actionPerformed [evt]
                                   (if (seq @sref)
                                     (let [sourceIdsInViewOrder (map #(resolveOne % @oref) (deep-node-ids @nref))
-                                          id (f (first @sref) n sourceIdsInViewOrder)]
+                                          id (f (first @sref) @rootA sourceIdsInViewOrder)]
                                       (if id
                                         (updateSelection id)))))))))
 
@@ -469,6 +496,17 @@
                           (.add right)
                           (.add up)
                           (.add down))
+                          
+        delete (doto (JButton. "Delete"))
+        add (doto (JButton. "Add") (.setEnabled false))
+        swapPrevious (doto (JButton. "<-") (.setEnabled false))
+        swapNext (doto (JButton. "->") (.setEnabled false))
+        editToolBar (doto (JToolBar.)
+                        (.add (JLabel. "Edit:"))
+                        (.add delete)
+                        (.add add)
+                        (.add swapPrevious)
+                        (.add swapNext))
         
         parens (doto (JCheckBox. "Parens") 
                   (.setSelected PARENS_DEFAULT))
@@ -481,6 +519,7 @@
         header (doto (JPanel.)
                 (.setLayout (GridLayout. 0 1))
                 (.add selectionToolBar)
+                (.add editToolBar)
                 (.add optionsToolBar))
                         
         frame (doto (JFrame. (str "Meta - " title))
@@ -491,11 +530,21 @@
                 (.setSize 500 750)
                 (.setVisible true))]
 
+    (.addActionListener delete
+      (proxy [ActionListener] []
+        (actionPerformed [evt]
+          (swap! rootA delete-node (first @sref))
+          (let [ [n o] (display @rootA (.isSelected parens)) ]
+            (dosync 
+              (ref-set nref n)
+              (ref-set oref o)))
+          (.repaint panel))))
+
     (.addActionListener parens 
       (proxy [ActionListener] []
         (actionPerformed [evt]
-          (let [ [n o] (display n (.isSelected parens)) ]
-            (dosync 
+          (let [ [n o] (display @rootA (.isSelected parens)) ]
+            (dosync
               (ref-set nref n)
               (ref-set oref o)))
           (.repaint panel))))
