@@ -109,6 +109,7 @@
   ; math italics
   :cmmi10 (Font. "jsMath-cmmi10" Font/PLAIN TEXT_SIZE)
   :cmmi10-script (Font. "jsMath-cmmi10" Font/PLAIN SCRIPT_SIZE)
+  :cmmi10-scriptscript (Font. "jsMath-cmmi10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
 
   ; math roman
   :cmr10 (Font. "jsMath-cmr10" Font/PLAIN TEXT_SIZE)
@@ -118,6 +119,7 @@
   ; bold extended (keywords)
   :cmbx10 (Font. "jsMath-cmbx10" Font/PLAIN TEXT_SIZE)
   :cmbx10-script (Font. "jsMath-cmbx10" Font/PLAIN SCRIPT_SIZE)
+  :cmbx10-scriptscript (Font. "jsMath-cmbx10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
 
   ; math symbol
   ; For some reason, glyphs do not appear for any char < 0x2x,
@@ -313,7 +315,8 @@
   [n #^Graphics2D g ctx debug?]
   (let [ [w h b] (size n g ctx)
           font (FONTS (node-attr-value n :font))
-          #^String s (as-string (node-attr-value n :str))
+          #^String s (as-string (node-attr n :str))
+          ; _ (println "chars:" s) ; HACK
           angle 0.0 ];(.getItalicAngle font) ]
     ; (println [s w h b angle])
     (if debug?
@@ -388,7 +391,7 @@
         sup (node-attr n :super)
         [nx ny nb] (size nucl g ctx)
         [sx sy sb] (size sup g ctx)]
-    [ [nucl 0 (/ sy 3) nx ny] [sup (+ 1 nx) 0 sx sy] ]))  ; HACK
+    [ [nucl 0 (/ (if sb sb sy) 3) nx ny] [sup (+ 1 nx) 0 sx sy] ]))  ; HACK
 
 (defmethod draw-impl :view/scripted [n & more])
 
