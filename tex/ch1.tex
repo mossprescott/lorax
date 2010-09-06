@@ -1,0 +1,31 @@
+\section{Introduction}
+
+
+
+\subsection{Weaknesses of conventional tools}
+Lack of extensibility. Barriers to constructing small languages (e.g. External DSLs). Poor information density. Lack of correspondence with familiar notation (math, etc.) Unable to take advantage of display capabilities: high-resolution, color, animation.
+
+\subsection{The problem of parsing}
+An interesting challenge for CS, but a real problem for programmers, who have to simulate the parser ``in their heads'' to understand the meaning of their program. Witness online parsers in modern IDEs, and attempts to use the AST to improve usability (e.g. syntax-coloring, navigation).
+
+\subsection{The LISP alternative}
+Trade nice syntax for flexibility and extensibility. What is lost.
+
+\subsection{The Solution}
+aim is to construct programs in a way that gives programmer flexibility and power. by increasing expressiveness.
+
+\textit{in section 2, I say...}
+
+\begin{enumerate}
+\item Using an \emph{abstract syntax tree} as the ultimate source code is a viable alternative to textual source code.
+\item Enables programs to be easier to read and understand.
+\item It's natural to build a full-featured language by extending a kernel language with additional syntax, when both are represented uniformly using ASTs.
+\item Such a system is naturally a meta-programming system, and elegantly solves some of the problems of meta-programming.
+\item Once source code is represented as nodes rather than text, several types of flexibility are achieved immediately.
+\item Once the content and the presentation of programs are that flexible, the same properties are nice to have for many other kinds of data.
+\end{enumerate}
+
+
+\subsection{Related Work}
+Fortress. Intentional Whatever. MPS. Structured editors in general. Visual programming languages. \textit{more...}
+
