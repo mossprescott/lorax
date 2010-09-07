@@ -389,19 +389,24 @@
   (is (= [1 2 3]
         (sortAs [3 1 2] (range 20))))
   (is (= [1 2 3]
-        (sortAs [-1 1 100 3 50 2] (range 20)))))
+        (sortAs [-1 1 100 3 50 2] (range 4)))))
 
 (defn- siblings
   [sourceId root sourceIdsInViewOrder]
   (if-let [p (idToPath sourceId root)]
     (let [paths (sibling-paths root p)
-          ids (for [p paths] (node-id (node-at-path root p)))]
+          ; _ (println "paths:" paths)  ; HACK
+          ids (for [p paths] (node-id (node-at-path root p)))
+          ; _ (println "ids (unsorted):" ids)  ; HACK
+          ; _ (println "siivo:" sourceIdsInViewOrder)  ; HACK
+          ]
       (sortAs ids sourceIdsInViewOrder))))
   
 (defn- leftIdOrNil
   [sourceId root sourceIdsInViewOrder]
   (if-let [ids (siblings sourceId root sourceIdsInViewOrder)]
-    (let [i (first (index-filter #(= sourceId %) ids))]
+    (let [; _ (println "ids:" ids)  ; HACK
+          i (first (index-filter #(= sourceId %) ids))]
       (if (and i (> i 0))
         (nth ids (dec i))))))
 
@@ -435,18 +440,17 @@
   "
   Params:
   rootA: atom with the source program
-  primaryA
-  checkerA
+  primaryA: ref with the primary display reduction, which can be applied to the 
+    source program to produce a program in :view/expr.
+  TODO: checkerA
   
-  primary: reduction to the 'expr' language  
   errors: map of (source program) ids to seq of errors"
-  [root title primary errors]
-  (let [rootA (atom root)
-        debugFlag (ref false)
+  [rootA title primaryA errors]
+  (let [debugFlag (ref false)
         ; lastReduction (apply-until [reduceAny (reduceByType exprRules)])
         display (fn [n p] 
                   (let [ _ (if PRINT_ALL (do (print "source: ") (print-node n true)) )
-                        [np o] (primary n)
+                        [np o] (@primaryA n)
                         _ (if PRINT_ALL (do (print "expr: ") (print-node np true) 
                                             (println "o:" o)) )
                         [npp op] (meta-reduce2 np reduceAny)
@@ -475,8 +479,11 @@
                           ;(.repaint panel)
                           (inspectorUpdate)))
                           
-        sourceIdsInViewOrder (fn [] (map #(resolveOne % @oref)  ; TODO: filter out nils?
-                                         (deep-node-ids @nref)))
+        sourceIdsInViewOrder (fn [] 
+                              ; (println "o:" @oref) ; HACK
+                                (filter #(not (nil? %))
+                                  (map #(resolveOne % @oref)
+                                       (deep-node-ids @nref))))
         
         selectionButton (fn [f #^String iconPath]
                           (doto (JButton. (ImageIcon. iconPath))
@@ -533,14 +540,21 @@
                 (.setVisible true))]
     
     ; set up a watcher to redisplay after any edit:
-    (add-watch rootA :redisplay
-      (fn [k r old new]
-        (println "Reducing for changed source")
-        (let [ [n o] (display @rootA (.isSelected parens)) ]
-          (dosync 
-            (ref-set nref n)
-            (ref-set oref o)))))
+    (let [watch (fn [a reason]
+                  (add-watch a panel
+                    (fn [k r old new]
+                      (print (str "Reducing for " reason ": "))
+                      (let [ [n o] (time (display @rootA (.isSelected parens))) ]
+                        (dosync 
+                          (ref-set nref n)
+                          (ref-set oref o))))))]
+      (watch rootA "changed source")
+      (watch primaryA "changed grammar (display)"))
 
+    ;
+    ; Edit actions:
+    ;
+    
     (.addActionListener delete
       (proxy [ActionListener] []
         (actionPerformed [evt]
@@ -560,6 +574,10 @@
             (if-let [nextId (rightIdOrNil id @rootA (sourceIdsInViewOrder))]
               (swap! rootA swap-nodes nextId id))))))
 
+    ;
+    ; Options:
+    ;
+
     (.addActionListener parens 
       (proxy [ActionListener] []
         (actionPerformed [evt]
@@ -574,6 +592,11 @@
           (dosync (ref-set debugFlag (.isSelected debug)))
           (.repaint panel))))
 
+
+    ;
+    ; Listeners:
+    ;
+    
     (.addMouseListener panel 
       (proxy [ MouseAdapter ] []
         (mouseClicked [#^MouseEvent evt]

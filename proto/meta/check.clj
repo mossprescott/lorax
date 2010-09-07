@@ -620,7 +620,7 @@
                 
                 :super
                 (make-node :view/expr/juxt [
-                  (node-attr n :min)
+                  (make-node :view/expr/int { :str (str (node-attr-value n :min)) })
                   (make-node :view/expr/keyword { :str ".." })
                   ; TODO: max?
                 ])
