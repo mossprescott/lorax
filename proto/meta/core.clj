@@ -35,6 +35,16 @@
             (transient {})
             (for ~bind [~key ~val]))))
 
+(defmacro time2
+  "Slightly enhanced time macro"
+  [msg expr]
+  `(let [start# (. System (nanoTime))
+         ret# ~expr
+         elapsed# (/ (double (- (. System (nanoTime)) start#)) 1000000.0)]
+     (println (str ~msg elapsed# " ms"))
+     ret#))
+
+
 ;
 ; Some utilities for working with nodes:
 ;

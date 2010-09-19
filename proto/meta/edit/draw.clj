@@ -215,8 +215,8 @@
                   ;                                   (.getGraphics this))) ; HACK
                   ;         (println "size" (size (node :view/sequence :items [ (node :view/chars :str "abc" :font :cmr10) (node :view/chars :str "a" :font :cmmi10) ]) 
                   ;                                   (.getGraphics this))) ; HACK
-                  (print "draw-all: ")
-                  (time (draw-all @rootA 
+                  (time2 "draw-all: "
+                         (draw-all @rootA 
                                   (doto (.create g) (.translate MARGIN MARGIN)) 
                                   @debugA @selectedIdsA @errorIdsA @originsA))))
               (getPreferredSize []
@@ -543,8 +543,8 @@
     (let [watch (fn [a reason]
                   (add-watch a panel
                     (fn [k r old new]
-                      (print (str "Reducing for " reason ": "))
-                      (let [ [n o] (time (display @rootA (.isSelected parens))) ]
+                      (let [ [n o] (time2 (str "Reducing for " reason ": ")
+                                          (display @rootA (.isSelected parens))) ]
                         (dosync 
                           (ref-set nref n)
                           (ref-set oref o))))))]
