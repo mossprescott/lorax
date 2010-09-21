@@ -188,73 +188,81 @@
 
 (def reduce-one-plus) ; forward-decl!
 
-(defn- reduce-child-plus
-  ;; TODO: remove this? Only nodes ever make it here now, I think.
-  [c f v depth]
-  ; (prn "c:" c)  ; HACK
-  (cond
-    (node? c) 
-    (reduce-one-plus c f v depth)
-    
-    ; (vector? c) 
-    ; (let [; _ (println "c: " c)
-    ;       ts (map #(reduce-one-plus % f v depth) c)  ; TODO: thread v through the reductions
-    ;       ; _ (println "ts:" ts)
-    ;       ]
-    ;   [(vec (map first ts))
-    ;     (reduce merge {} (map second ts))
-    ;     v])  ; TODO: return last v
-    
-    true 
-    (do
-      (println "Never happens?")
-      [c {} v])))
+; (defn- reduce-child-plus
+;   ;; TODO: remove this? Only nodes ever make it here now, I think.
+;   [c f v depth]
+;   ; (prn "c:" c)  ; HACK
+;   (cond
+;     (node? c) 
+;     (reduce-one-plus c f v depth)
+;     
+;     ; (vector? c) 
+;     ; (let [; _ (println "c: " c)
+;     ;       ts (map #(reduce-one-plus % f v depth) c)  ; TODO: thread v through the reductions
+;     ;       ; _ (println "ts:" ts)
+;     ;       ]
+;     ;   [(vec (map first ts))
+;     ;     (reduce merge {} (map second ts))
+;     ;     v])  ; TODO: return last v
+;     
+;     true 
+;     (do
+;       (println "Never happens?")
+;       [c {} v])))
+
+(defn merge!
+  "Merge one or more maps into a transient map (the first arg)."
+  ([tm m1]
+    (loop [tm tm es (seq m1)]
+              (if es
+                (recur (conj! tm (first es))
+                       (next es))
+                tm)))
+  ([tm m1 m2 & more]
+    (apply merge! (merge! tm m1) m2 more)))
 
 (defn- reduce-children-plus
   "Reduce the children of a node, returning a node (with the same id and set 
   of attributes) and a map of descendant node ids to the original node id for 
   each."
+  ; TODO: detect when no reduction has taken place and return the original node?
+  ; As it is, each node gets rebuilt, which means allocating an entire new tree
+  ; on every reduction. Is that why it's slow?
   [#^nodetype n f v depth]
-  ; (prn "n:")  ; HACK
-  ; (print-node n true)  ; HACK
   (cond 
     (map-node? n)
     (let [ childrenAndMaps (for [ a (node-attrs n) ]
                             (let [ c (node-attr n a)
-                                   [ rc o vp ] (reduce-child-plus c f v depth)  ; TODO: thread the value through?
-                                   ; _ (println "[rc o vp]" rc o vp) ; HACK
+                                   [ rc o vp ] (reduce-one-plus c f v depth)  ; TODO: thread the value through?
                                    ]
                               [ a rc o vp ]))
-                              ; (do (println "b:" [ a rc o vp ]) [ a rc o vp ])))
-          ; _ (println "CaM:" childrenAndMaps)  ; HACK
-          val (reduce (fn [ m [a c o vp] ] (assoc m a c)) 
-                      {} childrenAndMaps)
-          ; _ (doall childrenAndMaps)
-          ; _ (println "n:" n)
-          ; _ (println "start:" (take 3 childrenAndMaps))
-          ; _ (count childrenAndMaps)
-          ; _ (println "chAM:" (count childrenAndMaps))
+          ; val (reduce (fn [ m [a c o vp] ] (assoc m a c)) 
+          ;             {} childrenAndMaps)
+          val (mapfor [[a c o vp] childrenAndMaps] a c)
           reducedNode (make-node (node-type n)
                                  (node-id n)
                                  val)
-          origins (reduce (fn [ m [a c o vp]] (merge m o))
-                            {} childrenAndMaps)
-          ; _ (println "reduced (map):" reducedNode) ; HACK
+          ; origins (reduce (fn [ m [a c o vp]] (merge m o))
+          ;                   {} childrenAndMaps)
+          origins (persistent!
+                    (reduce (fn [m [a c o vp]] (merge! m o))
+                                (transient {}) childrenAndMaps))
           ]
       [ reducedNode origins v ])
     
     (seq-node? n)
     (let [childrenAndMaps (for [c (node-children n)]
-                            (reduce-child-plus c f v depth))
+                            (reduce-one-plus c f v depth))
           val (vec (for [ [c o vp] childrenAndMaps ] c))
           
           reducedNode (make-node (node-type n)
                                  (node-id n)
                                  val)
-          origins (reduce (fn [ m [c o vp]] (merge m o))
-                            {} childrenAndMaps)
-          ; _ (println "reduced (seq):") ; HACK
-          ; _ (print-node reducedNode)
+          ; origins (reduce (fn [ m [c o vp]] (merge m o))
+          ;                   {} childrenAndMaps)
+          origins (persistent!
+                    (reduce (fn [m [c o vp]] (merge! m o))
+                                (transient {}) childrenAndMaps))
           ]
       [ reducedNode origins v ])
     
@@ -275,30 +283,21 @@
   in the 'original' program."
   [#^nodetype n f v depth]
   (if (node? n)
-    (let [ ; _ (print-node n true)
-            ; _ (println "keys:" (keys n))
-            ; _ (if PRINT (println "f:" f))
-            _ (if PRINT (do (print "reduce-one: ")(print-node n true)))
-            origId (node-id n)
-            [np vp] (f n v) ]
-      ; (println "origId" origId)
-      ; (println "np" np)
+    (let [_ (if PRINT (do (print "reduce-one: ")(print-node n true)))
+          origId (node-id n)
+          [np vp] (f n v) ]  ; apply the reduction!
       (if (nil? np)
         (if PRINT_UNREDUCED_TYPES
           (println (indent depth) (node-type n)))
         (if PRINT_REDUCED_TYPES
-          (println (indent depth) (node-type n) ;(if (vector? np) 
-                                                 ; "-> []" 
-                                                  (str "-> " (node-type np)))))
+          (println (indent depth) (node-type n) (str "-> " (node-type np)))))
       (let [ [ npp o vpp] (cond 
                             (nil? np) (reduce-children-plus n f vp (inc depth))  ; n is fully-reduced; recursively reduce its children
-                            ; (vector? np) (reduce-child-plus np f vp (inc depth))  ; Tricky! if a node was reduced to a vector, its contents may need reduction
                             true (reduce-one-plus np f vp (inc depth))) ; n may need additional reduction
               op (if (node? npp)
                   (assoc o (node-id npp) origId) ; this includes all nodes in the result, mapping new nodes to themselves
                   o) ; if the result is not a node (e.g. it's a vector) then the id mapping is lost
               ; [;op (if (nil? np) o (assoc o (node-id npp) origId)) ]
-              ; _ (println "reduced (one-plus):" npp) ; HACK
               ]
           [ npp op vpp ]))
     [ n {} v ]))
