@@ -146,11 +146,10 @@
   :prime [ "\u0030" :cmsy10 ]
 })
 
-
+;
 ; Reduction to the lower-level language:
-; TODO: keep track of [displaymode (D(D'),T,S,SS), meta-level]
-; TODO: select font based on mode
-; TODO: reduce expr/embed and expr/unbed using meta-level
+;
+
 (defn- black-node [] (node :view/gray :brightness 0.0))
 
 ; The value is a vector containing:
@@ -158,8 +157,6 @@
 ;   lowercase version of each is Knuth's "cramped", so my :d is his D'
 ; - the meta-level, an integer beginning at 0, incremented each time an :embed
 ;   node is encountered, and decremented on :unbed 
-
-; HACK: for now, the value is just the meta-level int
 
 ; Map/fn from mode to next smaller mode:
 (def scripted {
@@ -169,6 +166,7 @@
   :SS :SS, :ss :ss
 })
 
+; TODO: support "cramped" modes
 ; Map/fn from mode to cramped mode in same size:
 ; (def cramped {
 ;   :D :d, :d :d, 
@@ -512,7 +510,6 @@
 ;
 ; Reduction of :view/expr nodes. Each node is reduced only once, and only if 
 ; its id appears in the set which is provided as the reduction's aux. value.
-; Note the special handling of unquote's, which are 
 ;
 (def metaExprRules
   (letfn [ (borderize 
@@ -579,4 +576,10 @@
   
     :view/expr/prod
     (borderize 0.7 "prod" :str)
+    
+    :view/expr/embed
+    (borderize 0.7 "embed" :content)
+
+    :view/expr/unbed
+    (borderize 0.7 "unbed" :content)
   }))
