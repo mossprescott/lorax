@@ -282,7 +282,20 @@
 (defn- bind-attrs
   [d attrs]
   (if-not (seq attrs)
-    d
+    ; Tricky: need to rename the root node of the reduced tree, since it will 
+    ; appear multiple times in the target tree. Only the root is renamed, 
+    ; because the tree will contain other nodes that are part of the source 
+    ; tree and we don't want to lose track of those.
+    ; d
+    (make-node :clojure/kernel/app {
+              :expr
+              (make-node :clojure/kernel/extern { :name "meta.core/rename-node" })  ; Note: needs qualification only on _second_ use!
+              
+              :args
+              (make-node :clojure/kernel/args [
+                d
+              ])
+            })
     (let [a (first attrs)]
       (make-node :clojure/kernel/let {
         :bind
@@ -306,12 +319,7 @@
 
 (defn- display-fn
   [mn attr]
-  ; (let [red (node-attr mn attr)]  ; Note: rename the reduction's nodes, because they may appear mult. times in the reduced program.
-  (let [red (node-attr mn attr)
-        ; _ (println "red:") _ (print-node red true)
-        redp (rename-nodes red)  ; Note: rename the reduction's nodes, because they may appear mult. times in the reduced program.
-        ; _ (println "redp:") _ (print-node redp true)
-        ]
+  (let [red (node-attr mn attr)]
     (make-node :clojure/kernel/lambda {
       :params 
       (make-node :clojure/kernel/params [
@@ -319,8 +327,9 @@
       ])
       
       :body
-      (bind-attrs redp (node-attr-children mn :attrs))
+      (bind-attrs red (node-attr-children mn :attrs))
     })))
+
 
 (defn- reduce-seq
   "Reduction function for the :display nodes of seqNode rules. Replaces any 
@@ -328,56 +337,74 @@
   This isn't a nice general-purpose evaluation like we do for map-nodes, but it
   works."
   [elems]
-  (reduceByType {
-    :grammar/seq
-    (fn [n]
+  (fn [n]
+    (if (= (node-type n) :grammar/seq)
       (let [val (if-not (has-attr? n :separator)
                   elems
-                  (interpose (node-attr n :separator) elems))]
-        (make-node (node-attr-value n :type)
-                   val)))
-  }))
+                  (interpose (node-attr n :separator) elems))  ; TODO: rename the separator?
+            s (make-node (node-attr-value n :type)
+                         val)]
+          s))))
+
+
+(defn reduce-with-rule
+  "Given a rule node and reduction attr name, returns a reduction function
+  or nil."
+  [rule attr]
+  (if (has-attr? rule attr)
+    (condp = (node-type rule)
+      :grammar/mapNode
+      (let [_ (println (str "compiling reduction for " (node-attr-value rule :type) "..."))  ; HACK
+            ; _ (println "found rule:")  ; HACK
+            ; _ (print-node rule true)  ; HACK
+            mdf (display-fn rule attr)
+            ; _ (println "mdf:")  ; HACK
+            ; _ (print-node mdf true)  ; HACK
+            cl (meta-compile mdf)
+            ; _ (when (= :clojure/core/square (node-attr-value rule :type)) 
+            ;     (print-node mdf true)
+            ;     (println "cl:" cl))  ; HACK
+            ; _ (println "cl:" cl)  ; HACK
+            df (eval cl)
+            ; _ (println "df:" df)  ; HACK
+            ; np (df n)
+            ; _ (print-node np true)  ; HACK
+            ]
+        df)
+    
+      :grammar/seqNode
+      (let [red (node-attr rule attr)]
+        (fn [n]
+          (let [redr (rename-nodes red)
+                f (reduce-seq (node-children n))
+                ; _ (println "seq:" (node-type n))
+                ]
+            ; (let [r ; HACK
+            (rename-node   ; rename the root node, which will be replicated in the target tree
+              (meta-reduce redr f))
+            ; ] (print-node r true) r) ; HACK
+              )))
+      
+      true
+      (assert false))))
+
 
 (defn reduce-with-grammar
   "Takes a :grammar/language node and returns a reduction function which
-  performs one of the reductions described in the grammar.
-  Note that currently the reduction visits the grammar node each time it is 
-  invoked (that is, for each source node), and then compiles a reduction on the
-  spot -- it would be equally easy to pre-compile a reduction for each rule,
-  and more efficient."
+  performs one of the reductions described in the grammar (i.e. :display or 
+  :expand)."
   [grammar attr]
-  (fn [n]
-    ; (println "type for display:" (node-type n))
-    ; (print-node n true)
-    (let [typ (node-type n)]
-      (if-let [rule (getGrammarRule grammar typ)]
-        (if (has-attr? rule attr)
-          (condp = (node-type rule)
-            :grammar/mapNode
-            (let [; _ (println "found rule:")  ; HACK
-                  ; _ (print-node rule true)  ; HACK
-                  mdf (display-fn rule attr)
-                  ; _ (println "mdf:")  ; HACK
-                  ; _ (print-node mdf true)  ; HACK
-                  cl (meta-compile mdf)
-                  ; _ (when (= :clojure/core/square (node-attr-value rule :type)) 
-                  ;     (print-node mdf true)
-                  ;     (println "cl:" cl))  ; HACK
-                  ; _ (println "cl:" cl)  ; HACK
-                  df (eval cl)
-                  ; _ (println "df:" df)  ; HACK
-                  np (df n)
-                  ; _ (print-node np true)  ; HACK
-                  ]
-              np)
-          
-            :grammar/seqNode
-            ; nil
-            ; (first (meta-reduce2 n (reduce-seq rule)))
-            (meta-reduce (node-attr rule attr) (reduce-seq (node-children n)))
-            
-            true
-            (assert false)))))))
+  (let [fnsByType (mapfor [rule (node-children grammar)]
+                          (node-attr-value rule :type)
+                          (reduce-with-rule rule attr))
+        ; _ (doseq [[k v] fnsByType]  ; HACK
+        ;       (println k v))
+        f (reduceByType fnsByType)]
+    f))
+    ; (fn [n] 
+    ;   (if-let [np (f n)]
+    ;     (rename-nodes np)))))  ; rename _after_ reduction, since reduced nodes can appear multiple times
+  
 
 (defn grammar-to-display
   "Takes a :grammar/language node and returns a reduction function which

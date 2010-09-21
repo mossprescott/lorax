@@ -211,26 +211,26 @@
 (defn size
   [n g ctx]
   (let [ [sizes layouts] ctx
-         id (node-id n) 
+         key (System/identityHashCode n)  ; Note: this will work even if ids are not unique
          ;_ (println "size-in-context:" id)  ; HACK
          ]
-    (if-let [e (find @sizes id)]
+    (if-let [e (find @sizes key)]
       (val e)
       (let [ret (size-impl n g ctx)]
-        (swap! sizes assoc id ret)
+        (swap! sizes assoc key ret)
         ret))))
 
 ; TODO: handle non-node
 (defn layout
   [n g ctx]
   (let [ [sizes layouts] ctx
-         id (node-id n) 
+         key (System/identityHashCode n)  ; Note: this will work even if ids are not unique
          ; _ (println "layout-in-context:" id)  ; HACK
          ]
-    (if-let [e (find @layouts id)]
+    (if-let [e (find @layouts key)]
       (val e)
       (let [ret (layout-impl n g ctx)]
-        (swap! layouts assoc id ret)
+        (swap! layouts assoc key ret)
         ret))))
 
 (defn draw

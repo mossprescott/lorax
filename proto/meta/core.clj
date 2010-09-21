@@ -388,6 +388,16 @@
 ;     (prn "debug: " x)
 ;     x))
 
+
+(defn rename-node
+  "Copy of a node with a new id (for just the root)."
+  [#^nodetype n]
+  ; (println "rename:" (node-type n) (node-id n))  ; HACK
+  (make-node (node-type n)
+             (genid (subs (str (node-id n) "__") 1))
+             (node-content n)))
+
+
 (defn rename-nodes
   "New AST with all nodes assigned new ids. Ref-nodes are updated accordingly,
   with ref-nodes that refer to nodes outside the tree (i.e. free variables) 
