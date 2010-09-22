@@ -5,56 +5,24 @@
 \geometry{letterpaper}                   % ... or a4paper or a5paper or ... 
 %\geometry{landscape}                % Activate for for rotated page geometry
 \usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
-%\usepackage{graphicx}
+\usepackage{graphicx}
 %\usepackage{amssymb}
 %\usepackage{epstopdf}
 %\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+\DeclareGraphicsRule{.tiff}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tiff`.png}
 
-\title{Building a Language Builder}
+\input src/defs.tex
+
+\title{\Meta: a Toolkit for Language Construction}
 \author{Moss Prescott}
-\date{18 August 2010}
+\date{18 August 2010...}
 
-%
-% Syntax macros:
-%
-
-\newcommand{\todo}[1]{ {\textit{\color{red}[TODO: #1]}} }
-
-% font for literals in the presentation:
-\newcommand{\keyword}[1]{\texttt{#1}}%{\ensuremath{\mathtt{#1}}}
-\newcommand{\clojure}[1]{\texttt{#1}}%{\ensuremath{\mathtt{#1}}}
-
-% a way of setting off ???
-%\newcommand{\syntax}[1]{\ensuremath{\fbox{\ensuremath{#1}}}}
-
-% 
-%\definecolor{literal}{rgb}{.8,.8,.6}
-%\definecolor{literalbg}{rgb}{1,1,.8}
-
-% deprecated:
-%\newcommand{\embed}[1]{\ensuremath{\fcolorbox{literal}{literalbg}{\ensuremath{#1}}}}
-%\newcommand{\unbed}[1]{\ensuremath{\fcolorbox{literal}{white}{\ensuremath{#1}}}}
-
-%\newcommand{\quoted}[1]{\ensuremath{\fcolorbox{literal}{literalbg}{\ensuremath{#1}}}}
-%\newcommand{\unquoted}[1]{\ensuremath{\fcolorbox{literal}{white}{\ensuremath{#1}}}}
-
-%\newcommand{\node}[2]{\ensuremath{#1 \: \{ #2 \}}}
-%\newcommand{\attr}[2]{\ensuremath{\mathrm{#1} : \: #2}}
-
-%\newcommand{\reducep}{\ensuremath{\overset{present}{\longrightarrow}}}
-%\newcommand{\reducec}{\ensuremath{\overset{compile}{\longrightarrow}}}
-
-%\newcommand{\gray}[1]{ {\color[gray]{.7}#1}}
-%\newcommand{\gparens}[1]{ \gray{(} #1 \gray{)} }
-
-% formatting for selections:
-%\definecolor{selection}{rgb}{1,.5,.8}
-
+\setcounter{tocdepth}{3}
 
 \begin{document}
 
 \begin{abstract}
-\todo{}
+\input src/abstract.tex
 \end{abstract}
 
 % Follows the abstract (but appears first), in amsart, for some reason:
@@ -64,7 +32,7 @@
 %\newpage
 \tableofcontents
 
-\newpage
+%\newpage
 
 % Jeremy:
 % - step back and remember the big picture
@@ -72,6 +40,12 @@
 
 % How would you build a language with incompatible semantics (e.g. Java)? On this kernel language? No, instead reduce to a different kernel, and execute that...
 % Ex. Python, with extensions, and generate Python? Or Python AST?
+
+
+% Some contributions are not hilited very well:
+% - parenthesization
+% - 
+
 
 
 % alt. structure:
@@ -112,13 +86,12 @@
 %
 % future work
 
-\input ch1.tex  % Introduction
-\input ch2.tex  % Foundations
-\input ch3.tex  % Implementation
-\input ch4.tex  % Presentation
-\input ch5.tex  % Editing
-
-\section{Future Work}
+\input src/ch1.tex  % Introduction
+\input src/ch2.tex  % Foundations
+\input src/ch3.tex  % Languages
+\input src/ch4.tex  % Prototype
+\input src/ch5.tex  % Examples
+\input src/ch6.tex  % Future Work
 
 % references
 
