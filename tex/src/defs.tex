@@ -1,0 +1,48 @@
+%
+% Macros and definitions:
+%
+
+% TODO: what am I calling the darned thing?
+\def\Meta{Foopy}
+
+\newcommand{\temp}[1]{ {\color{blue}#1} }
+
+% font for literals in the presentation:
+\newcommand{\keyword}[1]{\textbf{#1}}%{\ensuremath{\mathtt{#1}}}
+\newcommand{\clojure}[1]{\texttt{#1}}%{\ensuremath{\mathtt{#1}}}
+
+\def\lsyn{ {\color{blue}\left(\!\right.} }
+\def\rsyn{ {\color{blue}\left.\!\right)} }
+
+\newcommand{\todo}[1]{ {\textit{\color{red}[TODO: #1]}} }
+
+
+% \TeX seems to be built-in
+%\def\tex{T\kern-.1667em\lower.5ex\hbox{E}\kern-.125emX\spacefactor1000}
+
+
+% a way of setting off ???
+%\newcommand{\syntax}[1]{\ensuremath{\fbox{\ensuremath{#1}}}}
+
+% 
+%\definecolor{literal}{rgb}{.8,.8,.6}
+%\definecolor{literalbg}{rgb}{1,1,.8}
+
+% deprecated:
+%\newcommand{\embed}[1]{\ensuremath{\fcolorbox{literal}{literalbg}{\ensuremath{#1}}}}
+%\newcommand{\unbed}[1]{\ensuremath{\fcolorbox{literal}{white}{\ensuremath{#1}}}}
+
+%\newcommand{\quoted}[1]{\ensuremath{\fcolorbox{literal}{literalbg}{\ensuremath{#1}}}}
+%\newcommand{\unquoted}[1]{\ensuremath{\fcolorbox{literal}{white}{\ensuremath{#1}}}}
+
+%\newcommand{\node}[2]{\ensuremath{#1 \: \{ #2 \}}}
+%\newcommand{\attr}[2]{\ensuremath{\mathrm{#1} : \: #2}}
+
+%\newcommand{\reducep}{\ensuremath{\overset{present}{\longrightarrow}}}
+%\newcommand{\reducec}{\ensuremath{\overset{compile}{\longrightarrow}}}
+
+%\newcommand{\gray}[1]{ {\color[gray]{.7}#1}}
+%\newcommand{\gparens}[1]{ \gray{(} #1 \gray{)} }
+
+% formatting for selections:
+%\definecolor{selection}{rgb}{1,.5,.8}
