@@ -13,11 +13,11 @@
 
 \input src/defs.tex
 
-\title{\Meta: a Toolkit for Language Construction}
+\title{A Meta-Programming Approach to Syntax}
 \author{Moss Prescott}
-\date{18 August 2010...}
+\date{8 October 2010}
 
-\setcounter{tocdepth}{3}
+%\setcounter{tocdepth}{3}
 
 \begin{document}
 
@@ -29,10 +29,10 @@
 \maketitle
 
 
-%\newpage
+\newpage
 \tableofcontents
 
-%\newpage
+\newpage
 
 % Jeremy:
 % - step back and remember the big picture
@@ -42,56 +42,13 @@
 % Ex. Python, with extensions, and generate Python? Or Python AST?
 
 
-% Some contributions are not hilited very well:
-% - parenthesization
-% - 
-
-
-
-% alt. structure:
-%
-% foundations
-% - nodes, values, refs
-% - specs
-% - reductions
-% - characteristics
-%   - self-describing
-%   - source locations
-%   - diff
-% - compared to other approaches
-%   - XML
-%   - ML/Haskell ADT
-%   - s-expressions
-%
-% building languages
-% - abstract node types and instances
-% - names
-% - expr. language (one or more)
-% - kernel language (one or more)
-%   - meta-programming
-% - grammars
-% - foreign languages
-%
-% implementation
-% - platform/kernel language
-%   - clojure, compilation in general, quotations
-% - expr. language (the one I implemented)
-%   - principles
-%   - :expr, and the fancy shit it provides
-%   - :view
-%   - reducing :expr to :view
-% - names
-% - parens/"precedence"
-% - editing
-%
-% future work
-
 \input src/ch1.tex  % Introduction
 \input src/ch2.tex  % Foundations
 \input src/ch3.tex  % Languages
 \input src/ch4.tex  % Prototype
 \input src/ch5.tex  % Examples
 \input src/ch6.tex  % Future Work
+\input src/ch7.tex  % Conclusion
 
 % references
 
