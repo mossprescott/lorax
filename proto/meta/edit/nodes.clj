@@ -611,14 +611,14 @@
   ; table has them in a much more rational order, so I must be missing something.
   "(" [ "\u00c0" "\u00b0" "\u00d2" "\u00ef" ]  ; growable: 30, 42, 31
   ")" [ "\u00c1" "\u00d1" "\u00d3" "\u0021" ]  ; growable: 40, 43, 41
-  "[" [ "\u00c2" ]  ; TODO...
-  "]" [ "\u00c3" ]
-  :lfloor [ "\u00c4" ]
+  "[" [ "\u00c2" "\u0068" "\u00d4" "\u0022" ]  
+  "]" [ "\u00c3" "\u0069" "\u00d5" "\u0023" ]
+  :lfloor [ "\u00c4" ] ; TODO...
   :rfloor [ "\u00c5" ]
   :lceil [ "\u00c6" ]
   :rceil [ "\u00c7" ]
-  "{" [ "\u00c8" ]
-  "}" [ "\u00c9" ]
+  "{" [ "\u00c8" "\u006e" "\u00da" "\u0028" ]
+  "}" [ "\u00c9" "\u006f" "\u00db" "\u0029" ]
   :langle [ "\u00ca" ]
   :rangle [ "\u00cb" ]
   "|" []
