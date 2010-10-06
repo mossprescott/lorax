@@ -111,6 +111,11 @@
   :cmmi10-script (Font. "jsMath-cmmi10" Font/PLAIN SCRIPT_SIZE)
   :cmmi10-scriptscript (Font. "jsMath-cmmi10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
 
+  ; text italics
+  :cmti10 (Font. "jsMath-cmti10" Font/PLAIN TEXT_SIZE)
+  :cmti10-script (Font. "jsMath-cmti10" Font/PLAIN SCRIPT_SIZE)
+  :cmti10-scriptscript (Font. "jsMath-cmti10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+
   ; math roman
   :cmr10 (Font. "jsMath-cmr10" Font/PLAIN TEXT_SIZE)
   :cmr10-script (Font. "jsMath-cmr10" Font/PLAIN SCRIPT_SIZE)
@@ -141,6 +146,10 @@
   ; used for monospace in a few places
   :courier (Font. "Courier New" Font/PLAIN TEXT_SIZE)
   :courierItalic (Font. "Courier New" Font/ITALIC TEXT_SIZE)
+  
+  :sans (Font. "Lucida Grande" Font/PLAIN 12);TEXT_SIZE)
+  :sans-script (Font. "Lucida Grande" Font/PLAIN 10);SCRIPT_SIZE)
+  :sans-scriptscript (Font. "Lucida Grande" Font/PLAIN 7);SCRIPT_SCRIPT_SIZE)
 })
 
 ;
@@ -602,8 +611,17 @@
   ; table has them in a much more rational order, so I must be missing something.
   "(" [ "\u00c0" "\u00b0" "\u00d2" "\u00ef" ]  ; growable: 30, 42, 31
   ")" [ "\u00c1" "\u00d1" "\u00d3" "\u0021" ]  ; growable: 40, 43, 41
-
-  ; TODO: [, ], {, }, <, >, floor, ciel, |
+  "[" [ "\u00c2" ]  ; TODO...
+  "]" [ "\u00c3" ]
+  :lfloor [ "\u00c4" ]
+  :rfloor [ "\u00c5" ]
+  :lceil [ "\u00c6" ]
+  :rceil [ "\u00c7" ]
+  "{" [ "\u00c8" ]
+  "}" [ "\u00c9" ]
+  :langle [ "\u00ca" ]
+  :rangle [ "\u00cb" ]
+  "|" []
   })
 
 (def DELIM_SPACE 1)
@@ -611,16 +629,16 @@
 (defmethod size-impl :view/delimited
   [n #^Graphics2D g ctx]
   (let [l (node-attr-value n :left)
-        x (node-attr n :content)
+        c (node-attr n :content)
         r (node-attr-value n :right)
-        [xw xh xb] (size x g ctx)
-        [lst ^Rectangle2D lr] (pick-glyph xh (DELIMS l) (FONTS :cmex10) g)
-        [rst ^Rectangle2D rr] (pick-glyph xh (DELIMS r) (FONTS :cmex10) g)
+        [cw ch cb] (size c g ctx)
+        [lst ^Rectangle2D lr] (pick-glyph ch (DELIMS l) (FONTS :cmex10) g)
+        [rst ^Rectangle2D rr] (pick-glyph ch (DELIMS r) (FONTS :cmex10) g)
         dh (max (.getHeight lr) (.getHeight rr))
-        xy (/ (- dh xh) 2)]
-    [ (+ (.getWidth lr) DELIM_SPACE xw DELIM_SPACE (.getWidth rr)) 
-      (max (.getHeight lr) xh (.getHeight rr))
-      (if xb (+ xy xb))]))
+        cy (/ (- dh ch) 2)]
+    [ (+ (.getWidth lr) DELIM_SPACE cw DELIM_SPACE (.getWidth rr)) 
+      (max (.getHeight lr) ch (.getHeight rr))
+      (if cb (+ cy cb))]))
     
 (defmethod layout-impl :view/delimited
   [n #^Graphics2D g ctx]
