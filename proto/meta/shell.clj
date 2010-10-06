@@ -12,6 +12,7 @@
      'meta.check
      'meta.reduce
      'meta.name
+     'meta.clojure.run
      'meta.edit.expr
      'meta.edit.draw)
 
@@ -159,17 +160,26 @@
 ; (def core-display
 ;   (grammar-to-display clojure-grammar))
 
+(def core-display
+  (lift compose-reductions 
+        (ref name-to-expr) 
+        (lift (fn [r] #(meta-reduce2 % r)) clojure-display)))
+
 (defn show-program
   [fname]
   (let [pr (load-program fname)
         errors {} ; (core-checker pr)
         ; _ (show-errors errors)
-        display (lift compose-reductions 
-                      (ref name-to-expr) 
-                      (lift (fn [r] #(meta-reduce2 % r)) clojure-display))]
-    (makeSyntaxFrame pr fname display errors)))
+        ]
+    (makeSyntaxFrame pr fname core-display errors)))
 
-
+(defn show-session
+  [fname]
+  (let [pr (load-program fname)
+        sess (run-program @pr expand-core)
+        errors {} ; TODO
+        ]
+    (makeSyntaxFrame (atom sess) fname core-display errors false)))
 ;
 ; Expr-language examples:
 ;
