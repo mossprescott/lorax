@@ -602,31 +602,40 @@
   (fn [n]
     (make-node :view/section [
         (make-node :view/expr/flow [
-            (node-attr n :type)
-            ; (make-node :view/expr/prod { 
-            ;     :str (simpleName (node-attr-value n :type)) 
-            ;   })
-            (make-node :view/expr/symbol {
-                :str :to
-              })
             (node-attr n :supers)
-          ])
-        (make-node :view/sequence [
-            (node :view/quad)
+            (make-node :view/expr/symbol {
+                :str :from
+              })
+            (node-attr n :type)
             (node-attr n :attrs)
           ])
+        ; (make-node :view/sequence [
+        ;     (node :view/quad)
+        ;     (node-attr n :display)
+        ;   ])
         (make-node :view/sequence [
-            (node :view/quad)
-            (node-attr n :display)
-          ])
-        (with-attr n :expand e
-          (make-node :view/sequence [
-              (make-node :view/quad)
-              (make-node :view/expr/symbol { :str :to })
-              (make-node :view/thickspace)
-              e
-            ])
-          (make-node :view/sequence [])) ; HACK: empty node
+          (make-node :view/quad)
+          (with-attr n :display e
+            ; (make-node :view/sequence [
+                ; (make-node :view/expr/keyword { :str "display" })
+                ; (make-node :view/thickspace)
+                ; (make-node :view/expr/symbol { :str :to })
+                ; (make-node :view/thickspace)
+                e
+              ; ])
+            (make-node :view/sequence [])) ; HACK: empty node
+          (with-attr n :expand e
+            (make-node :view/sequence [
+                ; (make-node :view/quad)
+                ; (make-node :view/expr/keyword { :str "expand" })
+                (make-node :view/thickspace)
+                ; (make-node :view/expr/symbol { :str :longrightarrow })
+                (make-node :view/expr/symbol { :str :to })
+                (make-node :view/thickspace)
+                e
+              ])
+            (make-node :view/sequence [])) ; HACK: empty node
+        ])
       ]))
       
   :grammar/seqNode
@@ -692,12 +701,24 @@
   
   :grammar/attrs
   (fn [n]
-    (make-node :view/section
-      (node-children n)))
+    (make-node :view/delimited {
+      :left "{"
+      :right "}"
+      :content
+      (make-node :view/sequence
+        (vec (interpose
+                (make-node :view/sequence [
+                    (make-node :view/expr/keyword { :str "," })
+                    (make-node :view/thickspace {})
+                  ])
+                (node-children n))))
+    }))
+    ; (make-node :view/section
+    ;   (node-children n)))
 
   :grammar/attr
   (fn [n]
-    (make-node :view/expr/relation [
+    (make-node :view/expr/binary [
         (node-attr n :name)
         (make-node :view/expr/keyword { :str ":" })
         (node-attr n :options)
@@ -711,10 +732,17 @@
       
   :grammar/options
   (fn [n] 
-    (make-node :view/expr/binary
+    (make-node :view/expr/relation
       (interpose (make-node :view/expr/symbol { :str "|" })
                  (node-children n))))
   
+  :grammar/ref
+  (fn [n]
+    (make-node :view/expr/binary [
+      (make-node :view/expr/keyword { :str "ref" })
+      (make-node :view/expr/prod { :str (baseName (node-attr-value n :type)) })
+    ]))
+
   ; :grammar/ref
   ; (fn [n]
   ;   (make-node :view/expr/unbed {
