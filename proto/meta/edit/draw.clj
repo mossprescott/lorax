@@ -5,7 +5,7 @@
   (:use (clojure test)
         (meta core edit reduce path)
         (meta.clojure kernel)
-        (meta.edit nodes expr select))
+        (meta.edit nodes expr select export))
   (:import 
     (javax.swing
       ImageIcon 
@@ -17,7 +17,8 @@
       JPanel
       JScrollPane
       JTextField
-      JToolBar)
+      JToolBar
+      JFileChooser)
     (java.awt.event 
       ActionListener
       KeyAdapter
@@ -34,7 +35,8 @@
     (java.awt.geom 
       Line2D 
       Line2D$Float
-      Rectangle2D$Float)))
+      Rectangle2D$Float)
+    (java.io File)))
   
 ; (defn celsius []
 ;   (let [frame (JFrame. "Celsius Converter")
@@ -71,6 +73,8 @@
 
 (def resolveOne) ; forward decl.
 
+(def alignToPixels true)  ; if true, each node is aligned to the nearest pixel boundary (or half-pixel?)
+
 (defn draw-node
   "Recursively draw nodes, using nodes/draw and nodes/layout."
   [n ^Graphics2D g ctx df]
@@ -81,7 +85,9 @@
       (df n g)
       ; the node's children:
       (doseq [ [child x y w h] (layout n g ctx) ]
-        (let [ gp (doto (.create g) (.translate x y)) ]  ; TODO: eliminate extra graphics creation?
+        (let [rx (if alignToPixels (Math/round (float x)) x)  ; TODO: try adding 0.5?
+              ry (if alignToPixels (Math/round (float y)) y)
+              gp (doto (.create g) (.translate (float rx) (float ry))) ]  ; TODO: eliminate extra graphics creation?
           (draw-node child gp ctx df)))))) ; no clipping for now  
           ; (draw-node child (.create g x y w h) df)))  ; clipping
 
@@ -458,11 +464,15 @@
                         nppp (if p (parenthesize npp) npp)
                         _ (if PRINT_ALL (do (print "parens: ") (print-node nppp true)) )
                         [npppp opp] (exprToView nppp)
-                        _ (if PRINT_ALL (do (print "view: ") (print-node npppp true)) ) ]
+                        _ (if PRINT_ALL (do (print "view: ") (print-node npppp true)) )
+                        ; ids (deep-node-ids npppp)  ; HACK
+                        ; counts (reduce (fn [m id] (assoc m id (inc (get m id 0)))) {} ids)  ; HACK
+                        ; _ (doseq [ [k v] counts :when (> v 1)] (println k "->" v))  ; HACK
+                        ]
                     ; (print-node nppp true)  ; HACK
                     ; (println "foo")  ; HACK
                     [npppp [opp op o]]))
-        [np o] (display @rootA PARENS_DEFAULT) 
+        [np o] (display @rootA PARENS_DEFAULT)
         nref (ref np)  ; contains the reduced program
         oref (ref o)   ; contains a list of maps of reduced program node ids to pre-reduction ids
         sref (ref #{}) ; contains a set of selected node (source program) ids
@@ -476,15 +486,13 @@
                           (dosync 
                             (ref-set sref #{sourceId})
                             (ref-set snref (find-node @rootA sourceId))
-                          ;(.repaint panel)
                           (inspectorUpdate)))
                           
         sourceIdsInViewOrder (fn [] 
-                              ; (println "o:" @oref) ; HACK
                                 (filter #(not (nil? %))
                                   (map #(resolveOne % @oref)
-                                       (deep-node-ids @nref))))
-        
+                                     (deep-node-ids @nref))))
+       
         selectionButton (fn [f #^String iconPath]
                           (doto (JButton. (ImageIcon. iconPath))
                             (.addActionListener
@@ -520,10 +528,14 @@
         parens (doto (JCheckBox. "Parens") 
                   (.setSelected PARENS_DEFAULT))
         debug (JCheckBox. "Outlines")
+        svg (JButton. "Export to SVG...")
+        pdf (JButton. "Export to PDF...")
         optionsToolBar (doto (JToolBar.)
                         (.add (JLabel. "Options:"))
                         (.add parens)
-                        (.add debug))
+                        (.add debug)
+                        (.add svg)
+                        (.add pdf))
 
         header (doto (JPanel.)
                 (.setLayout (GridLayout. 0 1))
@@ -591,7 +603,24 @@
         (actionPerformed [evt]
           (dosync (ref-set debugFlag (.isSelected debug)))
           (.repaint panel))))
-
+    (.addActionListener svg 
+      (proxy [ActionListener] []
+        (actionPerformed [evt]
+          (let [fc (doto (JFileChooser.)
+                      (.setCurrentDirectory (File. (str (System/getProperty "user.dir") 
+                                                        "/../tex/src/image"))))
+                result (.showSaveDialog fc panel)]
+            (if (= result JFileChooser/APPROVE_OPTION)
+              (render-to-svg panel (-> fc .getSelectedFile .getPath)))))))
+    (.addActionListener pdf 
+      (proxy [ActionListener] []
+        (actionPerformed [evt]
+          (let [fc (doto (JFileChooser.)
+                      (.setCurrentDirectory (File. (str (System/getProperty "user.dir") 
+                                                        "/../tex/src/image"))))
+                result (.showSaveDialog fc panel)]
+            (if (= result JFileChooser/APPROVE_OPTION)
+              (render-to-pdf panel (-> fc .getSelectedFile .getPath)))))))
 
     ;
     ; Listeners:
