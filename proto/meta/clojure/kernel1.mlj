@@ -1,0 +1,374 @@
+; Grammar/presentation for the 'kernel' language, which is directly translatable to 
+; ordinary Clojure forms (and therefore no expansions are provided).
+; This is part 1 of 2, broken up for the benefit of the figure in the paper!
+;
+; This version uses the higher-level "grammar" language, which specifies structure as 
+; well as a presentation reduction, and which can be reduced/compiled down into both a
+; regular structure program and a presentation reduction.
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(make-node :grammar/language [
+    (make-node :grammar/mapNode {
+        :type
+        (make-node :grammar/type :clojure/kernel/nil)
+      
+        :supers 
+        (make-node :grammar/types [ 
+            (make-node :grammar/type :clojure/kernel/expr)
+          ])
+      
+        :attrs
+        (make-node :grammar/attrs [])
+        
+        :display
+        (make-node :clojure/kernel/quote {
+            :body
+            (node :view/expr/keyword
+              :str "nil")
+          })
+      })
+            
+    (make-node :grammar/mapNode {
+        :type
+        (make-node :grammar/type :clojure/kernel/true)
+    
+        :supers
+        (make-node :grammar/types [ 
+            (make-node :grammar/type :clojure/kernel/expr)
+          ])
+        
+        :attrs
+        (make-node :grammar/attrs [])
+        
+        :display
+        (make-node :clojure/kernel/quote {
+            :body
+            (node :view/expr/keyword
+              :str "true")
+          })
+      })
+        
+    (make-node :grammar/mapNode {
+        :type
+        (make-node :grammar/type :clojure/kernel/false)
+      
+        :supers
+        (make-node :grammar/types [ 
+            (make-node :grammar/type :clojure/kernel/expr)
+          ])
+      
+        :attrs
+        (make-node :grammar/attrs [])
+        
+        :display
+        (make-node :clojure/kernel/quote {
+            :body
+            (node :view/expr/keyword
+              :str "false")
+          })
+      })
+      
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/kernel/int)
+    
+      :supers
+      (make-node :grammar/types [
+          (make-node :grammar/type :clojure/kernel/expr)
+        ])
+    
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :int_value {
+          :name
+          (make-node :grammar/name :clojure/kernel/int/value)
+
+          :options
+          (make-node :grammar/options [
+            (node :grammar/int)
+          ])
+      
+          :optional
+          false
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/int {
+          :str
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/app {
+              :expr
+              (make-node :clojure/kernel/extern { :name "str" })
+                      
+              :args 
+              (make-node :clojure/kernel/args [
+                ; (make-node :clojure/core/value {
+                ;   :expr
+                (make-node :clojure/kernel/app {
+                  :expr
+                  (make-node :clojure/kernel/extern { :name "meta.core/node-value" })
+                      
+                  :args 
+                  (make-node :clojure/kernel/args [
+                    (make-node :clojure/kernel/var {
+                      :ref (ref-node :int_value) 
+                    })
+                  ])
+                })
+              ])
+            })
+          })
+        })
+      })
+    })
+        
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/kernel/string)
+    
+      :supers
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+    
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :string_value {
+          :name
+          (make-node :grammar/name :clojure/kernel/string/value)
+
+          :options
+          (make-node :grammar/options [
+            (node :grammar/string)
+          ])
+      
+          :optional
+          false
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/string {
+          :str
+          (make-node :clojure/kernel/unquote {
+            :body
+            ; (make-node :clojure/kernel/app {
+            ;   :expr
+            ;   (make-node :clojure/kernel/extern { :name "meta.core/node-value" })
+            ;           
+            ;   :args 
+            ;   (make-node :clojure/kernel/args [
+                (make-node :clojure/kernel/var {
+                  :ref (ref-node :string_value) 
+                })
+            ;   ])
+            ; })
+          })
+        })
+      })
+    })
+      
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/kernel/name)
+    
+      :supers
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+    
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :name_value {
+          :name
+          (make-node :grammar/name :clojure/kernel/name/value)
+
+          :options
+          (make-node :grammar/options [
+            (node :grammar/string)  ; TODO: what represents a name?
+          ])
+      
+          :optional
+          false
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/keyword {
+          ; TODO: color? raw keyword isn't right; a color attribute here
+          ; is not propagated through the reduction to :view, though
+          ; (make-node :clojure/kernel/name { :value :view/drawable/color })
+          ; (make-node :clojure/kernel/quote {
+          ;   :body
+          ;   (make-node :view/rgb { :red 0.2 :green 0.2 :blue 0.5 })
+          ; })
+          
+          :str
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/app {
+              :expr
+              (make-node :clojure/kernel/extern { :name "subs" })
+          
+              :args
+              (make-node :clojure/kernel/args [
+                (make-node :clojure/kernel/app {
+                  :expr
+                  (make-node :clojure/kernel/extern { :name "str" })
+          
+                  :args
+                  (make-node :clojure/kernel/args [
+                    (make-node :clojure/kernel/app {
+                      :expr
+                      (make-node :clojure/kernel/extern { :name "meta.core/node-value" })
+          
+                      :args 
+                      (make-node :clojure/kernel/args [
+                        (make-node :clojure/kernel/var {
+                          :ref (ref-node :name_value) 
+                        })
+                      ])
+                    })
+                  ])
+                })
+                (make-node :clojure/kernel/int { :value 1 })
+              ])
+            })
+          })
+        })
+      })
+    })
+    
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/kernel/quote)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :quote_body {
+          :name
+          (make-node :grammar/name :clojure/kernel/quote/body)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+              :type :clojure/kernel/expr
+            })
+          ])
+          
+          :optional false
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/embed {
+          :content
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :quote_body)
+            })
+          })
+        })
+      })
+    })
+    
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/kernel/unquote)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        ; Note: unquote is legal _anywhere_, because the node it evaluates to
+        ; can't be checked until evaluation time (unless you have a type system)
+        (make-node :grammar/star)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :unquote_body {
+          :name
+          (make-node :grammar/name :clojure/kernel/unquote/body)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+              :type :clojure/kernel/expr
+            })
+          ])
+          
+          :optional false
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/unbed {
+          :content
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :unquote_body)
+            })
+          })
+        })
+      })
+    })
+    
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/kernel/extern)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :extern_name {
+          :name
+          (make-node :grammar/name :clojure/kernel/extern/name)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/string)
+          ])
+          
+          :optional false
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/mono {
+          :str
+          (make-node :clojure/kernel/unquote {
+            :body 
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :extern_name)
+            })
+          })
+        })
+      })
+    })
+  
+  ])
