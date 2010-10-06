@@ -18,8 +18,12 @@
 ; Atom containing a map of file names to atoms containing loaded programs.
 ; You can create a new world by redefining this var, but previously-created 
 ; views will still work.
-(def cache
-  (atom {}))
+(defn init
+  []
+  (def cache
+    (atom {})))
+
+(init)
 
 
 (defn load-program
@@ -79,7 +83,7 @@
 (def grammar-grammar 
   ; (load-grammar "meta/grammar.mlj" "meta/edit/view.mlj" "meta/edit/expr.mlj" 
   ;                   "meta/clojure/kernel.mlj" "meta/clojure/core.mlj"))
-  (load-grammars "meta/clojure/kernel.mlj"))
+  (load-grammars "meta/clojure/kernel1.mlj" "meta/clojure/kernel2.mlj"))
 
 
 ; Temporary: using the hand-written reduction for grammars
@@ -88,8 +92,9 @@
 
 ; ref containing the grammar for clojure, including kernel and core
 (def clojure-grammar 
-  ; (load-grammar "meta/core.mlj" "meta/clojure/kernel.mlj" "meta/clojure/core.mlj"))
-  (load-grammars "meta/clojure/kernel.mlj" "meta/clojure/core.mlj"))
+  (load-grammars "meta/clojure/kernel1.mlj" 
+                 "meta/clojure/kernel2.mlj" 
+                 "meta/clojure/core.mlj"))
   
 ; ref containing the reduction function for clojure kernel/core
 (def clojure-display
@@ -151,8 +156,6 @@
 ; Programs:
 ;
 
-
-
 ; (def core-display
 ;   (grammar-to-display clojure-grammar))
 
@@ -165,3 +168,25 @@
                       (ref name-to-expr) 
                       (lift (fn [r] #(meta-reduce2 % r)) clojure-display))]
     (makeSyntaxFrame pr fname display errors)))
+
+
+;
+; Expr-language examples:
+;
+(defn show-expr
+  [fname]
+  (let [pr (load-program fname)
+        errors {}
+        display (atom #(meta-reduce2 % (fn [n] nil)))]  ; no reduction!
+    (makeSyntaxFrame pr fname display errors)))
+
+;
+; Convenience:
+;
+
+(defn kernel1 [] (show-grammar "meta/clojure/kernel1.mlj"))
+(defn kernel2 [] (show-grammar "meta/clojure/kernel2.mlj"))
+(defn core [] (show-grammar "meta/clojure/core.mlj"))
+
+(defn ex1 [] (show-program "meta/example/core1.mlj"))
+(defn ex2 [] (show-program "meta/example/core2.mlj"))
