@@ -1,0 +1,29 @@
+; Java example for comparison with syntax-colored result:
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+; if (x < 5) print("foo");
+
+(make-node :view/expr/flow [
+  (make-node :view/expr/keyword { :str "if" })
+  (make-node :view/delimited {
+    :left "("
+    :right ")"
+    :content
+    (make-node :view/expr/relation [
+      (make-node :view/expr/var { :str "x" })
+      (make-node :view/expr/symbol { :str "<" })
+      (make-node :view/expr/int { :str "5" })    
+    ])
+  })
+  (make-node :view/expr/juxt [
+    (make-node :view/expr/var { :str "print" })
+    (make-node :view/delimited {
+      :left "("
+      :right ")"
+      :content
+      (make-node :view/expr/string { :str "foo" })
+    })
+    (make-node :view/expr/keyword { :str ";" })
+  ])
+])

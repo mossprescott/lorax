@@ -1,0 +1,64 @@
+; Snippet of the core grammar containing only the "not" node; for use as an example.
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(make-node :grammar/language [
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/not)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :not_expr {
+          :name
+          (make-node :grammar/name :clojure/core/not/expr)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/juxt [
+          (make-node :view/expr/symbol { :str :neg })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :not_expr)
+            })
+          })
+        ])
+      })
+  
+      :expand
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :clojure/kernel/if {
+          :test
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :not_expr)
+            })
+          })
+      
+          :then
+          (make-node :clojure/kernel/false)
+      
+          :else
+          (make-node :clojure/kernel/true)
+        })
+      })
+    })
+  ])

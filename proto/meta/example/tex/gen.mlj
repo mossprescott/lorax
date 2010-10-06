@@ -1,0 +1,16 @@
+(use 'meta.core)
+
+(make-node :clojure/core/program [ 
+  (make-node :clojure/core/sqrt {
+    :expr
+    (make-node :cube {
+      :expr
+    (make-node :clojure/core/plus {
+      :left
+      (make-node :clojure/kernel/int { :value 9 })
+      :right
+      (make-node :clojure/kernel/int { :value 16 })
+    })
+    })
+  })  
+])

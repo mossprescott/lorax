@@ -1,0 +1,102 @@
+; Snippet of the core grammar containing only the "and" node; for use as an example.
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(make-node :grammar/language [
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/and)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :and_left {
+          :name
+          (make-node :grammar/name :clojure/core/and/left)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+        (make-node :grammar/attr :and_right {
+          :name
+          (make-node :grammar/name :clojure/core/and/right)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/relation [
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :and_left)
+            })
+          })
+          (make-node :view/expr/keyword { :str "and" })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :and_right)
+            })
+          })
+        ])
+      })
+  
+      :expand
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :clojure/kernel/let {
+          :bind 
+          (make-node :clojure/kernel/bind :l_and {})
+          
+          :expr
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :and_left)
+            })
+          })
+          
+          :body
+          (make-node :clojure/kernel/if {
+            :test
+            (make-node :clojure/core/not {
+              :expr
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :l_and)
+              })
+            })
+            
+            :then
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :l_and)
+            })
+            
+            :else
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :and_right)
+              })
+            })
+          })
+        })
+      })
+    })
+  ])
