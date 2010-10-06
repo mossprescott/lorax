@@ -125,19 +125,24 @@
   
   "!" [ "!" :cmr10 ]
   
-  :to [ "\u0021" :cmsy10 ]
+  :from [ "\u00ef" :cmsy10 ]  ; aka leftarrow; should be 0x20, according the the table
+  :to [ "\u0021" :cmsy10 ]  ; aka rightarrow
+
+  :longrightarrow [ "\u00c0\u0021" :cmsy10 ]  ; BUG: there's a space between for some reason
+  :longleftarrow [ "\u0021\u00ef" :cmsy10 ]
   
   :lambda [ "\u00d5" :cmmi10 ]
   
   "?" [ "?" :cmr10 ]
   "|" [ "\u006a" :cmsy10 ]
-  "*" [ "*" :cmr10 ]  ; cmsy has a centered asterix at 0x03
+  "*" [ "*" :cmr10 ]  ; cmsy has a centered asterisk at 0x03
   
   :mapsto [ "\u0037\u0021" :cmsy10 ]  ; \mapstochar + \rightarrow
   
   :neg [ "\u003a" :cmsy10 ]
   
   ">" [ ">" :cmmi10 ]
+  "<" [ "<" :cmmi10 ]
   
   "." [ "." :cmr10 ]
   
@@ -158,8 +163,24 @@
 ; - the meta-level, an integer beginning at 0, incremented each time an :embed
 ;   node is encountered, and decremented on :unbed 
 
-; Map/fn from mode to next smaller mode:
-(def scripted {
+; Map/fn from mode to mode for superscripts:
+(def superscript-mode {
+  :D :S, :d :s,
+  :T :S, :t :s,
+  :S :SS, :s :ss,
+  :SS :SS, :ss :ss
+})
+
+; Map/fn from mode to mode for subscripts:
+(def subscript-mode {
+  :D :s, :d :s,
+  :T :s, :t :s,
+  :S :ss, :s :ss,
+  :SS :ss, :ss :ss
+})
+
+; Map/fn from mode to mode for numerators/denominators:
+(def fraction-mode {
   :D :T, :d :t,
   :T :S, :t :s,
   :S :SS, :s :ss,
@@ -178,8 +199,10 @@
 (def FONTS_BY_STYLE_AND_MODE {
   :keyword { :T :cmbx10, :S :cmbx10-script, :SS :cmbx10-scriptscript }
   :symbol { :T :cmsy10, :S :cmsy10-script, :SS :cmsy10-scriptscript }
-  :var { :T :cmmi10, :S :cmmi10-script, :SS :cmmi10-scriptscript }
+  ; :var { :T :cmmi10, :S :cmmi10-script, :SS :cmmi10-scriptscript }
+  :var { :T :cmti10, :S :cmti10-script, :SS :cmti10-scriptscript }  ; use text italics, which have sensible spacing
   :int { :T :cmr10, :S :cmr10-script, :SS :cmr10-scriptscript }
+  :string { :T :sans, :S :sans-script, :SS :sans-scriptscript }
 })
 
 (def EMBED_COLORS (cycle [
@@ -210,6 +233,10 @@
 (defn exprToView 
   [n]
   (let [rules {
+          ;
+          ; Sequences:
+          ;
+          
           :view/expr/juxt
           (fn [n [mode level]]
             [ (make-node :view/sequence
@@ -236,6 +263,10 @@
                 (vec (interpose (node :view/thickspace) 
                                 (node-children n))))
               [mode level] ])
+
+          ;
+          ; Atoms:
+          ;
 
           :view/expr/keyword
           (fn [n [mode level]]
@@ -276,18 +307,22 @@
               [mode level] ])
 
           :view/expr/string
+          ; TODO: remove the quotes (they should be at language level)
+          ; TODO: use grey for space indicator, etc.
+          ; TODO: substitute for tab, return, etc. also
           (fn [n [mode level]]
             (let [val (node-attr n :str)
-                  s (as-string val)]
+                  s (as-string val)
+                  ds (.replace (str s) \space (.charAt "\u2423" 0)) ]  ; substitute for space chars
               [ (make-node :view/sequence [
                   (make-node :view/chars {
                     :str "\u005c"  ; Note: open and close quote chars for :cmr
                     :font :cmr10
                   })
                   (make-node :view/chars {
-                    :str s
-                    :font :cmr10
-                    :view/drawable/color (node :view/rgb :red 0 :green 0.5 :blue 0)
+                    :str ds
+                    :font (-> FONTS_BY_STYLE_AND_MODE :string mode)
+                    ; :view/drawable/color (node :view/rgb :red 0 :green 0.5 :blue 0)
                   })
                   (make-node :view/chars {
                     :str "\""  ; Note: open and close quote chars for :cmr
@@ -309,6 +344,16 @@
             [ (make-node :view/chars {
                 :str (as-string (node-attr n :str))
                 :font :courierItalic
+              })
+              [mode level] ])
+  
+          :view/expr/doc
+          (fn [n [mode level]]
+            [ (make-node :view/chars {
+                :str (as-string (node-attr n :str))
+                :font :sans
+                :view/drawable/color 
+                (make-node :view/gray { :brightness 0.3 })
               })
               [mode level] ])
   
@@ -379,11 +424,11 @@
                 
             :view/over
             (fn [n [mode level]]
-              (let [np (if (= (node-type (node-attr n :top)) :view/expr/temp-scripted)   ; HACK! to prevent infinite recursion
+              (let [np (if (= (node-type (node-attr n :top)) :view/expr/temp-over)   ; HACK! to prevent infinite recursion
                           nil
                           (make-node :view/over {
                               :top
-                              (make-node :view/expr/temp-scripted {
+                              (make-node :view/expr/temp-over {
                                 :body
                                 (node-attr n :top)
                               })
@@ -392,7 +437,7 @@
                               (node-attr n :weight)
                   
                               :bottom
-                              (make-node :view/expr/temp-scripted {
+                              (make-node :view/expr/temp-over {
                                 :body
                                 (node-attr n :bottom)
                               })
@@ -401,14 +446,14 @@
                   
             :view/scripted
             (fn [n [mode level]]
-              (let [np (if (= (node-type (node-attr n :super)) :view/expr/temp-scripted)   ; HACK! to prevent infinite recursion
+              (let [np (if (= (node-type (node-attr n :super)) :view/expr/temp-super)   ; HACK! to prevent infinite recursion
                           nil
                           (make-node :view/scripted {
                             :nucleus
                             (node-attr n :nucleus)
                             
                             :super
-                            (make-node :view/expr/temp-scripted {
+                            (make-node :view/expr/temp-super {
                               :body
                               (node-attr n :super)
                             })
@@ -417,9 +462,12 @@
 
           ; Handle temporary node by simple extracting the body and 
           ; adjusting the mode:
-          :view/expr/temp-scripted
+          :view/expr/temp-over
           (fn [n [mode level]]
-            [ (node-attr n :body) [(scripted mode) level] ])
+            [ (node-attr n :body) [(fraction-mode mode) level] ])
+          :view/expr/temp-super
+          (fn [n [mode level]]
+            [ (node-attr n :body) [(superscript-mode mode) level] ])
         }
       f (fn [n [mode level]]
           (if-let [r (rules (node-type n))]
@@ -545,10 +593,10 @@
     (borderize 0.7 "juxt" nil)
   
     :view/expr/binary
-    (borderize 0.7 "binary" nil)
+    (borderize 0.7 "bin" nil)
   
     :view/expr/relation
-    (borderize 0.7 "relation" nil)
+    (borderize 0.7 "rel" nil)
 
     :view/expr/flow
     (borderize 0.7 "flow" nil)
@@ -576,6 +624,9 @@
   
     :view/expr/prod
     (borderize 0.7 "prod" :str)
+    
+    :view/expr/doc
+    (borderize 0.7 "doc" :str)
     
     :view/expr/embed
     (borderize 0.7 "embed" :content)
