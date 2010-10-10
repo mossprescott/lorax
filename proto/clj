@@ -1,24 +1,36 @@
 #java -cp ~/clojure-1.1.0/clojure.jar clojure.lang.Repl $@
 
-JAVA=/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Home/bin/java
+dir=`dirname $0`
+appdir=$dir/../../../app
+
+JAVA=$jdk6/bin/java
+#JAVA=/System/Library/Frameworks/JavaVM.framework/Versions/1.6.0/Home/bin/java
 #JAVA=java
 
 #JAVA_OPTS=""
-JAVA_OPTS="-server"
+JAVA_OPTS="-server -Dapple.laf.useScreenMenuBar=true"
 
 #READLINE_LIB=~/libreadline-java-0.8.0/libreadline-java.jar
 
-JLINE_LIB=~/app/jline-0_9_5.jar
+JLINE_LIB=$appdir/jline-0_9_5.jar
 JLINE_CLASS=jline.ConsoleRunner
 
-#CLOJURE_LIB=~/app/clojure-1.1.0/clojure.jar
-CLOJURE_LIB=~/app/clojure-1.2.0-RC1/clojure.jar
+#CLOJURE_LIB=$appdir/clojure-1.1.0/clojure.jar
+CLOJURE_LIB=$appdir/clojure-1.2.0-RC1/clojure.jar
 CLOJURE_CLASS=clojure.main
 
-#CONTRIB_LIB=~/app/clojure-contrib-1.1.0rc2/clojure-contrib.jar
-CONTRIB_LIB=~/app/clojure-contrib-1.2.0-RC1/clojure-contrib.jar
+#CONTRIB_LIB=$appdir/clojure-contrib-1.1.0rc2/clojure-contrib.jar
+CONTRIB_LIB=$appdir/clojure-contrib-1.2.0-RC1/target/clojure-contrib-1.2.0-RC1.jar
 
-# DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
+BATIK_DIR=$appdir/batik-1.7
+BATIK_LIBS=$BATIK_DIR/lib/batik-svggen.jar
+BATIK_LIBS=$BATIK_LIBS:$BATIK_DIR/lib/batik-util.jar
+BATIK_LIBS=$BATIK_LIBS:$BATIK_DIR/lib/batik-awt-util.jar
+BATIK_LIBS=$BATIK_LIBS:$BATIK_DIR/lib/batik-dom.jar
+BATIK_LIBS=$BATIK_LIBS:$BATIK_DIR/lib/batik-ext.jar
+BATIK_LIBS=$BATIK_LIBS:$BATIK_DIR/lib/batik-xml.jar
+BATIK_LIBS=$BATIK_LIBS:$BATIK_DIR/batik-rasterizer.jar
 
-$JAVA $JAVA_OPTS $DEBUG_OPTS -cp .:$CLOJURE_LIB:$CONTRIB_LIB:$JLINE_LIB $JLINE_CLASS $CLOJURE_CLASS $@
+#DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n"
 
+$JAVA $JAVA_OPTS $DEBUG_OPTS -cp .:$CLOJURE_LIB:$CONTRIB_LIB:$JLINE_LIB:$BATIK_LIBS $JLINE_CLASS $CLOJURE_CLASS $@
