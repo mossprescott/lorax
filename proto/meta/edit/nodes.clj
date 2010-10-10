@@ -606,7 +606,7 @@
 ;
 
 (def DELIMS {
-  ; All from cmex10
+  ; All from cmex10 (Note: smaller sizes are in cmsy10)
   ; Note how randomly these are sprinkled around the font. JSMath's symbol 
   ; table has them in a much more rational order, so I must be missing something.
   "(" [ "\u00c0" "\u00b0" "\u00d2" "\u00ef" ]  ; growable: 30, 42, 31
@@ -624,7 +624,7 @@
   "|" []
   })
 
-(def DELIM_SPACE 1)
+(def DELIM_SPACE 2)
 
 (defmethod size-impl :view/delimited
   [n #^Graphics2D g ctx]
@@ -649,7 +649,7 @@
         [lst ^Rectangle2D lr] (pick-glyph xh (DELIMS l) (FONTS :cmex10) g)
         [rst ^Rectangle2D rr] (pick-glyph xh (DELIMS r) (FONTS :cmex10) g)
         dh (max (.getHeight lr) (.getHeight rr))
-        xx (+ (.getWidth lr) DELIM_SPACE)
+        xx (+ (.getWidth lr) DELIM_SPACE 1)
         xy (/ (- dh xh) 2)]
     [ [x xx xy xw xh] ]))
     
@@ -661,16 +661,16 @@
         [xw xh xb] (size x g ctx)
         [^String lst ^Rectangle2D lr] (pick-glyph xh (DELIMS l) (FONTS :cmex10) g)
         [^String rst ^Rectangle2D rr] (pick-glyph xh (DELIMS r) (FONTS :cmex10) g)
-        [h w b] (size n g ctx)]
+        [w h b] (size n g ctx)]
     (doto g
       (.setColor (node-color n))
       (.setFont (FONTS :cmex10))
       (.drawString lst 
                    (float 0) 
-                   (float (/ (- h (.getHeight lr) 2))))
+                   (float (- (/ (- h (.getHeight lr)) 2) (.getMinY lr))))
       (.drawString rst 
                    (float (+ (.getWidth lr) DELIM_SPACE xw DELIM_SPACE))
-                   (float (/ (- h (.getHeight rr) 2)))))))
+                   (float (- (/ (- h (.getHeight rr)) 2) (.getMinY rr)))))))
 
 ;
 ; Over (i.e. fraction):

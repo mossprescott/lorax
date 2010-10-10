@@ -18,7 +18,13 @@
       JScrollPane
       JTextField
       JToolBar
-      JFileChooser)
+      JFileChooser
+      JMenu
+      JMenuItem
+      JCheckBoxMenuItem
+      JSeparator
+      JMenuBar
+      KeyStroke)
     (java.awt.event 
       ActionListener
       KeyAdapter
@@ -97,10 +103,14 @@
   [n g o ctx]
   (apply concat 
     (for [ [c x y w h] (layout n g ctx) ]
+      ; (do (println "l:" (node-type c) (node-id c))  ; HACK
       (if (resolveOne (node-id c) o)
+        ; (do (println "...resolved")  ; HACK
         [ [x y w h] ]
+        ; ) ; HACK
         (for [ [xx yy ww hh] (find-child-rects c g o ctx)]
           [(+ x xx) (+ y yy) ww hh])))))
+          ; ) ; HACK
 
 (defn draw-all
   "Draw the program by making a series of traversals, painting the nodes and 
@@ -131,6 +141,7 @@
         (fn [n g]
           (if (not= :view/border (node-type n))
             (draw n g ctx debug?)))))))
+      ; TODO:
   ;       ; error indicator: 
   ;       (if (errors (resolveOne (node-id n) o))
   ;         (let [ [w h b] (size n g)
@@ -258,19 +269,19 @@
 
 (defn makeInspectorPanel
   "Panel containing information about the selected node, if any. What I really 
-  need for this stuff is a nice DSL for GUI...
-  Returns a panel and a no-arg fxn to be invoked when the view needs to be 
-  updated. Would an atom and a watcher be simpler?"
+  need for this stuff is a nice DSL for GUI..."
   [nref]
   (let [l (JLabel.)
         update (fn [] 
                 (let [n @nref]
                   (.setText l 
                     (if n
-                      (str (node-type n) " (" (node-id n) ")")
+                      (subs (str (node-type n)) 1)
+                      ; (str (node-type n) " (" (node-id n) ")")
                       " "))))]
     (update)
-    [l update]))
+    (add-watch nref l (fn [l nref old new] (update)))
+    l))
   
    
 (defn makeErrorPanel
@@ -443,16 +454,17 @@
           (node-id cn))))))
 
 (defn makeSyntaxFrame 
-  "
-  Params:
+  "Params:
   rootA: atom with the source program
   primaryA: ref with the primary display reduction, which can be applied to the 
     source program to produce a program in :view/expr.
-  TODO: checkerA
-  
-  errors: map of (source program) ids to seq of errors"
-  [rootA title primaryA errors]
-  (let [debugFlag (ref false)
+  TODO: checkerA  
+  errors: map of (source program) ids to seq of errors
+  editable: if true, editing operations are available (default: true)"
+  ([rootA title primaryA errors]
+    (makeSyntaxFrame rootA title, primaryA errors true))
+  ([rootA ^String title primaryA errors editable]
+    (let [debugFlag (ref false)
         ; lastReduction (apply-until [reduceAny (reduceByType exprRules)])
         display (fn [n p] 
                   (let [ _ (if PRINT_ALL (do (print "source: ") (print-node n true)) )
@@ -480,21 +492,51 @@
         panel #^JComponent (makePanel nref debugFlag sref (atom (set (keys errors))) oref)
         scroll (JScrollPane. panel)
         
-        [#^JComponent inspector inspectorUpdate] (makeInspectorPanel snref)
+        ^JComponent inspector (makeInspectorPanel snref)
+
+        menubar (JMenuBar.)
+
+        undo (doto (JMenuItem. "Undo")
+                (.setEnabled false)
+                (.setAccelerator (KeyStroke/getKeyStroke "meta Z")))
+
+        cut (doto (JMenuItem. "Cut")
+                (.setEnabled false)
+                (.setAccelerator (KeyStroke/getKeyStroke "meta X")))
+        copy (doto (JMenuItem. "Copy")
+                (.setEnabled false)
+                (.setAccelerator (KeyStroke/getKeyStroke "meta C")))
+        paste (doto (JMenuItem. "Paste")
+                (.setEnabled false)
+                (.setAccelerator (KeyStroke/getKeyStroke "meta V")))
 
         updateSelection (fn [sourceId]
                           (dosync 
                             (ref-set sref #{sourceId})
-                            (ref-set snref (find-node @rootA sourceId))
-                          (inspectorUpdate)))
+                            (ref-set snref (find-node @rootA sourceId))))
                           
         sourceIdsInViewOrder (fn [] 
                                 (filter #(not (nil? %))
                                   (map #(resolveOne % @oref)
-                                     (deep-node-ids @nref))))
+                                     ; (deep-node-ids @nref))))
+                                    (apply concat
+                                      (visitNode @nref
+                                        (fn [n] 
+                                          (cond
+                                            (= (node-type n) :view/over)
+                                            [ (node-id (node-attr n :top)) (node-id (node-attr n :bottom)) ]
+                                            
+                                            (= (node-type n) :view/scripted)
+                                            [ (node-id (node-attr n :nucleus)) (node-id (node-attr n :super)) ] ; TODO: sub!
+                                            
+                                            ; Note: the default uses the naive ordering, which only 
+                                            ; makes sense if the node is a sequence, actually.
+                                            true
+                                            (map node-id (node-children n)))))))))
        
-        selectionButton (fn [f #^String iconPath]
-                          (doto (JButton. (ImageIcon. iconPath))
+        selectionButton (fn [f ^String title ^String accel]
+                          (doto (JMenuItem. title)
+                            (.setAccelerator (KeyStroke/getKeyStroke accel))
                             (.addActionListener
                               (proxy [ActionListener] []
                                 (actionPerformed [evt]
@@ -503,50 +545,70 @@
                                       (if id
                                         (updateSelection id)))))))))
 
-        #^JButton left (selectionButton leftIdOrNil "meta/edit/image/Back16.gif")
-        #^JButton right (selectionButton rightIdOrNil "meta/edit/image/Forward16.gif")
-        #^JButton up (selectionButton parentIdOrNil "meta/edit/image/Up16.gif")
-        #^JButton down (selectionButton firstChildIdOrNil "meta/edit/image/Down16.gif")
-        selectionToolBar (doto (JToolBar.)
-                          (.add (JLabel. "Selection:"))
-                          (.add left)
-                          (.add right)
-                          (.add up)
-                          (.add down))
-                          
-        delete (doto (JButton. "Delete"))
-        add (doto (JButton. "Add") (.setEnabled false))
-        swapPrevious (doto (JButton. "<-"))
-        swapNext (doto (JButton. "->"))
-        editToolBar (doto (JToolBar.)
-                        (.add (JLabel. "Edit:"))
-                        (.add delete)
-                        (.add add)
-                        (.add swapPrevious)
-                        (.add swapNext))
+        #^JMenuItem previous (selectionButton leftIdOrNil "Select Previous Sibling" "meta LEFT") ;"meta/edit/image/Back16.gif")
+        #^JMenuItem next (selectionButton rightIdOrNil "Select Next Sibling" "meta RIGHT") ;"meta/edit/image/Forward16.gif")
+        #^JMenuItem parent (selectionButton parentIdOrNil "Select Parent" "meta UP") ;"meta/edit/image/Up16.gif")
+        #^JMenuItem firstChild (selectionButton firstChildIdOrNil "Select First Child" "meta DOWN") ;"meta/edit/image/Down16.gif")
+        ; selectionToolBar (doto (JToolBar.)
+        ;                   (.add (JLabel. "Selection:"))
+        ;                   (.add left)
+        ;                   (.add right)
+        ;                   (.add up)
+        ;                   (.add down))
         
-        parens (doto (JCheckBox. "Parens") 
-                  (.setSelected PARENS_DEFAULT))
-        debug (JCheckBox. "Outlines")
-        svg (JButton. "Export to SVG...")
-        pdf (JButton. "Export to PDF...")
-        optionsToolBar (doto (JToolBar.)
-                        (.add (JLabel. "Options:"))
-                        (.add parens)
-                        (.add debug)
-                        (.add svg)
-                        (.add pdf))
+        delete (doto (JMenuItem. "Delete") 
+                  (.setEnabled editable)
+                  (.setAccelerator (KeyStroke/getKeyStroke "DELETE")))
+        add (doto (JMenuItem. "Add") 
+                (.setEnabled false)
+                (.setAccelerator (KeyStroke/getKeyStroke "PLUS")))
+        swapPrevious (doto (JMenuItem. "Swap with Previous Sibling")
+                    (.setEnabled editable)
+                    (.setAccelerator (KeyStroke/getKeyStroke "meta alt LEFT")))
+        swapNext (doto (JMenuItem. "Swap with Next Sibling")
+                    (.setEnabled editable)
+                    (.setAccelerator (KeyStroke/getKeyStroke "meta alt RIGHT")))
+        _ (.add menubar (doto (JMenu. "Edit")
+                          (.add undo)
+                          (.add (JSeparator.))
+                          (.add cut)
+                          (.add copy)
+                          (.add paste)
+                          (.add (JSeparator.))
+                          (.add previous)
+                          (.add next)
+                          (.add parent)
+                          (.add firstChild)
+                          (.add (JSeparator.))
+                          (.add delete)
+                          (.add add)
+                          (.add swapPrevious)
+                          (.add swapNext)))
+        
+        parens (doto (JCheckBoxMenuItem. "Parens") 
+                  (.setSelected PARENS_DEFAULT)
+                  (.setAccelerator (KeyStroke/getKeyStroke "meta shift P")))
+        debug (doto (JCheckBoxMenuItem. "Outlines")
+                  (.setAccelerator (KeyStroke/getKeyStroke "meta shift O")))
+        _ (.add menubar (doto (JMenu. "Options")
+                          (.add parens)
+                          (.add debug)))
+        
+        svg (JMenuItem. "Export to SVG...")
+        pdf (JMenuItem. "Export to PDF...")
+        _ (.add menubar (doto (JMenu. "Tools")
+                          (.add svg)
+                          (.add pdf)))
 
-        header (doto (JPanel.)
-                (.setLayout (GridLayout. 0 1))
-                (.add selectionToolBar)
-                (.add editToolBar)
-                (.add optionsToolBar))
-                        
-        frame (doto (JFrame. (str "Meta - " title))
+        ; header (doto (JPanel.)
+        ;         (.setLayout (GridLayout. 0 1))
+        ;         (.add selectionToolBar))
+                          
+        frame (doto (JFrame. title)
                 (.setDefaultCloseOperation JFrame/DISPOSE_ON_CLOSE)
+                (.setJMenuBar menubar)
                 (.add scroll)
-                (.add header "North")
+                ; (.add header "North")
                 (.add inspector "South")
                 (.setSize 500 750)
                 (.setVisible true))]
@@ -642,18 +704,18 @@
             (.requestFocus panel)  ; ???
             ))))
 
-    (.addKeyListener panel
-      (proxy [ KeyAdapter ] []
-        (keyPressed [#^KeyEvent evt]
-          ; (let [k (.getKeyCode evt)]
-          ;   (println "pressed:" evt)
-            (condp = (.getKeyCode evt)
-              KeyEvent/VK_LEFT (.doClick left)
-              KeyEvent/VK_RIGHT (.doClick right)
-              KeyEvent/VK_UP (.doClick up)
-              KeyEvent/VK_DOWN (.doClick down)
-              nil))))
-    nil))
+    ; (.addKeyListener panel
+    ;   (proxy [ KeyAdapter ] []
+    ;     (keyPressed [#^KeyEvent evt]
+    ;       ; (let [k (.getKeyCode evt)]
+    ;       ;   (println "pressed:" evt)
+    ;         (condp = (.getKeyCode evt)
+    ;           KeyEvent/VK_LEFT (.doClick left)
+    ;           KeyEvent/VK_RIGHT (.doClick right)
+    ;           KeyEvent/VK_UP (.doClick up)
+    ;           KeyEvent/VK_DOWN (.doClick down)
+    ;           nil))))
+    nil)))
 
 ; (defn makeKernelFrame 
 ;   [n title errors]

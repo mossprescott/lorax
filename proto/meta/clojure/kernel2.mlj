@@ -1,6 +1,6 @@
 ; Grammar/presentation for the 'kernel' language, which is directly translatable to 
 ; ordinary Clojure forms (and therefore no expansions are provided).
-; This is part 2 of 2, broken up for the benefit of te figure in the paper!
+; This is part 2 of 2, broken up for the benefit of the figure in the paper!
 ;
 ; This version uses the higher-level "grammar" language, which specifies structure as 
 ; well as a presentation reduction, and which can be reduced/compiled down into both a
@@ -9,6 +9,7 @@
 (use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
 
 (make-node :grammar/language [
+    ; bind
     (make-node :grammar/mapNode {
         :type 
         (make-node :grammar/type :clojure/kernel/bind)
@@ -31,6 +32,7 @@
         ; })
       })
     
+    ; var
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/kernel/var)
@@ -66,6 +68,7 @@
       })
     })
         
+    ; lambda
     (make-node :grammar/mapNode {
         :type
         (make-node :grammar/type :clojure/kernel/lambda)
@@ -167,6 +170,55 @@
         })
       })
       
+    ; recur
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/kernel/recur)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :recur_args {
+          :name 
+          (make-node :grammar/name :clojure/kernel/recur/args)
+            
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+              :type :clojure/kernel/args
+            })
+          ])
+          
+          :optional false
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/sequence [
+          (make-node :view/expr/keyword { :str "recur" })
+          (make-node :view/thinspace)
+          (make-node :view/delimited {
+            :left "("
+            :right ")"
+            :content 
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :recur_args)
+              })
+            })
+          })
+        ])
+      })
+    })
+      
+    ; app        
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/kernel/app)
@@ -209,14 +261,14 @@
       :display
       (make-node :clojure/kernel/quote {
         :body
-        (make-node :view/sequence [
+        (make-node :view/expr/juxt [
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
               :ref (ref-node :app_expr)
             })
           })
-          (make-node :view/thinspace)
+          ; (make-node :view/thinspace)
           (make-node :view/delimited {
             :left "("
             :right ")"
@@ -231,7 +283,8 @@
         ])
       })
     })
-              
+    
+    ; args (exprList?)
     (make-node :grammar/seqNode {
       :type
       (make-node :grammar/type :clojure/kernel/args)
@@ -257,11 +310,11 @@
         
           :type
           (make-node :grammar/type
-            :view/expr/juxt)
+            :view/sequence)
             
           :separator
           (make-node :view/sequence [
-            (make-node :view/expr/keyword {
+            (make-node :view/expr/int {
               :str "," 
             })
             (make-node :view/thickspace)
@@ -269,7 +322,7 @@
         })
     })
     
-    
+    ; if
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/kernel/if)
@@ -353,6 +406,7 @@
       })
     })
 
+    ; let
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/kernel/let)
@@ -433,8 +487,6 @@
         ])
       })
     })
-      
+              
     ; TODO: loop
-    ; TODO: recur
-    
   ])

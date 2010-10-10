@@ -20,7 +20,7 @@
 (def grammar-grammar 
   ; (load-grammar "meta/grammar.mlj" "meta/edit/view.mlj" "meta/edit/expr.mlj" 
   ;                   "meta/clojure/kernel.mlj" "meta/clojure/core.mlj"))
-  (load-grammar "meta/clojure/kernel.mlj"))
+  (load-grammar "meta/clojure/kernel1.mlj" "meta/clojure/kernel2.mlj"))
 
 ; (def grammar-structure
 ;   (grammar-to-structure grammar-grammar))
@@ -33,7 +33,7 @@
 
 (def clojure-grammar 
   ; (load-grammar "meta/core.mlj" "meta/clojure/kernel.mlj" "meta/clojure/core.mlj"))
-  (load-grammar "meta/clojure/kernel.mlj" "meta/clojure/core.mlj"))
+  (load-grammar "meta/clojure/kernel1.mlj" "meta/clojure/kernel2.mlj" "meta/clojure/core.mlj"))
   
 (def clojure-display
   (grammar-to-display clojure-grammar))

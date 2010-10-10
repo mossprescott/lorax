@@ -1,0 +1,22 @@
+; Example for relative positions: -x selected...
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+; abs:
+; if x < 0 then -x else x
+
+(make-node :view/expr/flow [
+  (make-node :view/expr/keyword { :str "if" })
+  (make-node :view/expr/relation [
+    (make-node :view/expr/var { :str "x" })
+    (make-node :view/expr/symbol { :str "<" })
+    (make-node :view/expr/int { :str "0" })
+  ])
+  (make-node :view/expr/keyword { :str "then" })
+  (make-node :view/expr/juxt [
+    (make-node :view/expr/symbol { :str "-" })
+    (make-node :view/expr/var { :str "x" })
+  ])
+  (make-node :view/expr/keyword { :str "else" })
+  (make-node :view/expr/var { :str "x" })
+])

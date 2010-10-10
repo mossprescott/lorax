@@ -1,0 +1,160 @@
+(use 'meta.core)
+
+(make-node :clojure/core/program [
+  (make-node :clojure/core/doc { :string "Continued fractions:"})
+   
+  (make-node :cf/fraction {
+    :coeff
+    (make-node :clojure/kernel/int { :value 2 })
+
+    :cont
+    (make-node :clojure/kernel/int { :value 3 })
+  })
+   
+  (make-node :cf/fraction {
+    :coeff
+    (make-node :clojure/kernel/int { :value 2 })
+
+    :cont
+    (make-node :cf/fraction {
+      :coeff
+      (make-node :clojure/kernel/int { :value 3 })
+
+      :cont
+      (make-node :clojure/kernel/int { :value 4 })
+    })
+  })
+   
+  (make-node :clojure/kernel/let {
+    :bind
+    (make-node :clojure/kernel/bind :a_0 {})
+    
+    :expr
+    (make-node :clojure/kernel/int { :value 5 })
+    
+    :body
+    (make-node :cf/fraction {
+      :coeff
+      (make-node :clojure/kernel/var {
+        :ref (ref-node :a_0)
+      })
+
+      :cont
+      (make-node :cf/fraction {
+        :coeff
+        (make-node :clojure/kernel/int { :value 3 })
+
+        :cont
+        (make-node :clojure/kernel/int { :value 4 })
+      })
+    })
+  })
+   
+  (make-node :clojure/kernel/let {
+    :bind
+    (make-node :clojure/kernel/bind :b_1 {})
+    
+    :expr
+    (make-node :clojure/kernel/int { :value 5 })
+    
+    :body
+    (make-node :clojure/kernel/let {
+      :bind
+      (make-node :clojure/kernel/bind :c_1 {})
+    
+      :expr
+      (make-node :cf/fraction {
+        :coeff
+        (make-node :clojure/kernel/int { :value 3 })
+
+        :cont
+        (make-node :clojure/kernel/int { :value 4 })
+      })
+    
+      :body
+      (make-node :cf/fraction {
+        :coeff
+        (make-node :clojure/kernel/var {
+          :ref (ref-node :b_1)
+        })
+
+        :cont
+        (make-node :clojure/kernel/var {
+          :ref (ref-node :c_1)
+        })
+      })
+    })
+  })
+
+  (make-node :clojure/kernel/let {
+    :bind 
+    (make-node :clojure/kernel/bind :cf_parts {})
+    
+    :expr
+    (make-node :cf/fraction {
+      :coeff
+      (make-node :clojure/kernel/int { :value 2 })
+
+      :cont
+      (make-node :cf/fraction {
+        :coeff
+        (make-node :clojure/kernel/int { :value 3 })
+
+        :cont
+        (make-node :clojure/kernel/int { :value 4 })
+      })
+    })
+
+    :body
+    (make-node :clojure/core/list [
+      (make-node :cf/coeff {
+        :expr
+        (make-node :clojure/kernel/var {
+          :ref (ref-node :cf_parts)
+        })
+      })
+      (make-node :cf/cont {
+        :expr
+        (make-node :clojure/kernel/var {
+          :ref (ref-node :cf_parts)
+        })
+      })
+    ])
+  })
+
+  (make-node :clojure/core/list [
+    (make-node :cf/ratio {
+      :expr
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :clojure/kernel/int { :value 1 }) ; needs a quote?
+      })
+    })
+    (make-node :cf/ratio {
+      :expr
+      (make-node :cf/fraction {
+        :coeff
+        (make-node :clojure/kernel/int { :value 1 })
+
+        :cont
+        (make-node :clojure/kernel/int { :value 2 })
+      })
+    })
+    (make-node :cf/ratio {
+      :expr
+      (make-node :cf/fraction {
+        :coeff
+        (make-node :clojure/kernel/int { :value 1 })
+
+        :cont
+        (make-node :cf/fraction {
+          :coeff
+          (make-node :clojure/kernel/int { :value 2 })
+
+          :cont
+          (make-node :clojure/kernel/int { :value 3 })
+        })
+      })
+    })
+  ])
+])

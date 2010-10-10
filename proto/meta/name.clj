@@ -33,6 +33,9 @@
       
     :clojure/kernel/bind
     (fn [n] n)
+      
+    :clojure/kernel/lambda
+    (fn [n] n)
   })
 
 ; Map of node types to fxns which yield a (string) name for the given node,
@@ -45,6 +48,10 @@
     :clojure/kernel/bind
     (fn [n]
       (baseName (node-id n)))  ; HACK: look for an optional attr, or assign a random name (x, x', ...?)
+
+    :clojure/kernel/lambda
+    (fn [n]
+      (baseName (node-id n)))  ; HACK: what would be right?
   })
 
 
@@ -90,8 +97,9 @@
               (if (ref-node? n)
                 (if-let [ [name num] (node-id-to-name-and-num (ref-node-id n))]
                   (primed name num))
-                (if-let [ [name num] (name-id-to-name-and-num (node-id n))]
-                  (primed name num))))
+                (if (not= (node-type n) :clojure/kernel/lambda)
+                  (if-let [ [name num] (name-id-to-name-and-num (node-id n))]
+                    (primed name num)))))
         ]
     (meta-reduce2 root rf)))
 

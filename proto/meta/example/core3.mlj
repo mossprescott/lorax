@@ -2,99 +2,153 @@
 
 (use 'meta.core)
 
-(node :clojure/core/program
-  :exprs [
-    ; a couple of cons's:
-    (node :clojure/core/cons
+(make-node :clojure/core/program [
+  (make-node :clojure/core/doc { :string "Examples using the core syntax for sequences:"})
+
+  ; a couple of cons's:
+  (make-node :clojure/core/cons {
+    :first
+    (make-node :clojure/kernel/int { :value 1 })
+    
+    :rest
+    (make-node :clojure/core/cons {
       :first
-      (node :clojure/kernel/int :value 1)
-      
+      (make-node :clojure/kernel/int { :value 2 })
+    
       :rest
-      (node :clojure/core/cons
-        :first
-        (node :clojure/kernel/int :value 2)
-      
-        :rest
-        (node :clojure/kernel/nil)))
+      (make-node :clojure/kernel/nil)
+    })
+  })
+  
+  ; a comma-sep. list:
+  (make-node :clojure/core/list [
+    (make-node :clojure/kernel/int { :value 1 })
+    (make-node :clojure/kernel/int { :value 2 })
+    (make-node :clojure/kernel/int { :value 3 })
+  ])
+  
+  ; first, rest:
+  (make-node :clojure/kernel/let {
+    :bind
+    (make-node :clojure/kernel/bind :lst {})
     
-    ; a comma-sep. list:
-    (node :clojure/core/sequence
-      :items [
-        (node :clojure/kernel/int :value 1)
-        (node :clojure/kernel/int :value 2)
-        (node :clojure/kernel/int :value 3)
+    :expr
+    (make-node :clojure/core/list [
+      (make-node :clojure/kernel/string { :value "a" })
+      (make-node :clojure/kernel/string { :value "b" })
+      (make-node :clojure/kernel/string { :value "c" })
+    ])
+    
+    :body
+    (make-node :clojure/core/list [
+      (make-node :clojure/core/first {
+        :expr
+        (make-node :clojure/kernel/var {
+          :ref (ref-node :lst)
+        })
+      })
+      (make-node :clojure/core/first {
+        :expr
+        (make-node :clojure/core/rest {
+          :expr
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :lst)
+          })
+        })
+      })
+      (make-node :clojure/core/nth {
+        :expr
+        (make-node :clojure/kernel/var {
+          :ref (ref-node :lst)
+        })
+        
+        :index
+        (make-node :clojure/kernel/int { :value 2 })
+      })
+    ])
+  })
+  
+  (make-node :clojure/core/doc { :string "Note: f*(x) produces a lazy sequence, and x[i] uses no stack:"})
+
+  ; iterate
+  (make-node :clojure/kernel/let {
+    :bind
+    (make-node :clojure/kernel/bind :inc_iter {})
+    
+    :expr
+    (make-node :clojure/kernel/lambda {  ; TODO: closure syntax
+      :params
+      (make-node :clojure/kernel/params [
+        (make-node :clojure/kernel/bind :x_iter {})
       ])
-    
-    ; first, rest:
-    (node :clojure/kernel/let
-      :bind
-      (node :clojure/kernel/bind :core/id :lst)
-      
-      :expr
-      (node :clojure/core/sequence
-        :items [
-          (node :clojure/kernel/string :value "a")
-          (node :clojure/kernel/string :value "b")
-          (node :clojure/kernel/string :value "c")
-        ])
       
       :body
-      (node :clojure/core/sequence
-        :items [
-          (node :clojure/core/first
-            :coll
-            (node :clojure/kernel/var
-              :ref (ref-node :lst)))
-          (node :clojure/core/first
-            :coll
-            (node :clojure/core/rest
-              :coll
-              (node :clojure/core/rest
-                :coll
-                (node :clojure/kernel/var
-                  :ref (ref-node :lst)))))
-        ]))
-    
-    ; range:
-    (node :clojure/core/range
-      :start
-      (node :clojure/kernel/int :value 1)
-      
-      :end
-      (node :clojure/kernel/int :value 10))
-      
-    ; range + subscript:
-    (node :clojure/core/nth
-      :coll
-      (node :clojure/core/range
-        :start
-        (node :clojure/core/unaryminus
-          :expr
-          (node :clojure/kernel/int :value 100))
-      
-        :end
-        (node :clojure/core/times
-          :left
-          (node :clojure/kernel/int :value 1000)
-
-          :right
-          (node :clojure/kernel/int :value 1000)))
+      (make-node :clojure/core/plus {
+        :left
+        (make-node :clojure/kernel/var {
+          :ref (ref-node :x_iter)
+        })
         
+        :right
+        (make-node :clojure/kernel/int { :value 1 })
+      })
+    })
+    
+    :body
+    (make-node :clojure/core/nth {
+      :expr
+      (make-node :clojure/core/iterate {
+        :fn
+        (make-node :clojure/kernel/var {
+          :ref (ref-node :inc_iter)
+        })
+      
+        :expr
+        (make-node :clojure/kernel/int { :value 1 })
+      })
+    
       :index
-      (node :clojure/kernel/int :value 150))
+      (make-node :clojure/kernel/int { :value 999999})
+    })
+  })
+    
+  ; range:
+  (make-node :clojure/core/range {
+    :min
+    (make-node :clojure/kernel/int { :value 1 })
+    
+    :max
+    (make-node :clojure/kernel/int { :value 10 })
+  })
+  
       
-    ; set:
-    (node :clojure/core/in
-      :item
-      (node :clojure/kernel/int :value 137)
+  ; range + subscript:
+  (node :clojure/core/nth
+    :expr
+    (node :clojure/core/range
+      :min
+      (node :clojure/core/unaryminus
+        :expr
+        (node :clojure/kernel/int :value 100))
+    
+      :max
+      (node :clojure/kernel/int :value 1000000000))
       
-      :set
-      (node :clojure/core/set
-        :coll
-        (node :clojure/core/range
-          :start 
-          (node :clojure/kernel/int :value 0)
-          
-          :end
-          (node :clojure/kernel/int :value 99))))
-  ])
+    :index
+    (node :clojure/kernel/int :value 150))
+      
+    ; ; set:
+    ; (node :clojure/core/in
+    ;   :item
+    ;   (node :clojure/kernel/int :value 137)
+    ;   
+    ;   :set
+    ;   (node :clojure/core/set
+    ;     :coll
+    ;     (node :clojure/core/range
+    ;       :start 
+    ;       (node :clojure/kernel/int :value 0)
+    ;       
+    ;       :end
+    ;       (node :clojure/kernel/int :value 99))))
+])

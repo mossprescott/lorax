@@ -1,0 +1,432 @@
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(make-node :grammar/language [
+
+  ; TODO: make the :cont attr optional, and somehow deal with it being missing?
+
+  ; continuedFraction
+  (make-node :grammar/mapNode {
+    :type
+    (make-node :grammar/type :cf/fraction)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :cf_coeff {
+        :name
+        (make-node :grammar/name :cf/fraction/coeff)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :cf_cont {
+        :name
+        (make-node :grammar/name :cf/fraction/cont)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/core/plus {
+        :left
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+           :ref (ref-node :cf_coeff) 
+          })
+        })
+        
+        :right
+        (make-node :clojure/core/fraction {
+          :num
+          (make-node :clojure/kernel/int { :value 1 })
+          
+          :denom
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+             :ref (ref-node :cf_cont) 
+            })
+          })
+        })
+      })
+    })
+    
+    :expand  ; evaluates the sub-components and constructs a run-time node!
+    (make-node :clojure/kernel/quote {
+      :body
+      ; Tricky! double-quotation doesn't work because I reduce the node under 
+      ; the quote. There's probably an answer (a form of quotation that 
+      ; blocks reduction?), but for now a hack.
+      ; TODO: at least add some simple syntax for doing this.
+      (make-node :clojure/kernel/app {
+        :expr
+        (make-node :clojure/kernel/extern { :name "meta.core/make-node"})
+        
+        :args 
+        (make-node :clojure/kernel/args [
+          (make-node :clojure/kernel/name { :value :cf/fraction })
+          (make-node :clojure/kernel/app {
+            :expr
+            (make-node :clojure/kernel/extern { :name "hash-map"})
+        
+            :args 
+            (make-node :clojure/kernel/args [
+              (make-node :clojure/kernel/name { :value :coeff })
+
+              ; Tricky: the value of the attribute may need to be unread back into a node:
+              (make-node :clojure/kernel/app {
+                :expr
+                (make-node :clojure/kernel/extern { :name "meta.clojure.kernel/unread"})
+        
+                :args 
+                (make-node :clojure/kernel/args [
+                  (make-node :clojure/kernel/unquote {
+                    :body
+                    (make-node :clojure/kernel/var {
+                     :ref (ref-node :cf_coeff) 
+                    })
+                  })
+                ])
+              })
+
+              (make-node :clojure/kernel/name { :value :cont })
+
+              ; Tricky: the value of the attribute may need to be unread back into a node:
+              (make-node :clojure/kernel/app {
+                :expr
+                (make-node :clojure/kernel/extern { :name "meta.clojure.kernel/unread"})
+        
+                :args 
+                (make-node :clojure/kernel/args [
+                  (make-node :clojure/kernel/unquote {
+                    :body
+                    (make-node :clojure/kernel/var {
+                     :ref (ref-node :cf_cont) 
+                    })
+                  })
+                ])
+              })
+            ])
+          })
+        ])
+      })
+      ; (make-node :clojure/kernel/quote {
+      ;   :body
+      ;   (make-node :clojure/kernel/nil)
+      ;   ; (make-node :clojure/core/continuedFraction {
+      ;   ;   :coeff
+      ;   ;   (make-node :clojure/kernel/int { :value 2 })
+      ;   ; ;   (make-node :clojure/kernel/unquote {
+      ;   ; ;     :body
+      ;   ; ;     (make-node :clojure/kernel/unquote {
+      ;   ; ;       :body
+      ;   ; ;       (make-node :clojure/kernel/var {
+      ;   ; ;        :ref (ref-node :cf_coeff) 
+      ;   ; ;       })
+      ;   ; ;     })
+      ;   ; ;   })
+      ;   ; ; 
+      ;   ;   :cont
+      ;   ;   (make-node :clojure/kernel/int { :value 3 })
+      ;   ; ;   (make-node :clojure/kernel/unquote {
+      ;   ; ;     :body
+      ;   ; ;     (make-node :clojure/kernel/unquote {
+      ;   ; ;       :body
+      ;   ; ;       (make-node :clojure/kernel/var {
+      ;   ; ;        :ref (ref-node :cf_cont) 
+      ;   ; ;       })
+      ;   ; ;     })
+      ;   ; ;   })
+      ;   ; })
+      ; })
+    })
+  })
+
+  ; coeff
+  (make-node :grammar/mapNode {
+    :type
+    (make-node :grammar/type :cf/coeff)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :cf_coeff {
+        :name
+        (make-node :grammar/name :cf/coeff/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/juxt [
+        (make-node :view/expr/keyword { :str "coeff" })
+        (make-node :view/delimited {
+          :left "["
+          :right "]"
+          :content
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+             :ref (ref-node :cf_coeff) 
+            })
+          })
+        })
+      ])
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/core/attr {
+        :node
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+           :ref (ref-node :cf_coeff) 
+          })
+        })
+        
+        :name
+        (make-node :clojure/kernel/name { :value :coeff })
+      })
+    })
+  })
+
+  ; cont
+  (make-node :grammar/mapNode {
+    :type
+    (make-node :grammar/type :cf/cont)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :cont_expr {
+        :name
+        (make-node :grammar/name :cf/cont/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/juxt [
+        (make-node :view/expr/keyword { :str "cont" })
+        (make-node :view/delimited {
+          :left "["
+          :right "]"
+          :content
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+             :ref (ref-node :cont_expr) 
+            })
+          })
+        })
+      ])
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/core/attr {
+        :node
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+           :ref (ref-node :cont_expr) 
+          })
+        })
+        
+        :name
+        (make-node :clojure/kernel/name { :value :cont })
+      })
+    })
+  })
+  
+  ; ratio
+  (make-node :grammar/mapNode {
+    :type
+    (make-node :grammar/type :cf/ratio)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :ratio_expr {
+        :name
+        (make-node :grammar/name :cf/ratio/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/juxt [
+        (make-node :view/expr/keyword { :str "ratio" })
+        (make-node :view/delimited {
+          :left "["
+          :right "]"
+          :content
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+             :ref (ref-node :ratio_expr) 
+            })
+          })
+        })
+      ])
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/kernel/let {
+        :bind
+        (make-node :clojure/kernel/bind :r_ratio {})
+        
+        :expr
+        (make-node :clojure/kernel/lambda :q_ratio {
+          :params
+          (make-node :clojure/kernel/params [
+            (make-node :clojure/kernel/bind :f_ratio {})
+          ])
+          
+          :body
+          (make-node :clojure/kernel/if {
+            :test
+            (make-node :clojure/core/equal {
+              :left
+              (make-node :clojure/core/type {
+                :node
+                (make-node :clojure/kernel/var {
+                 :ref (ref-node :f_ratio) 
+                })
+              })
+              
+              :right
+              (make-node :clojure/kernel/name { :value :cf/fraction })
+            })
+      
+            :then
+            (make-node :clojure/core/plus {
+              :left
+              (make-node :clojure/core/eval {
+                :node
+                (make-node :cf/coeff {
+                  :expr
+                  (make-node :clojure/kernel/var {
+                   :ref (ref-node :f_ratio) 
+                  })
+                })
+              })
+              
+              :right
+              (make-node :clojure/core/fraction {
+                :num
+                (make-node :clojure/kernel/int { :value 1 })
+            
+                :denom
+                (make-node :clojure/kernel/app {
+                  :expr
+                  (make-node :clojure/kernel/var {
+                    :ref (ref-node :q_ratio) ;; Dies!?!
+                    ; :ref (ref-node :r_ratio) 
+                  })
+                  
+                  :args
+                  (make-node :clojure/kernel/args [
+                    (make-node :cf/cont {
+                      :expr
+                      (make-node :clojure/kernel/var {
+                       :ref (ref-node :f_ratio) 
+                      })
+                    })
+                  ])
+                })
+              })
+            })
+    
+            :else
+            (make-node :clojure/core/eval {
+              :node
+              (make-node :clojure/kernel/var {
+               :ref (ref-node :f_ratio) 
+              })
+            })
+          })
+        })
+      
+        :body
+        (make-node :clojure/kernel/app {
+          :expr
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :r_ratio)
+          })
+          
+          :args
+          (make-node :clojure/kernel/args [
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {            
+                :ref (ref-node :ratio_expr)
+              })
+            })
+          ])
+        })
+      })
+    })
+  })
+  
+  ; TODO: -, floor, {}, inc, reciprocal
+  
+])

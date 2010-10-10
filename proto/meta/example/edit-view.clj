@@ -317,5 +317,5 @@
 
 ; (print-node p)
 
-(makeSyntaxFrame p "view/..." #(meta-reduce2 % (fn [n] nil)) {})
+(makeSyntaxFrame (atom p) "view/..." (atom #(meta-reduce2 % (fn [n] nil))) {})
 ; (makeSyntaxFrame p "view/..." #(reduce-plus % (fn [n v] [nil v])) {})

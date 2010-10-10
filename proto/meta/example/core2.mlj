@@ -43,10 +43,14 @@
     :left
     (make-node :clojure/core/fraction {
       :num
-      (make-node :clojure/kernel/int { :value 1 })
-
+      (make-node :clojure/core/plus {
+        :left
+        (make-node :clojure/kernel/int { :value 1 })
+        :right
+        (make-node :clojure/kernel/int { :value 2 })
+      })
       :denom
-      (make-node :clojure/kernel/int { :value 3 })
+      (make-node :clojure/kernel/int { :value 4 })
     })
     
     :right

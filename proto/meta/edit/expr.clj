@@ -464,10 +464,12 @@
           ; adjusting the mode:
           :view/expr/temp-over
           (fn [n [mode level]]
-            [ (node-attr n :body) [(fraction-mode mode) level] ])
+            [ (make-node :view/sequence [ (node-attr n :body) ]) 
+              [(fraction-mode mode) level] ])
           :view/expr/temp-super
           (fn [n [mode level]]
-            [ (node-attr n :body) [(superscript-mode mode) level] ])
+            [ (make-node :view/sequence [ (node-attr n :body) ]) 
+              [(superscript-mode mode) level] ])
         }
       f (fn [n [mode level]]
           (if-let [r (rules (node-type n))]
@@ -589,7 +591,7 @@
                       [ np (disj v id) ])
                     [ nil v ]))))]
   {  
-    :view/juxt
+    :view/expr/juxt
     (borderize 0.7 "juxt" nil)
   
     :view/expr/binary

@@ -9,6 +9,7 @@
 (use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
 
 (make-node :grammar/language [
+    ; nil
     (make-node :grammar/mapNode {
         :type
         (make-node :grammar/type :clojure/kernel/nil)
@@ -28,7 +29,8 @@
               :str "nil")
           })
       })
-            
+    
+    ; true   
     (make-node :grammar/mapNode {
         :type
         (make-node :grammar/type :clojure/kernel/true)
@@ -49,6 +51,7 @@
           })
       })
         
+    ; false
     (make-node :grammar/mapNode {
         :type
         (make-node :grammar/type :clojure/kernel/false)
@@ -69,6 +72,7 @@
           })
       })
       
+    ; int
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/kernel/int)
@@ -103,10 +107,11 @@
             :body
             (make-node :clojure/kernel/app {
               :expr
-              (make-node :clojure/kernel/extern { :name "str" })
+              (make-node :clojure/kernel/extern { :name "format" })
                       
               :args 
               (make-node :clojure/kernel/args [
+                (make-node :clojure/kernel/string { :value "%,d" })
                 ; (make-node :clojure/core/value {
                 ;   :expr
                 (make-node :clojure/kernel/app {
@@ -126,7 +131,8 @@
         })
       })
     })
-        
+    
+    ; string
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/kernel/string)
@@ -175,6 +181,7 @@
       })
     })
       
+    ; name (is this still in?)
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/kernel/name)
@@ -248,6 +255,47 @@
       })
     })
     
+    ; extern
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/kernel/extern)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :extern_name {
+          :name
+          (make-node :grammar/name :clojure/kernel/extern/name)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/string)
+          ])
+          
+          :optional false
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/mono {
+          :str
+          (make-node :clojure/kernel/unquote {
+            :body 
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :extern_name)
+            })
+          })
+        })
+      })
+    })
+  
+    ; quote
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/kernel/quote)
@@ -289,6 +337,7 @@
       })
     })
     
+    ; unquote
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/kernel/unquote)
@@ -331,44 +380,5 @@
         })
       })
     })
-    
-    (make-node :grammar/mapNode {
-      :type
-      (make-node :grammar/type :clojure/kernel/extern)
-      
-      :supers 
-      (make-node :grammar/types [ 
-        (make-node :grammar/type :clojure/kernel/expr)
-      ])
-      
-      :attrs
-      (make-node :grammar/attrs [
-        (make-node :grammar/attr :extern_name {
-          :name
-          (make-node :grammar/name :clojure/kernel/extern/name)
-          
-          :options
-          (make-node :grammar/options [
-            (make-node :grammar/string)
-          ])
-          
-          :optional false
-        })
-      ])
-      
-      :display
-      (make-node :clojure/kernel/quote {
-        :body
-        (make-node :view/expr/mono {
-          :str
-          (make-node :clojure/kernel/unquote {
-            :body 
-            (make-node :clojure/kernel/var {
-              :ref (ref-node :extern_name)
-            })
-          })
-        })
-      })
-    })
-  
+
   ])

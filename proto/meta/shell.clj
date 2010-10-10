@@ -6,6 +6,9 @@
 ;         (meta.edit expr draw)
 ;         (meta.clojure kernel)))
 
+; Set the app name early (has to happen before Swing gets initialized, maybe)
+(System/setProperty "com.apple.mrj.application.apple.menu.about.name" "Maml Editor")
+
 ; Note: using raw 'use' insted of a proper namesapace because it's easier to 
 ; use in the REPL that way.
 (use 'meta.core
@@ -95,11 +98,14 @@
 (def clojure-grammar 
   (load-grammars "meta/clojure/kernel1.mlj" 
                  "meta/clojure/kernel2.mlj" 
-                 "meta/clojure/core.mlj"))
+                 "meta/clojure/core.mlj"
+                 "meta/clojure/core-seq.mlj"
+                 "meta/example/tex/continued-grammar.mlj"))
   
 ; ref containing the reduction function for clojure kernel/core
 (def clojure-display
-  (lift grammar-to-display clojure-grammar))
+  (let [g2d (fn [g] (do (println "Compiling display reductions...") (grammar-to-display g)))]
+    (lift g2d clojure-grammar)))
   ; (reduceByType kernelPresRules))
 
 
@@ -174,12 +180,17 @@
     (makeSyntaxFrame pr fname core-display errors)))
 
 (defn show-session
-  [fname]
-  (let [pr (load-program fname)
-        sess (run-program @pr expand-core)
-        errors {} ; TODO
-        ]
-    (makeSyntaxFrame (atom sess) fname core-display errors false)))
+  ([fname]
+    (show-session fname false))
+  ([fname show-reduced]
+    (let [pr (load-program fname)
+          display (lift compose-reductions 
+                      (ref (fn [n] [(run-program n expand-core show-reduced) {}]))
+                      core-display)
+          errors {} ; TODO
+          ]
+      (makeSyntaxFrame pr fname display errors false))))
+    
 ;
 ; Expr-language examples:
 ;
@@ -197,6 +208,10 @@
 (defn kernel1 [] (show-grammar "meta/clojure/kernel1.mlj"))
 (defn kernel2 [] (show-grammar "meta/clojure/kernel2.mlj"))
 (defn core [] (show-grammar "meta/clojure/core.mlj"))
+(defn core-seq [] (show-grammar "meta/clojure/core-seq.mlj"))
 
-(defn ex1 [] (show-program "meta/example/core1.mlj"))
-(defn ex2 [] (show-program "meta/example/core2.mlj"))
+(def ex1 "meta/example/core1.mlj")
+(def ex2 "meta/example/core2.mlj")
+(def ex3 "meta/example/core3.mlj")
+(def excf "meta/example/tex/continued.mlj")
+(def cfg "meta/example/tex/continued-grammar.mlj")

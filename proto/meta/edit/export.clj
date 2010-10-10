@@ -6,20 +6,31 @@
   ;       (meta.clojure kernel)
   ;       (meta.edit nodes expr select))
   (:import 
-    (java.awt Component)
-    (org.apache.batik.svggen SVGGraphics2D)
-    (org.apache.batik.dom GenericDOMImplementation)
+    (java.awt 
+      Component)
+    (org.apache.batik.svggen 
+      SVGGraphics2D 
+      SVGGeneratorContext)
+    (org.apache.batik.dom 
+      GenericDOMImplementation)
     (org.apache.batik.apps.rasterizer 
       SVGConverter
       DestinationType)
-    (org.w3c.dom Document
-                 DOMImplementation)
-    (java.io File
-             FileOutputStream
-             OutputStreamWriter
-             Writer)))
+    (org.w3c.dom 
+      Document
+      DOMImplementation)
+    (java.io 
+      File
+      FileOutputStream
+      OutputStreamWriter
+      Writer)))
 
 (def USE_CSS true)
+(def TEXT_AS_SHAPES false)
+
+; SVGGeneratorContext ctx = SVGGeneratorContext.createDefault(document);
+; ctx.setEmbeddedFontsOn(true);
+; SVGGraphics2D g2d = new SVGGraphics2D(ctx, true);
 
 (defn render-to-svg
   "Render the given component to an SVG file in vector format. Note: images
@@ -28,7 +39,8 @@
   (let [domImpl (GenericDOMImplementation/getDOMImplementation)
         svgNS "http://www.w3.org/2000/svg"
         document (.createDocument domImpl svgNS "svg" nil)
-        ^SVGGraphics2D svgGenerator (SVGGraphics2D. document)]
+        ctx (SVGGeneratorContext/createDefault document)
+        ^SVGGraphics2D svgGenerator (SVGGraphics2D. ctx TEXT_AS_SHAPES)]
     (.paint comp svgGenerator)
     (let [^Writer out (OutputStreamWriter. (FileOutputStream. fname)  "UTF-8")] ; HACK
       (.stream svgGenerator out (boolean USE_CSS))

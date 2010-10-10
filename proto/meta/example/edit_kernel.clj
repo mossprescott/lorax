@@ -217,9 +217,10 @@
 ; (makeKernelFrame p3 "clojure/kernel" errors)
 
 (let [cgr (load-node "meta/core.mlj")
-      kgr (load-node "meta/clojure/kernel.mlj")
+      kgr1 (load-node "meta/clojure/kernel1.mlj")
+      kgr2 (load-node "meta/clojure/kernel2.mlj")
       clgr (load-node "meta/clojure/core.mlj")
-      gr (compose-grammars cgr kgr clgr)
+      gr (compose-grammars cgr kgr1 kgr2 clgr)
       struc (grammar-to-structure gr)
 
       checker (make-structure-checker struc)

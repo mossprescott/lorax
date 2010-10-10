@@ -3,11 +3,13 @@
 
 (ns meta.clojure.run
   (:use (meta core check reduce)
-        (meta.clojure core kernel)))
+        (meta.clojure kernel)))
 
 (def kernel-grammar
-  (load-node "meta/clojure/kernel.mlj"))
-  
+  (compose-grammars
+    (load-node "meta/clojure/kernel1.mlj")
+    (load-node "meta/clojure/kernel2.mlj")))
+    
 ; (def kernel-structure
 ;   (grammar-to-structure kernel-grammar))
 
@@ -109,9 +111,15 @@
 ;         {}))))
 
 (def expand-core
-  (let [c (load-node "meta/clojure/core.mlj")]
+  (let [c (compose-grammars 
+            (load-node "meta/clojure/core.mlj")
+            (load-node "meta/clojure/core-seq.mlj")
+            (load-node "meta/example/tex/continued-grammar.mlj"))] ; HACK: for demo purposes
+    (println "Compiling core reductions...")
+    ; (let [r (reduce-with-grammar c :expand)]
+    ;       (fn [n] (println (node-type n)) (r n)))))
     (reduce-with-grammar c :expand)))
-
+    
 ; (println (keys core-expansions))
 
 ; (defn expand
@@ -129,36 +137,35 @@
 ;     ;(rename-nodes n)))
 
 (defn run-program
-  [n exp]
+  [n exp show-reduced]
   (make-node :clojure/core/session
     (vec (for [x (node-children n)]
             (if (#{ :clojure/core/doc :clojure/core/comment } (node-type x))
               x
-              (let [ ; _ (println "x:" x)
+              (let [ ; _ (println "x:") _ (print-node x true)
                      [xp o] (try (meta-reduce2 x exp)
                                  (catch Throwable x
                                         (println x)
                                         (make-node :clojure/kernel/nil))) ; HACK
                   
-                    ; _ (println "xp:" xp)
-                    ; _ (println "cxp:" (meta-compile x))
-                    r (try (meta-eval xp) 
+                    ; _ (println "xp:") _ (print-node xp true)
+                    ; _ (println "cxp:" (meta-compile xp))
+                    r (try (unread (meta-eval xp))
                            (catch Throwable x 
                                   (println x)
                                   (make-node :clojure/kernel/nil))) ; HACK
                     ; _ (println "r:" r)
                     ]
-                (make-node :clojure/core/exchange {
-                  :expr
-                  x
-
-                  ; Comment to disable:
-                  :kernel
-                  (rename-nodes xp)
-                
-                  :value
-                  r
-                })))))))
+                (if show-reduced
+                  (make-node :clojure/core/exchange {
+                    :expr   x
+                    :kernel (rename-nodes xp)
+                    :value  r
+                  })
+                  (make-node :clojure/core/exchange {
+                    :expr   x
+                    :value  r
+                  }))))))))
 
 ; (def x1
 ;   (make-node :clojure/core/program [

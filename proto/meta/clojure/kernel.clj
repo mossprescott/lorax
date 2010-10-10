@@ -51,6 +51,10 @@
           [ ~@(map meta-compile (node-children (node-attr n :params))) ]
           ~(meta-compile (node-attr n :body)))
         
+      :clojure/kernel/recur
+      `(recur
+        ~@(map meta-compile (node-children (node-attr n :args))))
+      
       :clojure/kernel/app
       `(~(meta-compile (node-attr n :expr)) 
         ~@(map meta-compile (node-children (node-attr n :args))))
@@ -97,30 +101,39 @@
       ;        (meta-compile-later (node-attr n :core/later/node))
 
       :clojure/kernel/quote
-      (meta-compile-later (node-attr n :body))
+      (meta-compile-later (node-attr n :body) 1)
       
 ;      :clojure/kernel/unquote ; should never be encountered here?
       
       (do 
-        (println "unrecognized node type:" (node-type n))
+        (println "unrecognized node type (not in kernel language):" (node-type n))
         (assert false)))))
 
 
 (defn- meta-compile-later
-  [n]
+  "level - initially 1. Incremented when another quote is seen, and decremented
+      on unquote, until it gets back to 1, and then we go back to normal compile 
+      mode."
+  ; TODO: rename nodes?
+  [n level]
   (cond
     (map-node? n)
-    (if (= (node-type n) :clojure/kernel/unquote)
-      ; handle "unquote" node now:
-      ; (let [q  ; HACK
-      (meta-compile (node-attr n :body))  ; what if the result is a raw value? 
-                                          ; how does it get wrapped in nodes?
-      ; ] (do (println "mcl:" q) q))
+    (let [level (condp = (node-type n)
+                  :clojure/kernel/quote (inc level)
+                  :clojure/kernel/unquote (dec level)
+                  level)
+            ; _ (println "node:" (node-type n))
+            ; _ (println "level:" level)
+            ]
+      (if (= level 0)
+        ; handle "unquote" node now:
+        (meta-compile (node-attr n :body))  ; what if the result is a raw value? 
+                                            ; how does it get wrapped in nodes?
     
-      ; otherwise recursively visit the children:
-      `(make-node ~(node-type n)
-                  ~(node-id n)
-                  ~(mapfor [k (node-attrs n)] k (meta-compile-later (node-attr n k)))))
+        ; otherwise recursively visit the children:
+        `(make-node ~(node-type n)
+                    ~(node-id n)
+                    ~(mapfor [k (node-attrs n)] k (meta-compile-later (node-attr n k) level)))))
       ; (zipmap 
       ;   (keys n) 
       ;   (for [k (keys n)] 
@@ -129,7 +142,7 @@
     (seq-node? n)
     `(make-node ~(node-type n)
                 ~(node-id n)
-                ~(vec (map meta-compile-later (node-children n))))
+                ~(vec (map #(meta-compile-later % level) (node-children n))))
     
     (node? n)
     `(make-node ~(node-type n)
@@ -140,13 +153,15 @@
     n))
 
 (defn unread
+  "Wrap a Java/Clojure value in nodes (leaving nodes as is)."
   [r]
   (cond
+    ; Note: this is a little wierd. Why not let the node just be the node?
     (node? r)
-    (make-node :clojure/kernel/quote {
-        :body
+    ; (make-node :clojure/kernel/quote {
+    ;     :body
         r
-      })
+      ; })
     
     (nil? r)
     (make-node :clojure/kernel/nil {})
@@ -164,7 +179,16 @@
         (make-node :clojure/kernel/int { :value (- r) })
       })
       (make-node :clojure/kernel/int { :value r }))
+    
+    (rational? r)
+    (make-node :clojure/core/fraction {
+      :num
+      (unread (numerator r))
       
+      :denom
+      (unread (denominator r))
+    })
+    
     (string? r)
     (make-node :clojure/kernel/string { :value r })
       
@@ -172,7 +196,7 @@
     (make-node :clojure/kernel/name { :value r })
       
     (seq? r)
-    (make-node :clojure/core/sequence
+    (make-node :clojure/core/list
       (vec (for [x r] (unread x))))
       
     true
@@ -182,13 +206,13 @@
 
 (defn meta-eval
   "Given a program in Clojure kernel syntax, compile it to raw Clojure forms,
-  evaluate them, and wrap the result in syntax."
+  evaluate them, and return the resulting Java/Clojure value."
   [n]
   (let [ ; _ (print-node n true)
         c (meta-compile n)
         ; _ (println c)
         r (eval c) ]
-    (unread r)))
+    r))
 
 
 ;

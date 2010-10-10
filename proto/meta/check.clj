@@ -601,11 +601,12 @@
   :grammar/mapNode
   (fn [n]
     (make-node :view/section [
+        (with-attr n :doc e
+          e
+          (make-node :view/sequence [])) ; HACK: empty node
         (make-node :view/expr/flow [
             (node-attr n :supers)
-            (make-node :view/expr/symbol {
-                :str :from
-              })
+            (make-node :view/expr/symbol { :str :from })
             (node-attr n :type)
             (node-attr n :attrs)
           ])
@@ -641,30 +642,60 @@
   :grammar/seqNode
   (fn [n]
     (make-node :view/section [
+        (with-attr n :doc e
+          e
+          (make-node :view/sequence [])) ; HACK: empty node
         (make-node :view/expr/flow [
-            (node-attr n :type)
-            (make-node :view/expr/symbol {
-                :str :to
-              })
             (node-attr n :supers)
-          ])
-        (make-node :view/sequence [
-            (make-node :view/quad)
-            (make-node :view/scripted {
-                :nucleus
-                (node-attr n :options)
+            (make-node :view/expr/symbol { :str :from })
+            (node-attr n :type)
+            (make-node :view/delimited {
+              :left "{"
+              :right "}"
+              :content
+              (make-node :view/scripted {
+                  :nucleus
+                  (node-attr n :options)
                 
-                :super
-                (make-node :view/expr/juxt [
-                  (make-node :view/expr/int { :str (str (node-attr-value n :min)) })
-                  (make-node :view/expr/keyword { :str ".." })
-                  ; TODO: max?
-                ])
+                  :super
+                  (make-node :view/expr/juxt [
+                    (make-node :view/expr/int { :str (str (node-attr-value n :min)) })
+                    (make-node :view/expr/keyword { :str ".." })
+                    ; TODO: max?
+                  ])
+                })
               })
-          ])
+            ])
+        ; (make-node :view/sequence [
+        ;     (make-node :view/quad)
+        ;     (make-node :view/scripted {
+        ;         :nucleus
+        ;         (node-attr n :options)
+        ;         
+        ;         :super
+        ;         (make-node :view/expr/juxt [
+        ;           (make-node :view/expr/int { :str (str (node-attr-value n :min)) })
+        ;           (make-node :view/expr/keyword { :str ".." })
+        ;           ; TODO: max?
+        ;         ])
+        ;       })
+        ;   ])
         (make-node :view/sequence [
             (make-node :view/quad)
             (node-attr n :display)
+            
+            ; expand, if any:
+            (with-attr n :expand e
+              (make-node :view/sequence [
+                  ; (make-node :view/quad)
+                  ; (make-node :view/expr/keyword { :str "expand" })
+                  (make-node :view/thickspace)
+                  ; (make-node :view/expr/symbol { :str :longrightarrow })
+                  (make-node :view/expr/symbol { :str :to })
+                  (make-node :view/thickspace)
+                  e
+                ])
+              (make-node :view/sequence [])) ; HACK: empty node
           ])
       ]))
 
@@ -674,11 +705,17 @@
       :content
       (make-node (node-attr-value n :type) [
         (make-node :view/expr/var { :str "elem" })
-        (node-attr n :separator)
+        (with-attr n :separator s
+          s
+          (make-node :view/sequence []))
         (make-node :view/chars { :str "..." :font :cmr10 })
       ])
     }))
       
+  :grammar/doc
+  (fn [n] 
+    (make-node :view/expr/doc { :str (node-attr n :str) }))
+  
   :grammar/types
   (fn [n]
     (make-node :view/expr/juxt

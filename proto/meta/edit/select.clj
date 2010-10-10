@@ -55,6 +55,8 @@
 (def INNER_RADIUS_Y 4)
 
 (defn fancy-hilite
+  "Draws the fancy selection indicator using an off-screen bitmap (which doesn't
+  work with Batik's SVG renderer)."
   [^Graphics2D g w h cs]
   (let [^BufferedImage img (make-image g (+ w 5) (+ h 5))
         ^Graphics2D g2 (.createGraphics img)
@@ -62,6 +64,7 @@
         w0 (+ w 4) h0 (+ h 4)
         r (RoundRectangle2D$Float. x0 y0 w0 h0 OUTER_RADIUS_X OUTER_RADIUS_Y)
         hy (min (/ h 4) 100)]
+    ; (println "hilite: " r)  ; HACK
     (doto g2
       (.translate (int (- x0)) (int (- y0)))
       
