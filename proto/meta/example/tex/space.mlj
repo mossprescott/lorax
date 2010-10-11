@@ -1,0 +1,23 @@
+; Example of each kind of spacing:
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+; if x < y + 4! then ... 
+
+(make-node :view/expr/flow [
+  (make-node :view/expr/keyword { :str "if" })
+  (make-node :view/expr/relation [
+    (make-node :view/expr/var { :str "x" })
+    (make-node :view/expr/symbol { :str "<" })
+    (make-node :view/expr/binary [
+      (make-node :view/expr/var { :str "y" })
+      (make-node :view/expr/symbol { :str "+" })
+      (make-node :view/expr/juxt [
+        (make-node :view/expr/int { :str "4" })
+        (make-node :view/expr/symbol { :str "!" })
+      ])
+    ])
+    (make-node :view/expr/var { :str "then" })
+    (make-node :view/expr/int { :str "..." })  ; HACK
+  ])
+])

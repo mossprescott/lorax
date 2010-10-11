@@ -783,5 +783,220 @@
     })
   })
   
-  ; TODO: take, drop, [i..j], and for
+  ; for
+  (make-node :grammar/mapNode {
+    :doc
+    (make-node :grammar/doc { :str "Sequence comprehension, with a single binding" })
+    
+    :type
+    (make-node :grammar/type :clojure/core/for)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :for_x {
+        :name
+        (make-node :grammar/name :clojure/core/for/x)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type
+              :clojure/kernel/bind
+            })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :for_seq {
+        :name
+        (make-node :grammar/name :clojure/core/for/seq)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type
+              :clojure/kernel/expr
+            })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :for_expr {
+        :name
+        (make-node :grammar/name :clojure/core/for/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type
+              :clojure/kernel/expr
+            })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/flow [
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :for_expr)
+          })
+        })        
+        (make-node :view/expr/symbol { :str "|" })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :for_x)
+          })
+        })
+        (make-node :view/expr/symbol { :str :from })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :for_seq)
+          })
+        })
+      ])
+    })
+    ; (make-node :clojure/kernel/quote {
+    ;   :body
+    ;   (make-node :view/expr/flow [
+    ;     (make-node :view/expr/keyword { :str "for" })
+    ;     (make-node :clojure/kernel/unquote {
+    ;       :body
+    ;       (make-node :clojure/kernel/var {
+    ;         :ref (ref-node :for_x)
+    ;       })
+    ;     })
+    ;     (make-node :view/expr/symbol { :str :from })
+    ;     (make-node :clojure/kernel/unquote {
+    ;       :body
+    ;       (make-node :clojure/kernel/var {
+    ;         :ref (ref-node :for_seq)
+    ;       })
+    ;     })
+    ;     (make-node :view/expr/symbol { :str "|" })
+    ;     (make-node :clojure/kernel/unquote {
+    ;       :body
+    ;       (make-node :clojure/kernel/var {
+    ;         :ref (ref-node :for_expr)
+    ;       })
+    ;     })        
+    ;   ])
+    ; })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/kernel/let {
+        :bind
+        (make-node :clojure/kernel/bind :for0 { :name "for" })
+        
+        :expr
+        (make-node :clojure/kernel/lambda :for_for {
+          :params 
+          (make-node :clojure/kernel/params [
+            (make-node :clojure/kernel/bind :for1 { :name "seq" })
+          ])
+          
+          :body
+          (make-node :clojure/kernel/if {
+            :test
+            (make-node :clojure/kernel/app {
+              :expr
+              (make-node :clojure/kernel/extern { :name "seq" }) ; ugly!
+              
+              :args
+              (make-node :clojure/kernel/args [
+                (make-node :clojure/kernel/var {
+                  :ref (ref-node :for1)
+                })
+              ])
+            })
+
+            :then
+            (make-node :clojure/kernel/let {
+              :bind
+              (make-node :clojure/kernel/unquote {
+                :body
+                (make-node :clojure/kernel/var {
+                  :ref (ref-node :for_x)
+                })
+              })
+
+              :expr
+              (make-node :clojure/core/first {
+                :expr
+                (make-node :clojure/kernel/var {
+                  :ref (ref-node :for1)
+                })
+              })
+              
+              :body
+              (make-node :clojure/core/cons {
+                :first
+                (make-node :clojure/kernel/unquote {
+                  :body
+                  (make-node :clojure/kernel/var {
+                    :ref (ref-node :for_expr)
+                  })
+                })
+                
+                :rest
+                (make-node :clojure/kernel/app {
+                  :expr
+                  (make-node :clojure/kernel/var {
+                    :ref (ref-node :for_for)
+                  })
+                  
+                  :args
+                  (make-node :clojure/kernel/params [
+                    (make-node :clojure/core/rest {
+                      :expr
+                      (make-node :clojure/kernel/var {
+                        :ref (ref-node :for1)
+                      })
+                    })
+                  ])
+                })
+              })
+            })
+            
+            :else
+            (make-node :clojure/kernel/nil)
+          })
+        })
+        
+        :body
+        (make-node :clojure/kernel/app {
+          :expr
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :for0)
+          })
+          
+          :args 
+          (make-node :clojure/kernel/args [
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :for_seq)
+              })
+            })
+          ])
+        })
+      })
+    })
+  })
+  
+  ; TODO: take, drop, [i..j]
 ])
