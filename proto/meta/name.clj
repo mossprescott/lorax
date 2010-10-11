@@ -47,7 +47,9 @@
 
     :clojure/kernel/bind
     (fn [n]
-      (baseName (node-id n)))  ; HACK: look for an optional attr, or assign a random name (x, x', ...?)
+      (if (has-attr? n :name)
+        (node-attr-value n :name)
+        (baseName (node-id n))))  ; HACK: assign a random name? (x, x', ...?)
 
     :clojure/kernel/lambda
     (fn [n]
