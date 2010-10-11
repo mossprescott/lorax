@@ -1,10 +1,13 @@
-\section{Related Work}\todo{}
+\chapter{Related Work}
+\todo{}
 
 Fortress. 
 
 Intentional Whatever. MPS. 
 
 Structure editors in general (CPS, etc.) Visual programming languages. 
+
+YALE\cite{zavodnik}: similar approach, but a completely different set of goals---speed compilation by avoiding lexing and syntactic analysis; prevent errors. Similarly to CPS, leaves expressions to be entered as text (because they are relatively simple to parse).
 
 barista(eisenberg)
 
@@ -16,7 +19,7 @@ XMLisp, sorta
 
 
 
-\section{JUNK: Future Work}
+%\section{JUNK: Future Work}
 
 %\temp{more checking: scope? loop/recur? type-check the reductions?}
 
@@ -29,15 +32,15 @@ XMLisp, sorta
 %\temp{integrate with an IDE}
 
 
-\subsection{Editing}
+%\subsection{Editing}
 
-\todo{put some of this into examples...}
+%\todo{put some of this into examples...}
 
-\temp{result: so-so. left/right vs. up/down is confusing. would it be better to distinguish between left/right and up/down and use some other keystrokes for parent/child?}
+%\temp{result: so-so. left/right vs. up/down is confusing. would it be better to distinguish between left/right and up/down and use some other keystrokes for parent/child?}
 
-\temp{goals: clarify tree structure; correspond to visual layout; minimize keystrokes; be reversible}
+%\temp{goals: clarify tree structure; correspond to visual layout; minimize keystrokes; be reversible}
 
-\temp{Is this discussion needed? here?} This simple model is sufficient but sometimes it requires several actions to change the selection to the desired node, and sometimes a sequence of actions produces an unexpected result. For example, once the first visible child of a node is selected, the \emph{select previous sibling} action is ineffective, so that action cannot be used to traverse beyond the current parent. A related action might be \emph{select previous cousin}, which would select either the previous sibling, or no such sibling exists, then the last visible child of the parent's previous sibling. Alternatively, \emph{select previous ???} would move from the first visible sibling to the \emph{parent's} previous sibling.
+%\temp{Is this discussion needed? here?} This simple model is sufficient but sometimes it requires several actions to change the selection to the desired node, and sometimes a sequence of actions produces an unexpected result. For example, once the first visible child of a node is selected, the \emp{select previous sibling} action is ineffective, so that action cannot be used to traverse beyond the current parent. A related action might be \emp{select previous cousin}, which would select either the previous sibling, or no such sibling exists, then the last visible child of the parent's previous sibling. Alternatively, \emp{select previous ???} would move from the first visible sibling to the \emp{parent's} previous sibling.
 
-\todo{talk about ways of extending the notion of selection to more than a single node?}
+%\todo{talk about ways of extending the notion of selection to more than a single node?}
 

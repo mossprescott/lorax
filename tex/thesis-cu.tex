@@ -1,0 +1,70 @@
+% Thesis using CU's 'thesis' class
+% Moss Prescott 2010
+
+\documentclass[defaultstyle,12pt]{thesis}
+
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage[nice]{nicefrac}
+
+\title{Going Meta: a New Approach to Language Construction}
+
+\author{Moss}{Prescott}
+
+\otherdegrees{B.A., University of California Berkeley, 2004}
+
+\degree{Master of Science}{M.S., Computer Science}
+
+\dept{Department of}{Computer Science}
+
+\advisor{Assistant Professor}
+		{Jeremy Siek}
+
+\reader{Asst.~Prof.~Bor-Yuh Evan Chang}
+\readerThree{Prof.~Clayton Lewis}
+
+\abstract{ \OnePageChapter
+\input{src/abstract.tex}
+}
+
+\dedication[Dedication]{
+To PJ, for some stuff, and to Kevin, for some other stuff.
+}
+
+\ToCisShort
+
+\LoFisShort
+
+\LoTisShort
+
+\begin{document}
+
+%% body &&
+\input src/defs.tex
+\input src/ch1.tex
+\input src/ch2.tex
+\input src/ch3.tex
+\input src/ch4.tex
+\input src/ch5.tex
+\input src/ch6.tex
+\input src/ch7.tex
+
+
+%% bibliography &&
+\bibliographystyle{plain}	% "plain", or "siam", or "alpha", or "abbrv"
+				% see other styles (.bst files) in
+				% $TEXHOME/texmf/bibtex/bst
+
+\nocite{*}		% list all refs in database, cited or not.
+
+\bibliography{src/refs}		% bib database file refs.bib
+
+
+%% appendices? &&
+
+%\appendix	% don't forget this line if you have appendices!
+
+
+
+\end{document}

@@ -1,0 +1,1 @@
+rm -v *.log *.lof *.lot *.blg *.aux *.gz* *.toc *.bbl

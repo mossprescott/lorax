@@ -1,74 +1,65 @@
-\section{Abstract Syntax Trees}
+\chapter{Abstract Syntax Trees}
+\label{ASTs}
 In order to build programs directly out of nodes, we need a common representation for nodes which is flexible enough to represent all possible programs, and which supports the kind of editing operations we will want to provide. It should provide a natural way to represent the primitive values which appear in programs, and the common ways of aggregating values into larger structures. It should be flexible enough to represent arbitrary programs, and allow nodes to be freely composed without imposing any fixed constraints but always maintaining a clearly defined structure.
 
 
-\subsection{Nodes, Values, and References}
-A \emph{program} is a tree made up of \emph{nodes}. Every node has a \emph{type}, a unique \emph{label}, and a \emph{value}. A node's type identifies it as one of a class of related nodes, all of which have some common meaning (for example, the type \keyword{plus} might represent addition expressions). A node's label is an opaque identifier which gives it a distinct identity, and allows references to nodes to survive transformations of the program. A node's value may be: \emph{empty}, if the node type alone carries all the node's meaning; an atomic value, which is a \emph{boolean}, \emph{integer}, or \emph{string} (a sequence of characters which are treated as an indivisible value)\footnote{An alternative would be to treat single characters as a primitive value, and build strings out of sequences of character-valued nodes. For the current purpose, treating strings as atomic is more efficient and simpler to deal with during editing.}; a \emph{sequence} of $n$ child nodes (indexed by integers $0$ to $n-1$); or an (unordered) \emph{map} of distinct \emph{attribute names} to child nodes. A \emph{reference} is a special type of node which has the type \keyword{ref}, and has as its value the label of another node.
+\section{Nodes, Values, and References}
+A \emp{program} is a tree made up of \emp{nodes}. Every node has a \emp{type}, a unique \emp{label}, and a \emp{value}. A node's type identifies it as one of a class of related nodes, all of which have some common meaning (for example, the type \keyword{plus} might represent addition expressions). A node's label is an opaque identifier which gives it a distinct identity, and allows references to nodes to survive transformations of the program. A node's value may be: \emp{empty}, if the node type alone carries all the node's meaning; an atomic value, which is a \emp{boolean}, \emp{integer}, or \emp{string} (a sequence of characters which are treated as an indivisible value)\footnote{An alternative would be to treat single characters as a primitive value, and build strings out of sequences of character-valued nodes. For the current purpose, treating strings as atomic is more efficient and simpler to deal with during editing.}; a \emp{sequence} of $n$ child nodes (indexed by integers $0$ to $n-1$); or an (unordered) \emp{map} of distinct \emp{attribute names} to child nodes. A \emp{reference} is a special type of node which has the type \keyword{ref}, and has as its value the label of another node.
 
-The program is \emph{well-formed} if its nodes satisfy the following constraints:
+The program is \emp{well-formed} if its nodes satisfy the following constraints:
 \begin{enumerate}
 \item No two nodes have the same label.
 \item No node appears as a child of more than one parent, or under more than one index/name of a sequence/map-valued node (so the nodes form a tree).
 \item The value of each reference node is the label of some node in the program.
 \end{enumerate}
 
-Nodes are immutable values, so a program is a \emph{persistent data structure}\cite{sarnak}. It is relatively efficient to construct a modified program by building a new tree sharing much of the structure of an existing tree.
+Nodes are immutable values, so a program is a \emp{persistent data structure}\cite{sarnak}. It is relatively efficient to construct a modified program by building a new tree sharing much of the structure of an existing tree.
 
 Note that any node can be considered as the root node of a sub-tree consisting of its descendant nodes. A sub-tree of a well-formed tree will be well-formed unless it contains a  reference to a node which is not part of the same sub-tree. Such a reference is analogous to a free variable, and can play a similar role.
 
 For the sake of modularity, types and attribute names are associated with namespaces, so that simple names can be used without fear of unintentional collisions. 
 
 
-\subsection{Specifications}
-A \emph{specification} constrains the structure of nodes in a program. A program is \emph{valid} with respect to a certain specification if the arrangement of nodes, values, and references satisfies the specification's constraints.
+\section{Specifications}
+A \emp{specification} constrains the structure of nodes in a program. A program is \emp{valid} with respect to a certain specification if the arrangement of nodes, values, and references satisfies the specification's constraints.
 
-%For example, a certain specification might include the constraint ``for all nodes $n$, if the type of $n$ is \keyword{if}, then $n$ has an attribute \keyword{test}, whose type is (an instance of) \keyword{expr}.''
+In practice a program may contain more than one violation of a specification, and the user will be interested in the nature of each violation in order to be able to fix them (by correcting either the program or the specification). Therefore a specification will typically be implemented in the form of a \emp{checker}, a function over programs which produces a set of \emp{errors} each consisting of a description of the problem and the location where it occurs.
 
-In practice a program may contain more than one violation of a specification, and the user will be interested in the nature of each violation in order to be able to fix them (by correcting either the program or the specification). Therefore a specification will typically be implemented in the form of a \emph{checker}, a function over programs which produces a set of \emph{errors} each consisting of a description of the problem and the location where it occurs.
-
-Depending on the nature of the properties being checked, a specification may be defined only in terms of \emph{local} properties of individual nodes and their direct children, or may refer to \emph{non-local} relationships between nodes more distantly connected. In general, local properties are easier to define, easier to check, and easier to understand, so for the most part they are to be preferred. In section \ref{grammars}, we describe a particularly direct and convenient way of specifying the basic structural properties which are sufficient to define the abstract syntax of a programming language.
+Depending on the nature of the properties being checked, a specification may be defined only in terms of \emp{local} properties of individual nodes and their direct children, or may refer to \emp{non-local} relationships between nodes more distantly connected. In general, local properties are easier to define, easier to check, and easier to understand, so for the most part they are to be preferred. In section \ref{grammars}, we describe a particularly direct and convenient way of specifying the basic structural properties which are sufficient to define the abstract syntax of a programming language.
 
 By providing a modular way of describing and checking properties of programs, specifications give much-needed structure to the open model of ASTs described in the preceding sections. But they do not restrict the user's ability to modify and extend her program and/or language, even if that means the program is invalid at times.
-%There is an analogy with the multi-level nature of an IDE: the main interface is a text editor, which can be used to enter arbitrary character sequences, but it is augmented with an ``online'' compiler, which parses the character stream into an AST and analyzes the program's types, etc. The information that is gleaned is then fed back to the text editor in the form of syntax hiliting, error indicators, and other helpful indications of the compiler's understanding. However, because in our system the program is not internally represented in an easily readable form, the presentation of it requires a more comprehensive approach.
 
 
-\subsection{Reduction}\label{reduction}
-The next step in making a useful system is a way to produce (multiple) \emph{target} programs from a given \emph{source} program. The central idea is to have a single source program, consisting of nodes in some ``user'' programming language, which includes a node type for every important programming construct. In an extensible system, the user is able to add new types of nodes or even entire languages to a running system, but the underlying system must be supplied with some fixed set of node types that it understands. The way to bridge this gap is via \emph{reduction}.
+\section{Reduction}\label{reduction}
+The next step in making a useful system is a way to produce (multiple) \emp{target} programs from a given \emp{source} program. The central idea is to have a single source program, consisting of nodes in some ``user'' programming language, which includes a node type for every important programming construct. In an extensible system, the user is able to add new types of nodes or even entire languages to a running system, but the underlying system must be supplied with some fixed set of node types that it understands. The way to bridge this gap is via \emp{reduction}.
 
-Reduction is a restricted form of \emph{graph reduction}, inspired by the macro expansion process of Lisp\footnote{When I use the term Lisp, I intend to refer to any of the many variants of Lisp, including Maclisp, Common Lisp, Emacs Lisp, Scheme.}, and in fact the term ``expansion'' might be more appropriate because a typical reduction replaces a more abstract node with a potentially larger number of lower-level nodes.
+Reduction is a restricted form of \emp{graph reduction}, inspired by the macro expansion process of Lisp\footnote{When I use the term Lisp, I intend to refer to any of the many variants of Lisp, including Maclisp, Common Lisp, Emacs Lisp, Scheme.}, and in fact the term ``expansion'' might be more appropriate because a typical reduction replaces a more abstract node with a potentially larger number of lower-level nodes.
 
-A \emph{source} program is reduced to a \emph{target} program by applying a \emph{reduction function} to the root node of the source program. If any reduction is possible, the reduction function returns a new, replacement root node, which typically repackages the children of the original root node under some new kind of parent. As long as some reduction is performed, the reduction function is applied repeatedly to the previous result. Eventually, the root node is fully-reduced (the function fails to return a new reduced node). At that point, each child node is reduced in the same way, and a new root node is constructed with the reduced children.
+A \emp{source} program is reduced to a \emp{target} program by applying a \emp{reduction function} to the root node of the source program. If any reduction is possible, the reduction function returns a new, replacement root node, which typically repackages the children of the original root node under some new kind of parent. As long as some reduction is performed, the reduction function is applied repeatedly to the previous result. Eventually, the root node is fully-reduced (the function fails to return a new reduced node). At that point, each child node is reduced in the same way, and a new root node is constructed with the reduced children. \todo{ask Jeremy if this needs more explanation}
 
-\todo{figure: schematic of a simple tree being reduced in steps}
-
-
-\subsubsection{Properties of the reduction algorithm}
 Because each reduction step constructs an arbitrary replacement node, it's possible to write virtually any transformation as a reduction. This means, for one thing, that reduction may not terminate. This generality, and the potential errors it allows, are typical of meta-programming systems; the full power of the language is available at compile-time, including the ability to introduce bad behavior.
 
 During reduction a series of intermediate programs are produced which are partially reduced, and in general do not conform to the source or target specification. It might be interesting to investigate ways of defining specifications and reductions such that it could be statically shown that a valid source program always reduces to a valid target program.
 
-As a practical matter, it's convenient to define reduction functions only for properly-formed inputs. This can be facilitated by declaring both the specification (e.g. expected attributes for each node type) and the reduction (given a node with those attributes) at the same time. If the specification defines only local properties, then the reduction should assume only the presence of \emph{some} node at each required location, but make no demands on the form of these child nodes. 
+As a practical matter, it's convenient to define reduction functions only for properly-formed inputs. This can be facilitated by declaring both the specification (e.g. expected attributes for each node type) and the reduction (given a node with those attributes) at the same time. If the specification defines only local properties, then the reduction should assume only the presence of \emp{some} node at each required location, but make no demands on the form of these child nodes. 
 
 
-\subsubsection{Passing information down}
-A local reduction works by examining one node at a time, producing a reduced node which combines the children of the original node in a new way, possibly with some additional nodes inserted as well. This is often sufficient, but in some cases it's necessary to propagate some additional information through the reduction process. A simple extension that meets many needs is to augment the reduction function described above to accept an additional \emph{environment} parameter, an arbitrary value, and to return both a reduced node and a new environment value. When recursively visiting child nodes, the value resulting from the parent's reduction is used. This allows the reduction function to compute values based on the shape of the tree and use them to control some aspects of the reduction. For example, a reduction could keep track of the depth of the tree (distance from the root node).
 
-This simple approach works because the children of each node are always available to the reduction function, while the parent nodes are not. The ``inherited'' value allows the reduction function to accumulate some information about the otherwise inaccessible ancestors.
+%\subsection{Passing information down}
+%A local reduction works by examining one node at a time, producing a reduced node which combines the children of the original node in a new way, possibly with some additional nodes inserted as well. This is often sufficient, but in some cases it's necessary to propagate some additional information through the reduction process. A simple extension that meets many needs is to augment the reduction function described above to accept an additional \emp{environment} parameter, an arbitrary value, and to return both a reduced node and a new environment value. When recursively visiting child nodes, the value resulting from the parent's reduction is used. This allows the reduction function to compute values based on the shape of the tree and use them to control some aspects of the reduction. For example, a reduction could keep track of the depth of the tree (distance from the root node).
 
-\subsubsection{Tracking source nodes}
-When it's desirable to keep track of what source node gave rise to a given target node, the reduction can record the labels of each pair of source and target node, forming a kind of mapping between the parallel trees. For this to work, the reduction function needs to operate strictly on the single node it's given, and not reach into any child node. This in turn places some constraints on the way the source program is constructed: each node (along with any environment) must bear sufficient information to identify the correct reduction.
-
-\todo{figure: "links" back to source nodes, or would it make more sense later?}
+%This simple approach works because the children of each node are always available to the reduction function, while the parent nodes are not. The ``inherited'' value allows the reduction function to accumulate some information about the otherwise inaccessible ancestors.
 
 
-\subsection{Characteristics}
+
+\section{Characteristics}
 This way of constructing program source has some implications for the way languages can be defined and the way programs can be worked with.
 
-Node types, attributes, and specifications naturally fit with the concepts of \emph{context-free grammars}, which allows specifications to be defined in ways that are familiar to language designers (i.e. with a grammar). Because grammars so-defined will be used only for checking tree structure and not for parsing, they can be constructed in the natural way, without any need for tricks to work around parsing algorithm shortcomings (e.g. left-factoring).
+Node types, attributes, and specifications naturally fit with the concepts of \emp{context-free grammars}, which allows specifications to be defined in ways that are familiar to language designers (i.e. with a grammar). Because grammars so-defined will be used only for checking tree structure and not for parsing, they can be constructed in the natural way, without any need for tricks to work around parsing algorithm shortcomings (e.g. left-factoring).
 
-Programs are \emph{self-describing}. Each node carries an explicit declaration of its meaning, and each primitive value is manifestly of a certain type. This is in contrast to a textual language, where the same sequence of characters might represent a name, data, or a keyword, depending on the context in which they appear. This is a major advantage especially for tools that manipulate programs, because no parser is necessary to extract the structure of the program.
+Programs are \emp{self-describing}. Each node carries an explicit declaration of its meaning, and each primitive value is manifestly of a certain type. This is in contrast to a textual language, where the same sequence of characters might represent a name, data, or a keyword, depending on the context in which they appear. This is a major advantage especially for tools that manipulate programs, because no parser is necessary to extract the structure of the program.
 
-Labels provide robust \emph{source locations}. The label provides each node with an identity that survives when the other parts of the program are changed, or when the program is serialized to non-volatile storage, etc. Thus labels provide a way for tools (e.g. compilers and debuggers) to refer to source locations. \todo{diff?}
+Labels provide robust \emp{source locations}. The label provides each node with an identity that survives when the other parts of the program are changed, or when the program is serialized to non-volatile storage, etc. Thus labels provide a way for tools (e.g. compilers and debuggers) to refer to source locations. \todo{diff?}
 
 Reference nodes provide a way of referring to entities in a program which can never be ambiguous, and is independent of such language-specific notions as names and scope. Using labels, as opposed to, say, pointers to the referenced node, keeps the tree simple, makes the relationship explicit, and allows references to be inspected without recourse to low-level techniques. Reference nodes require special support from editors, which may also take advantage of the explicit reference structure to provide enhanced presentation of references (which in a textual setting would require knowledge of not only the lexical but also the semantic structure of the language).
 
@@ -76,8 +67,8 @@ Nodes may be serialized for storage, distributed processing, etc. Assuming a cho
 
 This representation of programs as nodes has some things in common with a handful of other tree-structured representations source code and/or intermediate representations within tools such as compilers.
 
-\subsubsection{Comparison to XML}
-XML and other related \emph{markup languages}, are designed to augment textual data with explicit structure for a variety of purposes. The structure of an XML document has much in common with the structure of nodes as defined here, and the \emph{XML Infoset}\cite{infoset} model for documents in particular has a similar flavor. However, there are some important differences:
+\subsection{Compared to XML}
+XML and other related \emp{markup languages}, are designed to augment textual data with explicit structure for a variety of purposes. The structure of an XML document has much in common with the structure of nodes as defined here, and the \emp{XML Infoset}\cite{infoset} model for documents in particular has a similar flavor. However, there are some important differences:
 \begin{enumerate}
 \item The child elements of each node in an XML document are always in an ordered sequence, while named attributes can contain only simple character data. In \Meta, a node's children may be ordered or named, whichever makes sense, and there is no separate notion of attribute values vs. child nodes.
 \item XML is explicitly a format for character streams, onto which an abstract model can be imposed \textit{post-hoc}. This leads to many awkward and ultimately uninteresting problems, such as when to ignore white-space and when it should be included in the data model.
@@ -87,11 +78,12 @@ XML and other related \emph{markup languages}, are designed to augment textual d
 
 XML's undesirability as a concrete syntax for programs has been well-established, and stands as an example of the usability challenges posed by representing source code as structured data\cite{?}. We believe this this failure largely results from the use of the textual representation as the editing interface.
 
-\subsubsection{S-expressions}
-Most Lisp programs are written in \emph{S-expressions}, a simple data structure offering only lists, symbols (i.e. names), and a handful of types of primitive values. Because of this simplicity, a simple encoding of S-expressions (using parentheses for grouping and white-space to separate tokens) is sufficient to allow them to be ``parsed'' from text with minimal effort. This approach gives considerable generality and flexibility, but the use of s-expressions directly in lieu of a concrete syntax has been a highly divisive choice, essentially separating the population of programmers into two ``camps''---those who are put off by sequences of nested paretheses and those who appreciate the beauty of having the structure of the code plainly visible on the page\cite{?}.
+\subsection{Compared to S-expressions}
+Most Lisp programs are written in \emp{S-expressions}, a simple data structure offering only lists, symbols (i.e. names), and a handful of types of primitive values. Because of this simplicity, a simple encoding of S-expressions (using parentheses for grouping and white-space to separate tokens) is sufficient to allow them to be ``parsed'' from text with minimal effort. This approach gives considerable generality and flexibility, but the use of s-expressions directly in lieu of a concrete syntax has been a highly divisive choice, essentially separating the population of programmers into two ``camps''---those who are put off by sequences of nested parentheses and those who appreciate the beauty of having the structure of the code plainly visible on the page\cite{?}.
 
 It is a major goal of this thesis to establish that some of the benefits of the Lisp model can be realized in the context of a language that can be read by ``the rest of us.''
 
-\subsubsection{ADTs}
-When language tools are written in functional languages such as Haskell and ML, nodes are often represented using \emph{abstract data types}\cite{functionalAST}, which form similar persistent trees. The major difference is that ADTs are constrained by the type system to be valid. \Meta's nodes are untyped values, which provides significant flexibility.
+\subsection{Compared to ADTs}
+When language tools are written in functional languages such as Haskell and ML, nodes are often represented using \emp{abstract data types}\cite{functionalAST}. ADTs are rarely used directly to represent programs, but are often used to represent programs after parsing. 
 
+The major difference is that ADTs are constrained by the type system to be valid. \Meta's nodes are subject to fewer hard restrictions, which allows programs to be freely modified by the programmer in the process of constructing and modifying the program.
