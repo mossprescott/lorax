@@ -89,14 +89,13 @@
 ; jsMath's Computer Modern fonts:
 ;
 
-(def DISPLAY_SIZE 18)
 (def TEXT_SIZE 14)
 (def SCRIPT_SIZE 11)  ; Note: Knuth says 0.7x, which is more like 9.8
-(def SCRIPT_SCRIPT_SIZE (* DISPLAY_SIZE 0.5))
+(def SCRIPT_SCRIPT_SIZE 9)  ; Note: Knuth says 0.5x, which is 7
 
 ; (def TEXT_SIZE 12)
 ; (def SCRIPT_SIZE 10)  ; Note: Knuth says 0.7x, which is more like 9.8
-; (def SCRIPT_SCRIPT_SIZE (* DISPLAY_SIZE 0.5))
+; (def SCRIPT_SCRIPT_SIZE (* TEXT_SIZE 0.5))
 
 (def FONTS {
   ;
@@ -131,6 +130,7 @@
   ; although the jsMath site claims they are present.
   :cmsy10 (Font. "jsMath-cmsy10" Font/PLAIN TEXT_SIZE)
   :cmsy10-script (Font. "jsMath-cmsy10" Font/PLAIN SCRIPT_SIZE)
+  :cmsy10-scriptscript (Font. "jsMath-cmsy10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
   
   ;
   ; Other fonts, for special purposes:
@@ -357,23 +357,27 @@
 ;
 ; Space:
 ;
-(def QUAD_WIDTH (* 1.0 DISPLAY_SIZE))  ; HACK: this is the quad width for cmmi
+(def QUAD_WIDTH (* 1.0 TEXT_SIZE))  ; HACK: this is the quad width for cmmi
 
+; TODO: reduce these spaces from expr, using different sizes for each mode
 (defmethod size-impl :view/thinspace [n & more] 
   (let [ quadWidth QUAD_WIDTH ]
-  [(* quadWidth (float 1/6)) 0 0]))  ; see Knuth, p167
+  ; [(* quadWidth (float 1/6)) 0 0]))  ; 3mu; see Knuth, p167
+  [2 0 0]))
 (defmethod layout-impl :view/thinspace [n & more] [])
 (defmethod draw-impl :view/thinspace [n & more] nil)
 
 (defmethod size-impl :view/mediumspace [n & more]
   (let [ quadWidth QUAD_WIDTH ]
-  [(* quadWidth (float 2/9)) 0 0]))  ; see Knuth, p167
+  ; [(* quadWidth (float 2/9)) 0 0]))  ; 4mu; see Knuth, p167
+  [5 0 0]))
 (defmethod layout-impl :view/mediumspace [n & more] [])
 (defmethod draw-impl :view/mediumspace [n & more] nil)
 
 (defmethod size-impl :view/thickspace [n & more]
   (let [ quadWidth QUAD_WIDTH ]
-  [(* quadWidth (float 5/18)) 0 0]))  ; see Knuth, p167
+  ; [(* quadWidth (float 5/18)) 0 0]))  ; 5mu; see Knuth, p167
+  [8 0 0]))
 (defmethod layout-impl :view/thickspace [n & more] [])
 (defmethod draw-impl :view/thickspace [n & more] nil)
 

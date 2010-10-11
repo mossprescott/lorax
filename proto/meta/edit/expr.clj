@@ -149,6 +149,8 @@
   :in [ "2" :cmsy10 ]
   
   :prime [ "\u0030" :cmsy10 ]
+  
+  :cdot [ "\u00c1" :cmsy10 ]
 })
 
 ;
@@ -281,7 +283,15 @@
             (let [sname (node-attr-value n :str)]
               (assert-pred #(contains? SYMBOLS %) sname)  ; TODO: don't assert? instead reduce to what?
               (let [ [c f] (SYMBOLS sname)
-                     fp (if (= f :cmsy10) (-> FONTS_BY_STYLE_AND_MODE :symbol mode) f)]  ; HACK
+                     fp (condp = f          ; HACK!
+                          :cmsy10
+                          (-> FONTS_BY_STYLE_AND_MODE :symbol mode)
+                          
+                          :cmr10
+                          (-> FONTS_BY_STYLE_AND_MODE :int mode)
+                          
+                          f)
+                    ]
                 [ (make-node :view/chars {
                     :str (make-node :core/string c)
                     :font (make-node :core/name fp)
