@@ -6,6 +6,9 @@
 
   ; continuedFraction
   (make-node :grammar/mapNode {
+    :doc 
+    (make-node :grammar/doc { :str "Continued fraction constructor, with coefficient (an int at runtime) and optional continuation (a cont. fraction)." })
+    
     :type
     (make-node :grammar/type :cf/fraction)
     
@@ -36,32 +39,70 @@
           (make-node :grammar/node { :type :clojure/kernel/expr })
         ])
         
-        :optional false
+        :optional true
       }) 
     ])
     
     :display
     (make-node :clojure/kernel/quote {
       :body
-      (make-node :clojure/core/plus {
+      (make-node :clojure/core/plus {  ; TODO: don't use the actual plus node?
         :left
         (make-node :clojure/kernel/unquote {
           :body
           (make-node :clojure/kernel/var {
-           :ref (ref-node :cf_coeff) 
+           :ref (ref-node :cf_coeff) ; HACK
           })
         })
         
         :right
-        (make-node :clojure/core/fraction {
-          :num
-          (make-node :clojure/kernel/int { :value 1 })
-          
-          :denom
-          (make-node :clojure/kernel/unquote {
-            :body
-            (make-node :clojure/kernel/var {
-             :ref (ref-node :cf_cont) 
+        ; Note: big scary conditional to handle an optional attribute:
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/if {
+            :test
+            (make-node :clojure/kernel/app {  ; TODO: use core/type? better yet, core/missing?
+              :expr
+              (make-node :clojure/kernel/extern { :name "="})
+              
+              :args
+              (make-node :clojure/kernel/args [
+                (make-node :clojure/kernel/app {
+                  :expr
+                  (make-node :clojure/kernel/extern { :name "meta.core/node-type"})
+              
+                  :args
+                  (make-node :clojure/kernel/args [
+                    (make-node :clojure/kernel/var {
+                      :ref (ref-node :cf_cont)
+                    })
+                  ])
+                })
+                (make-node :clojure/kernel/name { :value :view/expr/missing })
+              ])
+            })
+            
+            :then
+            (make-node :clojure/kernel/quote {
+              :body
+              (make-node :view/expr/symbol { :str :cdot })
+            })
+            
+            :else
+            (make-node :clojure/kernel/quote {
+              :body
+              (make-node :clojure/core/fraction {
+                :num
+                (make-node :clojure/kernel/int { :value 1 })
+                      
+                :denom
+                (make-node :clojure/kernel/unquote {
+                  :body
+                  (make-node :clojure/kernel/var {
+                   :ref (ref-node :cf_cont) 
+                  })
+                })
+              })
             })
           })
         })
@@ -74,7 +115,7 @@
       ; Tricky! double-quotation doesn't work because I reduce the node under 
       ; the quote. There's probably an answer (a form of quotation that 
       ; blocks reduction?), but for now a hack.
-      ; TODO: at least add some simple syntax for doing this.
+      ; TODO: at least add some simpler syntax for doing this.
       (make-node :clojure/kernel/app {
         :expr
         (make-node :clojure/kernel/extern { :name "meta.core/make-node"})
@@ -106,6 +147,7 @@
                 ])
               })
 
+              ; TODO: handle missing :cont
               (make-node :clojure/kernel/name { :value :cont })
 
               ; Tricky: the value of the attribute may need to be unread back into a node:
@@ -171,7 +213,7 @@
     
     :attrs
     (make-node :grammar/attrs [
-      (make-node :grammar/attr :cf_coeff {
+      (make-node :grammar/attr :coeff_expr {
         :name
         (make-node :grammar/name :cf/coeff/expr)
         
@@ -196,7 +238,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-             :ref (ref-node :cf_coeff) 
+             :ref (ref-node :coeff_expr) 
             })
           })
         })
@@ -211,7 +253,7 @@
         (make-node :clojure/kernel/unquote {
           :body
           (make-node :clojure/kernel/var {
-           :ref (ref-node :cf_coeff) 
+           :ref (ref-node :coeff_expr) 
           })
         })
         
