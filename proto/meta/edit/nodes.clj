@@ -2,7 +2,7 @@
 ; horizontal list and math list concepts.
 
 ; TODO: grammar for the nodes
-; TODO: optionally align certain elements to pixel (or half-pixel) boundaries?
+; TODO: optional alignment of certain elements to pixel (or half-pixel) boundaries?
 ; TODO: some kind of magnification factor?
 
 (ns meta.edit.nodes
@@ -216,7 +216,6 @@
   []
   [(atom {}) (atom {})])
 
-; TODO: handle non-node
 (defn size
   [n g ctx]
   (let [ [sizes layouts] ctx
@@ -229,7 +228,6 @@
         (swap! sizes assoc key ret)
         ret))))
 
-; TODO: handle non-node
 (defn layout
   [n g ctx]
   (let [ [sizes layouts] ctx
@@ -303,6 +301,8 @@
     (node? str-attr) (subs (str (node-type str-attr)) 1)  ; HACK
     true (str str-attr)))
 
+(def BROKEN_DESCENDER_FONTS #{ :cmsy10 :cmsy10-script :cmsy10-scriptscript })
+
 (defmethod size-impl :view/chars
   [n #^Graphics2D g ctx]
   (let [s (as-string (node-attr n :str))
@@ -313,7 +313,8 @@
         #^Rectangle2D bounds (string-bounds s f g)]
       ; (println bounds)
       [(.getWidth bounds)
-        (if (= f :cmsy10)  ; HACK: workaround weird descent in the symbol font for now
+          ; Note: workaround weird descent in the symbol font for now
+        (if (contains? BROKEN_DESCENDER_FONTS f)
           (- (.getMinY bounds))
           (.getHeight bounds))
         (- (.getMinY bounds))]))
@@ -463,7 +464,7 @@
     ; (println "szs" szs) ; HACK
     [ (apply max 0 (for [ [w h b] szs ] w))
       (- (reduce #(+ %1 (second %2) LINE_SPACING) 0 szs) LINE_SPACING)
-      nil ])) 
+      (if (seq szs) ((first szs) 2)) ])) ; use baseline of first child, if any
 
 (defmethod layout-impl :view/section
   [n #^Graphics2D g ctx] 
@@ -610,22 +611,23 @@
 ;
 
 (def DELIMS {
-  ; All from cmex10 (Note: smaller sizes are in cmsy10)
+  ; All from cmex10 (Note: smaller sizes, with normal baselines, are in cmsy10)
   ; Note how randomly these are sprinkled around the font. JSMath's symbol 
   ; table has them in a much more rational order, so I must be missing something.
   "(" [ "\u00c0" "\u00b0" "\u00d2" "\u00ef" ]  ; growable: 30, 42, 31
   ")" [ "\u00c1" "\u00d1" "\u00d3" "\u0021" ]  ; growable: 40, 43, 41
   "[" [ "\u00c2" "\u0068" "\u00d4" "\u0022" ]  
   "]" [ "\u00c3" "\u0069" "\u00d5" "\u0023" ]
-  :lfloor [ "\u00c4" ] ; TODO...
-  :rfloor [ "\u00c5" ]
-  :lceil [ "\u00c6" ]
-  :rceil [ "\u00c7" ]
-  "{" [ "\u00c8" "\u006e" "\u00da" "\u0028" ]
-  "}" [ "\u00c9" "\u006f" "\u00db" "\u0029" ]
-  :langle [ "\u00ca" ]
-  :rangle [ "\u00cb" ]
-  "|" []
+  :lfloor [ "\u00c4" "\u006a" "\u00d6" "\u0024" ] ; TODO... ; cmsy 0x62
+  :rfloor [ "\u00c5" "\u006b" "\u00b8" "\u0025" ] ; cmsy 0x63
+  :lceil [ "\u00c6" ] ; cmsy 0x64
+  :rceil [ "\u00c7" ] ; cmsy 0x65
+  "{" [ "\u00c8" "\u006e" "\u00da" "\u0028" ] ; cmsy 0x66
+  "}" [ "\u00c9" "\u006f" "\u00db" "\u0029" ] ; cmsy 0x67
+  :langle [ "\u00ca" ] ; cmsy 0x68
+  :rangle [ "\u00cb" ] ; cmsy 0x69
+  "|" [] ; cmsy 0x6a
+  "||" []  ; cmsy 0x6b
   })
 
 (def DELIM_SPACE 2)
@@ -639,7 +641,7 @@
         [lst ^Rectangle2D lr] (pick-glyph ch (DELIMS l) (FONTS :cmex10) g)
         [rst ^Rectangle2D rr] (pick-glyph ch (DELIMS r) (FONTS :cmex10) g)
         dh (max (.getHeight lr) (.getHeight rr))
-        cy (/ (- dh ch) 2)]
+        cy (/ (max (- dh ch) 0) 2)]
     [ (+ (.getWidth lr) DELIM_SPACE cw DELIM_SPACE (.getWidth rr)) 
       (max (.getHeight lr) ch (.getHeight rr))
       (if cb (+ cy cb))]))
@@ -647,24 +649,24 @@
 (defmethod layout-impl :view/delimited
   [n #^Graphics2D g ctx]
   (let [l (node-attr-value n :left)
-        x (node-attr n :content)
+        c (node-attr n :content)
         r (node-attr-value n :right)
-        [xw xh xb] (size x g ctx)
-        [lst ^Rectangle2D lr] (pick-glyph xh (DELIMS l) (FONTS :cmex10) g)
-        [rst ^Rectangle2D rr] (pick-glyph xh (DELIMS r) (FONTS :cmex10) g)
+        [cw ch cb] (size c g ctx)
+        [lst ^Rectangle2D lr] (pick-glyph ch (DELIMS l) (FONTS :cmex10) g)
+        [rst ^Rectangle2D rr] (pick-glyph ch (DELIMS r) (FONTS :cmex10) g)
         dh (max (.getHeight lr) (.getHeight rr))
-        xx (+ (.getWidth lr) DELIM_SPACE 1)
-        xy (/ (- dh xh) 2)]
-    [ [x xx xy xw xh] ]))
+        cx (+ (.getWidth lr) DELIM_SPACE 1) ; not sure why I need this extra pixel, but it helps
+        cy (/ (max (- dh ch) 0) 2)]
+    [ [c cx cy cw ch] ]))
     
 (defmethod draw-impl :view/delimited
   [n #^Graphics2D g ctx debug?]
   (let [l (node-attr-value n :left)
-        x (node-attr n :content)
+        c (node-attr n :content)
         r (node-attr-value n :right)
-        [xw xh xb] (size x g ctx)
-        [^String lst ^Rectangle2D lr] (pick-glyph xh (DELIMS l) (FONTS :cmex10) g)
-        [^String rst ^Rectangle2D rr] (pick-glyph xh (DELIMS r) (FONTS :cmex10) g)
+        [cw ch cb] (size c g ctx)
+        [^String lst ^Rectangle2D lr] (pick-glyph ch (DELIMS l) (FONTS :cmex10) g)
+        [^String rst ^Rectangle2D rr] (pick-glyph ch (DELIMS r) (FONTS :cmex10) g)
         [w h b] (size n g ctx)]
     (doto g
       (.setColor (node-color n))
@@ -673,7 +675,7 @@
                    (float 0) 
                    (float (- (/ (- h (.getHeight lr)) 2) (.getMinY lr))))
       (.drawString rst 
-                   (float (+ (.getWidth lr) DELIM_SPACE xw DELIM_SPACE))
+                   (float (+ (.getWidth lr) DELIM_SPACE cw DELIM_SPACE))
                    (float (- (/ (- h (.getHeight rr)) 2) (.getMinY rr)))))))
 
 ;

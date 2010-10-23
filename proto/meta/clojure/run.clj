@@ -110,11 +110,26 @@
 ;             f })  ; HACK
 ;         {}))))
 
+(def core-grammar-sources [
+  "meta/clojure/kernel1.mlj" 
+  "meta/clojure/kernel2.mlj" 
+  "meta/clojure/core-ast.mlj"
+  "meta/example/tex/binaryNode.mlj" ; HACK
+  "meta/clojure/core.mlj"
+  "meta/clojure/core-seq.mlj"
+  "meta/example/tex/and.mlj"  ; HACK
+  "meta/example/tex/continued-grammar.mlj"  ; HACK
+  "meta/example/tex/continued-ops.mlj"  ; HACK
+])
+
 (def expand-core
-  (let [c (compose-grammars 
-            (load-node "meta/clojure/core.mlj")
-            (load-node "meta/clojure/core-seq.mlj")
-            (load-node "meta/example/tex/continued-grammar.mlj"))] ; HACK: for demo purposes
+  (let [c (apply compose-grammars (map load-node core-grammar-sources))]
+            ; (load-node "meta/clojure/core.mlj")
+            ; (load-node "meta/clojure/core-seq.mlj")
+            ; (load-node "meta/example/tex/and.mlj") ; HACK: for demo purposes
+            ; (load-node "meta/example/tex/continued-grammar.mlj") ; HACK: for demo purposes
+            ; (load-node "meta/example/tex/continued-ops.mlj") ; HACK: for demo purposes
+            ; )]
     (println "Compiling core reductions...")
     ; (let [r (reduce-with-grammar c :expand)]
     ;       (fn [n] (println (node-type n)) (r n)))))

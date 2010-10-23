@@ -7,280 +7,404 @@
 ; TODO: update to the current :grammar language
 
 (make-node :grammar/language [
+
+  ; language
+  (make-node :grammar/seqNode {
+    :type 
+    (make-node :grammar/type :grammar/language)
+    
+    :supers 
+    (make-node :grammar/types [])
+    
+    :options
+    (make-node :grammar/options [
+      (make-node :grammar/node { :type :grammar/declaration })
+    ])
+    
+    :min 1
+    
+    :display 
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/section [
+        ; TODO
+      ])
+    })
+  })
   
-    (make-node :grammar/mapNode {
-      :type 
-      (make-node :grammar/type :grammar/language)
+  ; mapNode
+  (make-node :grammar/mapNode {
+    :type 
+    (make-node :grammar/type :grammar/mapNode)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/node { :type :grammar/declaration })
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :mapNode_doc {
+        :name 
+        (make-node :grammar/name :grammar/mapNode/doc)
       
-      :supers 
-      (make-node :grammar/types [])
-      
-      :attrs
-      (make-node :grammar/attrs [
-          (make-node :grammar/attr :mapNode_type)
-              :name 
-              (make-node :grammar/name :grammar/attr/name)
-            
-              :options
-              (make-node :grammar/options [
-                  (make-node :grammar/node {
-                      :type
-                      :grammar/name
-                    })
-                ])
-              
-              :optional 
-              false
-            })
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :grammar/doc })
         ])
         
-      ; TODO: fix from here on...
+        :optional 
+        true
+      })
+      (make-node :grammar/attr :mapNode_supers {
+        :name 
+        (make-node :grammar/name :grammar/mapNode/supers)
       
-      :display
-      (node :view/section
-        :items
-        (node :grammar/sequence
-          :name
-          :grammar/language/rules
-          
-          :options [
-            (node :structure/node
-              :type :grammar/rule)
-          ]
-          
-          :min 0)))
-    
-    (node :grammar/rule
-      :type 
-      :grammar/rule
-      
-      :supers []
-      
-      :display
-      (node :view/section
-        :items [
-          (node :view/expr/flow
-            :boxes [
-              ; (node :view/expr/var
-              ;   :str
-                (node :grammar/attr  ; TODO: something nicer with the name?
-                  :name
-                  :grammar/rule/type
-              
-                  :options [
-                    (node :structure/name)
-                  ]
-                  
-                  :optional false);)
-              (node :view/expr/keyword :str ":")
-              (node :view/sequence
-                :items
-                (node :grammar/sequence
-                  :name
-                  :grammar/rule/supers
-          
-                  :options [
-                    (node :structure/name)
-                  ]
-          
-                  :min 0
-                
-                  :separator
-                  (node :view/expr/keyword :str ", ")))
-              ])
-          (node :view/sequence
-            :items [
-              (node :view/quad)
-              (node :grammar/attr
-                :name
-                :grammar/rule/display
-                
-                :options [
-                  ; ??? this will be a drawable, but maybe it should be quoted?
-                  (node :structure/node
-                    :type :view/drawable)
-                ]
-                
-                :optional false)
-            ])
-          (node :view/sequence
-            :items [
-              (node :view/quad)
-              (node :grammar/attr
-                :name
-                :grammar/rule/expand
-                
-                :options [
-                  ; ??? this will be a drawable, but maybe it should be quoted?
-                  (node :structure/node
-                    :type :clojure/kernel/expr)
-                ]
-                
-                :optional false)
-            ])
-        ]))
-
-    (node :grammar/rule
-      :type 
-      :grammar/attr
-      
-      :supers [ :view/drawable ]  ; being drawable makes an attr legal in the "display"
-      
-      :display  ;; TODO: actual display?
-      (node :view/expr/relation
-        :boxes [
-          (node :grammar/attr
-            :name
-            :grammar/attr/name
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :grammar/supers })
+        ])
         
-            :options [ (node :structure/name) ]
+        :optional 
+        false
+      })
+      (make-node :grammar/attr :mapNode_type {
+        :name 
+        (make-node :grammar/name :grammar/mapNode/type)
+      
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :grammar/name })
+        ])
         
-            :optional false)
-          (node :view/sequence
-            :items
-            (node :grammar/sequence
-              :name
-              :grammar/attr/options
+        :optional 
+        false
+      })
+      (make-node :grammar/attr :mapNode_attrs {
+        :name 
+        (make-node :grammar/name :grammar/mapNode/attrs)
+      
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :grammar/attrs })
+        ])
         
-              :options [ (node :structure/node :type :structure/type) ]
+        :optional 
+        false
+      })
+      (make-node :grammar/attr :mapNode_display {
+        :name 
+        (make-node :grammar/name :grammar/mapNode/display)
+      
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
         
-              :min 1
+        :optional 
+        true
+      })
+      (make-node :grammar/attr :mapNode_expand {
+        :name 
+        (make-node :grammar/name :grammar/mapNode/expand)
+      
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional 
+        true
+      })
+    ])
             
-              :separator (node :view/expr/keyword :str ", ")))
-          (node :grammar/attr
-            :name
-            :grammar/attr/optional
-            
-            :options [ (node :structure/boolean) ]
-            
-            :optional false)
-        ]))
-        
-    (node :grammar/rule
-      :type 
-      :grammar/sequence
-      
-      :supers [ :view/drawable ]  ; being drawable makes an attr legal in the "display"
-      
-      :display  ;; TODO: actual display?
-      (node :view/expr/relation
-        :boxes [
-          (node :grammar/attr
-            :name
-            :grammar/sequence/name
-        
-            :options [ (node :structure/name) ]
-        
-            :optional false)
-          (node :view/sequence
-            :items
-            (node :grammar/sequence
-              :name
-              :grammar/sequence/options
-        
-              :options [ (node :structure/node :type :structure/type) ]
-        
-              :min 1
-            
-              :separator (node :view/expr/keyword :str ", ")))
-          (node :grammar/attr
-            :name
-            :grammar/sequence/min
-            
-            :options [ (node :structure/int) ]
-            
-            :optional false)
-          (node :grammar/attr
-            :name
-            :grammar/sequence/max
-            
-            :options [ (node :structure/int) ]
-            
-            :optional true)
-          (node :grammar/attr
-            :name
-            :grammar/sequence/separator
-            
-            :options [ (node :structure/node :type :view/drawable) ]
-            
-            :optional true)
-        ]))
-        
-    ;
-    ; Some rules for the :structure language, which probably belong in a different file:
-    ;
-    (node :grammar/rule
-      :type 
-      :structure/node
-      
-      :supers [ :structure/type ]
-      
-      :display  ;; TODO: actual display?
-      (node :grammar/attr
-        :name
-        :structure/node/type
-        
-        :options [ (node :structure/name) ]
-        
-        :optional false))
-        
-    (node :grammar/rule
-      :type 
-      :structure/ref
-      
-      :supers [ :structure/type ]
-      
-      :display  ;; TODO: actual display?
-      (node :grammar/attr
-        :name
-        :structure/ref/type
-        
-        :options [ (node :structure/name) ]
-        
-        :optional false))
-        
-    (node :grammar/rule
-      :type 
-      :structure/name
-      
-      :supers [ :structure/type ]
-      
-      :display
-      (node :view/expr/keyword :str "name"))
-        
-    (node :grammar/rule
-      :type 
-      :structure/string
-      
-      :supers [ :structure/type ]
-      
-      :display
-      (node :view/expr/keyword :str "string"))
-        
-    (node :grammar/rule
-      :type 
-      :structure/int
-      
-      :supers [ :structure/type ]
-      
-      :display
-      (node :view/expr/keyword :str "int"))
-        
-    (node :grammar/rule
-      :type 
-      :structure/float
-      
-      :supers [ :structure/type ]
-      
-      :display
-      (node :view/expr/keyword :str "float"))
-        
-    (node :grammar/rule
-      :type 
-      :structure/boolean
-      
-      :supers [ :structure/type ]
-      
-      :display
-      (node :view/expr/keyword :str "boolean"))
-  ])
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/section [
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :mapNode_doc)
+            })
+          })
+        (make-node :view/expr/flow [
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :mapNode_supers)
+            })
+          })
+          (make-node :view/expr/symbol { :str :from })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :mapNode_type)
+            })
+          })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :mapNode_attrs)
+            })
+          })
+        ])
+        (make-node :view/sequence [
+          (make-node :view/quad)
+          ; TODO: this part optional
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :mapNode_display)
+            })
+          })
+          ; TODO: this part optional
+          (make-node :view/quad)
+          (make-node :view/expr/symbol { :str :to })
+          (make-node :view/quad)
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :mapNode_expand)
+            })
+          })
+        ])
+      ])
+    })
+  })
+  
+    ; 
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :grammar/rule
+    ;   
+    ;   :supers []
+    ;   
+    ;   :display
+    ;   (node :view/section
+    ;     :items [
+    ;       (node :view/expr/flow
+    ;         :boxes [
+    ;           ; (node :view/expr/var
+    ;           ;   :str
+    ;             (node :grammar/attr  ; TODO: something nicer with the name?
+    ;               :name
+    ;               :grammar/rule/type
+    ;           
+    ;               :options [
+    ;                 (node :structure/name)
+    ;               ]
+    ;               
+    ;               :optional false);)
+    ;           (node :view/expr/keyword :str ":")
+    ;           (node :view/sequence
+    ;             :items
+    ;             (node :grammar/sequence
+    ;               :name
+    ;               :grammar/rule/supers
+    ;       
+    ;               :options [
+    ;                 (node :structure/name)
+    ;               ]
+    ;       
+    ;               :min 0
+    ;             
+    ;               :separator
+    ;               (node :view/expr/keyword :str ", ")))
+    ;           ])
+    ;       (node :view/sequence
+    ;         :items [
+    ;           (node :view/quad)
+    ;           (node :grammar/attr
+    ;             :name
+    ;             :grammar/rule/display
+    ;             
+    ;             :options [
+    ;               ; ??? this will be a drawable, but maybe it should be quoted?
+    ;               (node :structure/node
+    ;                 :type :view/drawable)
+    ;             ]
+    ;             
+    ;             :optional false)
+    ;         ])
+    ;       (node :view/sequence
+    ;         :items [
+    ;           (node :view/quad)
+    ;           (node :grammar/attr
+    ;             :name
+    ;             :grammar/rule/expand
+    ;             
+    ;             :options [
+    ;               ; ??? this will be a drawable, but maybe it should be quoted?
+    ;               (node :structure/node
+    ;                 :type :clojure/kernel/expr)
+    ;             ]
+    ;             
+    ;             :optional false)
+    ;         ])
+    ;     ]))
+    ; 
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :grammar/attr
+    ;   
+    ;   :supers [ :view/drawable ]  ; being drawable makes an attr legal in the "display"
+    ;   
+    ;   :display  ;; TODO: actual display?
+    ;   (node :view/expr/relation
+    ;     :boxes [
+    ;       (node :grammar/attr
+    ;         :name
+    ;         :grammar/attr/name
+    ;     
+    ;         :options [ (node :structure/name) ]
+    ;     
+    ;         :optional false)
+    ;       (node :view/sequence
+    ;         :items
+    ;         (node :grammar/sequence
+    ;           :name
+    ;           :grammar/attr/options
+    ;     
+    ;           :options [ (node :structure/node :type :structure/type) ]
+    ;     
+    ;           :min 1
+    ;         
+    ;           :separator (node :view/expr/keyword :str ", ")))
+    ;       (node :grammar/attr
+    ;         :name
+    ;         :grammar/attr/optional
+    ;         
+    ;         :options [ (node :structure/boolean) ]
+    ;         
+    ;         :optional false)
+    ;     ]))
+    ;     
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :grammar/sequence
+    ;   
+    ;   :supers [ :view/drawable ]  ; being drawable makes an attr legal in the "display"
+    ;   
+    ;   :display  ;; TODO: actual display?
+    ;   (node :view/expr/relation
+    ;     :boxes [
+    ;       (node :grammar/attr
+    ;         :name
+    ;         :grammar/sequence/name
+    ;     
+    ;         :options [ (node :structure/name) ]
+    ;     
+    ;         :optional false)
+    ;       (node :view/sequence
+    ;         :items
+    ;         (node :grammar/sequence
+    ;           :name
+    ;           :grammar/sequence/options
+    ;     
+    ;           :options [ (node :structure/node :type :structure/type) ]
+    ;     
+    ;           :min 1
+    ;         
+    ;           :separator (node :view/expr/keyword :str ", ")))
+    ;       (node :grammar/attr
+    ;         :name
+    ;         :grammar/sequence/min
+    ;         
+    ;         :options [ (node :structure/int) ]
+    ;         
+    ;         :optional false)
+    ;       (node :grammar/attr
+    ;         :name
+    ;         :grammar/sequence/max
+    ;         
+    ;         :options [ (node :structure/int) ]
+    ;         
+    ;         :optional true)
+    ;       (node :grammar/attr
+    ;         :name
+    ;         :grammar/sequence/separator
+    ;         
+    ;         :options [ (node :structure/node :type :view/drawable) ]
+    ;         
+    ;         :optional true)
+    ;     ]))
+    ;     
+    ; ;
+    ; ; Some rules for the :structure language, which probably belong in a different file:
+    ; ;
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :structure/node
+    ;   
+    ;   :supers [ :structure/type ]
+    ;   
+    ;   :display  ;; TODO: actual display?
+    ;   (node :grammar/attr
+    ;     :name
+    ;     :structure/node/type
+    ;     
+    ;     :options [ (node :structure/name) ]
+    ;     
+    ;     :optional false))
+    ;     
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :structure/ref
+    ;   
+    ;   :supers [ :structure/type ]
+    ;   
+    ;   :display  ;; TODO: actual display?
+    ;   (node :grammar/attr
+    ;     :name
+    ;     :structure/ref/type
+    ;     
+    ;     :options [ (node :structure/name) ]
+    ;     
+    ;     :optional false))
+    ;     
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :structure/name
+    ;   
+    ;   :supers [ :structure/type ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/keyword :str "name"))
+    ;     
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :structure/string
+    ;   
+    ;   :supers [ :structure/type ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/keyword :str "string"))
+    ;     
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :structure/int
+    ;   
+    ;   :supers [ :structure/type ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/keyword :str "int"))
+    ;     
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :structure/float
+    ;   
+    ;   :supers [ :structure/type ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/keyword :str "float"))
+    ;     
+    ; (node :grammar/rule
+    ;   :type 
+    ;   :structure/boolean
+    ;   
+    ;   :supers [ :structure/type ]
+    ;   
+    ;   :display
+    ;   (node :view/expr/keyword :str "boolean"))
+])

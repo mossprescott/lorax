@@ -25,8 +25,8 @@
 ; TODO: why no HSV out of the box?!
 (defn rgb [r g b] (Color. (float r) (float g) (float b)))
 
-(def SELECTED_COLOR (rgb 1.0 0.7 0.85))
-(def SELECTED_HILITE_COLOR (rgb 1.0 0.85 0.95))
+(def SELECTED_COLOR (rgb 0.9 0.4 0.9))
+(def SELECTED_HILITE_COLOR (rgb 0.95 0.6 0.95))
 
 
 (defn simple-hilite

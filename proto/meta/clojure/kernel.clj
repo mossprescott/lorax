@@ -107,6 +107,7 @@
       
       (do 
         (println "unrecognized node type (not in kernel language):" (node-type n))
+        (print-node n)  ; HACK
         (assert false)))))
 
 
@@ -120,7 +121,9 @@
     (map-node? n)
     (let [level (condp = (node-type n)
                   :clojure/kernel/quote (inc level)
-                  :clojure/kernel/unquote (dec level)
+                  :clojure/kernel/unquote (if (has-attr? n :levels) 
+                                            (- level (node-attr-value n :levels))
+                                            (dec level))
                   level)
             ; _ (println "node:" (node-type n))
             ; _ (println "level:" level)

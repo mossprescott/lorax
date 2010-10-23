@@ -44,6 +44,17 @@
         ; (doseq [ [k v] @cache ] (println k "->" (node-type @v)))
         root))))
 
+(defn reload
+  "Re-load all programs in the cache."
+  []
+  (doseq [ [fname a] @cache ]
+    (try
+      (println "reloading" fname)
+      (let [pr (load-node fname)]
+        (swap! (@cache fname) (fn [old] pr))) ; HACK: not a real swap, is it?
+      (catch Exception x
+        (println (format "Error loading {0}: {1}"
+                    fname x))))))
 
 ;
 ; Some common definitions:
@@ -92,15 +103,22 @@
 
 ; Temporary: using the hand-written reduction for grammars
 (def grammar-display-simple
-  (reduceByType (merge grammarPresRules structurePresRules)))
+  (reduceByType grammarPresRules))
+  ; (reduceByType (merge grammarPresRules structurePresRules)))
 
 ; ref containing the grammar for clojure, including kernel and core
 (def clojure-grammar 
-  (load-grammars "meta/clojure/kernel1.mlj" 
-                 "meta/clojure/kernel2.mlj" 
-                 "meta/clojure/core.mlj"
-                 "meta/clojure/core-seq.mlj"
-                 "meta/example/tex/continued-grammar.mlj"))
+  (apply load-grammars core-grammar-sources))
+                 ;  "meta/clojure/kernel1.mlj" 
+                 ; "meta/clojure/kernel2.mlj" 
+                 ; "meta/clojure/core-ast.mlj"
+                 ; "meta/example/tex/binaryNode.mlj" ; HACK
+                 ; "meta/clojure/core.mlj"
+                 ; "meta/clojure/core-seq.mlj"
+                 ; "meta/example/tex/and.mlj"  ; HACK
+                 ; "meta/example/tex/continued-grammar.mlj"  ; HACK
+                 ; "meta/example/tex/continued-ops.mlj"  ; HACK
+                 ; ))
   
 ; ref containing the reduction function for clojure kernel/core
 (def clojure-display
@@ -209,9 +227,10 @@
 (defn kernel2 [] (show-grammar "meta/clojure/kernel2.mlj"))
 (defn core [] (show-grammar "meta/clojure/core.mlj"))
 (defn core-seq [] (show-grammar "meta/clojure/core-seq.mlj"))
+(defn cfg [] (show-grammar "meta/example/tex/continued-grammar.mlj"))
+(defn cfo [] (show-grammar "meta/example/tex/continued-ops.mlj"))
 
 (def ex1 "meta/example/core1.mlj")
 (def ex2 "meta/example/core2.mlj")
 (def ex3 "meta/example/core3.mlj")
 (def excf "meta/example/tex/continued.mlj")
-(def cfg "meta/example/tex/continued-grammar.mlj")

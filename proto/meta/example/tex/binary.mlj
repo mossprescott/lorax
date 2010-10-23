@@ -1,0 +1,50 @@
+; Examples for binaryNode
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(make-node :grammar/language [
+  ; plus
+  (make-node :grammar/binaryNode {
+    :doc 
+    (make-node :grammar/doc { :str "Addition" })
+    
+    :type
+    (make-node :grammar/type :clojure/core/plus)
+    
+    :op
+    (make-node :view/expr/symbol { :str "+" })
+    
+    :fn
+    (make-node :clojure/kernel/extern { :name "add"})
+  })
+
+  ; format
+  (make-node :grammar/binaryNode {
+    :doc 
+    (make-node :grammar/doc { :str "String formatting" })
+    
+    :type
+    (make-node :grammar/type :clojure/core/format)
+    
+    :op
+    (make-node :view/expr/int { :str "%" })
+    
+    :fn
+    (make-node :clojure/kernel/extern { :name "format"})
+  })
+  
+  ; contains
+  (make-node :grammar/binaryNode {
+    :doc 
+    (make-node :grammar/doc { :str "Set membership" })
+    
+    :type
+    (make-node :grammar/type :clojure/core/contains)
+    
+    :op
+    (make-node :view/expr/symbol { :str :ni })
+    
+    :fn
+    (make-node :clojure/kernel/extern { :name "contains?"})
+  })
+])

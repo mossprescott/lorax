@@ -124,14 +124,14 @@
     ; example
     (node :grammar/rule
       :type
-      :view/expr/unbed
+      :view/expr/disembed
       
       :supers [ :view/drawable ]
       
       :display
       (node :grammar/attr
         :name 
-        :view/expr/unbed/content
+        :view/expr/disembed/content
     
         :options [
           (node :structure/node

@@ -621,7 +621,9 @@
                                           (display @rootA (.isSelected parens))) ]
                         (dosync 
                           (ref-set nref n)
-                          (ref-set oref o))))))]
+                          (ref-set oref o)
+                          (if (seq @sref)
+                            (ref-set snref (find-node @rootA (first @sref)))))))))]
       (watch rootA "changed source")
       (watch primaryA "changed grammar (display)"))
 
@@ -704,17 +706,34 @@
             (.requestFocus panel)  ; ???
             ))))
 
-    ; (.addKeyListener panel
-    ;   (proxy [ KeyAdapter ] []
-    ;     (keyPressed [#^KeyEvent evt]
-    ;       ; (let [k (.getKeyCode evt)]
-    ;       ;   (println "pressed:" evt)
-    ;         (condp = (.getKeyCode evt)
-    ;           KeyEvent/VK_LEFT (.doClick left)
-    ;           KeyEvent/VK_RIGHT (.doClick right)
-    ;           KeyEvent/VK_UP (.doClick up)
-    ;           KeyEvent/VK_DOWN (.doClick down)
-    ;           nil))))
+    (.addKeyListener panel
+      (proxy [ KeyAdapter ] []
+        (keyPressed [#^KeyEvent evt]
+          (condp = (.getKeyCode evt)
+  ;           KeyEvent/VK_LEFT (.doClick left)
+  ;           KeyEvent/VK_RIGHT (.doClick right)
+  ;           KeyEvent/VK_UP (.doClick up)
+  ;           KeyEvent/VK_DOWN (.doClick down)
+            (println "not handled: " (.getKeyCode evt))))
+        (keyTyped [#^KeyEvent evt]
+          (let [ch (.getKeyChar evt)]
+            (println "typed:" ch)
+            (if (and @snref (has-attr? @snref :value) (value-node? (node-attr @snref :value)))
+              (let [val-node (node-attr @snref :value)
+                    val (node-value val-node)]
+                (println "val:" val)
+                (cond
+                  (and (integer? val) (contains? (set "0123456789") ch))
+                  (let [new-val (Integer/parseInt (str val ch))]
+                    (swap! rootA replace-node (node-id val-node) 
+                                              (make-node (node-type val-node)
+                                                         (node-id val-node)
+                                                         new-val)))
+                  
+                  true
+                  (println "not handled"))))))
+      ))
+        
     nil)))
 
 ; (defn makeKernelFrame 

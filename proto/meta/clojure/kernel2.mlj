@@ -488,5 +488,25 @@
       })
     })
               
+    ; bind
+    (make-node :grammar/mapNode {
+      :type 
+      (make-node :grammar/type :clojure/kernel/fail)
+     
+      :supers
+      (make-node :grammar/types [
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+     
+      :attrs
+      (make-node :grammar/attrs [])
+  
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/keyword { :str "fail" })
+      })
+    })
+    
     ; TODO: loop
   ])

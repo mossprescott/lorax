@@ -73,6 +73,39 @@
       })
     })
   })
+  
+  (make-node :clojure/core/where {
+    :body 
+    (make-node :clojure/core/plus {
+      :left
+      (make-node :clojure/kernel/var {
+        :ref (ref-node :a_where)
+      })
+      
+      :right
+      (make-node :clojure/kernel/var {
+        :ref (ref-node :b_where)
+      })
+    })
+    
+    :vars
+    (make-node :clojure/core/whereVars [
+      (make-node :clojure/core/whereVar {
+        :bind
+        (make-node :clojure/kernel/bind :a_where { :name "a" })
+        
+        :expr
+        (make-node :clojure/kernel/int { :value 1 })
+      })
+      (make-node :clojure/core/whereVar {
+        :bind
+        (make-node :clojure/kernel/bind :b_where { :name "b" })
+        
+        :expr
+        (make-node :clojure/kernel/int { :value 2 })
+      })
+    ])
+  })
 
   ; (make-node :clojure/core/and {
   ;   :left

@@ -307,6 +307,7 @@
       })
     })
   
+    ; where
     (make-node :grammar/mapNode {
       :type 
       (make-node :grammar/type :clojure/core/where)
@@ -336,7 +337,7 @@
           :options
           (make-node :grammar/options [
             (make-node :grammar/node {
-                :type :clojure/core/vars
+                :type :clojure/core/whereVars
               })
           ])
         })
@@ -367,6 +368,139 @@
             })
           ])
         ])
+      })
+      
+      ; TODO:
+      ; :expand
+    })
+    
+    ; whereVars
+    (make-node :grammar/seqNode {
+      :type 
+      (make-node :grammar/type :clojure/core/whereVars)
+      
+      :supers 
+      (make-node :grammar/types [])
+
+      :options 
+      (make-node :grammar/options [
+        (make-node :grammar/node {
+          :type :clojure/kernel/whereVar
+        })
+      ])
+      
+      :min
+      (make-node :grammar/count 1)
+          
+      :display
+      (make-node :grammar/seq {
+        :type 
+        (make-node :grammar/type :view/section)
+        
+        ; :separator
+        ; (make-node :view/expr/keyword { :str " " })
+      })
+    })
+    
+    ; whereVar
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/whereVar)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :whereVar_bind {
+          :name
+          (make-node :grammar/name :clojure/core/whereVar/bind)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/bind
+              })
+          ])
+        })
+        (make-node :grammar/attr :whereVar_expr {
+          :name
+          (make-node :grammar/name :clojure/core/whereVar/expr)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+        })
+      ])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        ; Note: _not_ using :view/expr/flow because don't need parens around main expr in this case!
+        (make-node :view/sequence [
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :whereVar_bind)
+            })
+          })
+          (make-node :view/thickspace)
+          (make-node :view/expr/symbol { :str "=" })
+          (make-node :view/thickspace)
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :whereVar_expr)
+            })
+          })
+        ])
+      })
+    })  
+  
+    ; fail
+    (make-node :grammar/mapNode {
+      :type
+      (make-node :grammar/type :clojure/core/fail)
+      
+      :supers 
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [])
+      
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/expr/keyword { :str "fail" })
+      })
+  
+      :expand
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :clojure/kernel/app {
+          :expr
+          (make-node :clojure/kernel/extern { :name "throw" })
+          
+          :args
+          (make-node :clojure/kernel/args [
+            (make-node :clojure/kernel/app {
+              :expr
+              (make-node :clojure/kernel/extern { :name "Exception." })
+          
+              :args
+              (make-node :clojure/kernel/args [
+                (make-node :clojure/kernel/string { :value "failed" })
+              ])
+            })
+          ])
+        })
       })
     })
   
@@ -712,6 +846,7 @@
       })
     })
 
+    ; times
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/core/times)
@@ -1113,297 +1248,6 @@
               :ref (ref-node :n_square)
             })
           })
-        })
-      })
-    })
-
-    ;
-    ; Some operators on nodes, for use in grammars (and meta-programs, I guess):
-    ;
-    
-  ; attr
-  (make-node :grammar/mapNode {
-    :type
-    (make-node :grammar/type :clojure/core/attr)
-    
-    :supers 
-    (make-node :grammar/types [
-      (make-node :grammar/type :clojure/kernel/expr)
-    ])
-    
-    :attrs
-    (make-node :grammar/attrs [
-      (make-node :grammar/attr :attr_node {
-        :name
-        (make-node :grammar/name :clojure/core/attr/node)
-        
-        :options
-        (make-node :grammar/options [
-          (make-node :grammar/node { :type :clojure/kernel/expr })
-        ])
-        
-        :optional false
-      }) 
-      (make-node :grammar/attr :attr_name {
-        :name
-        (make-node :grammar/name :clojure/core/attr/name)
-      
-        :options
-        (make-node :grammar/options [
-          (make-node :grammar/node { :type :clojure/kernel/expr })
-        ])
-      
-        :optional false
-      }) 
-    ])
-    
-    :display
-    (make-node :clojure/kernel/quote {
-      :body
-      (make-node :view/expr/juxt [
-        (make-node :view/expr/keyword { :str "attr" })
-        (make-node :view/delimited {
-          :left "["
-          :right "]"
-          :content
-          (make-node :view/sequence [
-            (make-node :clojure/kernel/unquote {
-              :body
-              (make-node :clojure/kernel/var {
-               :ref (ref-node :attr_node) 
-              })
-            })
-            (make-node :view/expr/int { :str "," })
-            (make-node :view/mediumspace)
-            (make-node :clojure/kernel/unquote {
-              :body
-              (make-node :clojure/kernel/var {
-               :ref (ref-node :attr_name) 
-              })
-            })
-          ])
-        })
-      ])
-    })
-    
-    :expand
-    (make-node :clojure/kernel/quote {
-      :body
-      (make-node :clojure/kernel/app {
-        :expr
-        (make-node :clojure/kernel/extern { :name "meta.core/node-attr" })
-        
-        :args
-        (make-node :clojure/kernel/args [
-          (make-node :clojure/kernel/unquote {
-            :body
-            (make-node :clojure/kernel/var {
-             :ref (ref-node :attr_node) 
-            })
-          })
-          (make-node :clojure/kernel/unquote {
-            :body
-            (make-node :clojure/kernel/var {
-             :ref (ref-node :attr_name) 
-            })
-          })
-        ])
-      })
-    })
-  })
-  
-  ; type
-  (make-node :grammar/mapNode {
-    :type
-    (make-node :grammar/type :clojure/core/type)
-    
-    :supers 
-    (make-node :grammar/types [
-      (make-node :grammar/type :clojure/kernel/expr)
-    ])
-    
-    :attrs
-    (make-node :grammar/attrs [
-      (make-node :grammar/attr :type_node {
-        :name
-        (make-node :grammar/name :clojure/core/type/node)
-        
-        :options
-        (make-node :grammar/options [
-          (make-node :grammar/node { :type :clojure/kernel/expr })
-        ])
-        
-        :optional false
-      }) 
-    ])
-    
-    :display
-    (make-node :clojure/kernel/quote {
-      :body
-      (make-node :view/expr/juxt [
-        (make-node :view/expr/keyword { :str "type" })
-        (make-node :view/delimited {
-          :left "["
-          :right "]"
-          :content
-          (make-node :view/sequence [
-            (make-node :clojure/kernel/unquote {
-              :body
-              (make-node :clojure/kernel/var {
-               :ref (ref-node :type_node) 
-              })
-            })
-          ])
-        })
-      ])
-    })
-    
-    :expand
-    (make-node :clojure/kernel/quote {
-      :body
-      (make-node :clojure/kernel/app {
-        :expr
-        (make-node :clojure/kernel/extern { :name "meta.core/node-type" })
-        
-        :args
-        (make-node :clojure/kernel/args [
-          (make-node :clojure/kernel/unquote {
-            :body
-            (make-node :clojure/kernel/var {
-             :ref (ref-node :type_node) 
-            })
-          })
-        ])
-      })
-    })
-  })
-  
-  ; eval
-  (make-node :grammar/mapNode {
-    :type
-    (make-node :grammar/type :clojure/core/eval)
-    
-    :supers 
-    (make-node :grammar/types [
-      (make-node :grammar/type :clojure/kernel/expr)
-    ])
-    
-    :attrs
-    (make-node :grammar/attrs [
-      (make-node :grammar/attr :eval_node {
-        :name
-        (make-node :grammar/name :clojure/core/eval/node)
-        
-        :options
-        (make-node :grammar/options [
-          (make-node :grammar/node { :type :clojure/kernel/expr })
-        ])
-        
-        :optional false
-      }) 
-    ])
-    
-    :display
-    (make-node :clojure/kernel/quote {
-      :body
-      (make-node :view/expr/juxt [
-        (make-node :view/expr/keyword { :str "eval" })
-        (make-node :view/delimited {
-          :left "["
-          :right "]"
-          :content
-          (make-node :view/sequence [
-            (make-node :clojure/kernel/unquote {
-              :body
-              (make-node :clojure/kernel/var {
-               :ref (ref-node :eval_node) 
-              })
-            })
-          ])
-        })
-      ])
-    })
-    
-    :expand
-    (make-node :clojure/kernel/quote {
-      :body
-      (make-node :clojure/kernel/app {
-        :expr
-        (make-node :clojure/kernel/extern { :name "meta.clojure.kernel/meta-eval" })
-        
-        :args
-        (make-node :clojure/kernel/args [
-          (make-node :clojure/kernel/unquote {
-            :body
-            (make-node :clojure/kernel/var {
-             :ref (ref-node :eval_node) 
-            })
-          })
-        ])
-      })
-    })
-  })
-  
-    ; value: but probably what I actually want is eval?
-    (make-node :grammar/mapNode {
-      :type
-      (make-node :grammar/type :clojure/core/value)
-      
-      :supers 
-      (make-node :grammar/types [ 
-        (make-node :grammar/type :clojure/kernel/expr)
-      ])
-      
-      :attrs
-      (make-node :grammar/attrs [
-        (make-node :grammar/attr :value_expr {
-          :name
-          (make-node :grammar/name :clojure/core/value/expr)
-          
-          :options
-          (make-node :grammar/options [
-            (make-node :grammar/node {
-                :type :clojure/kernel/expr
-              })
-          ])
-        })
-      ])
-    
-      :display
-      (make-node :clojure/kernel/quote {
-        :body
-        (make-node :view/expr/juxt [
-          (make-node :view/expr/keyword { :str "value" })
-          (make-node :view/delimited { 
-            :left "["
-            :right "]"
-            :content
-            (make-node :clojure/kernel/unquote {
-              :body
-              (make-node :clojure/kernel/var {
-                :ref (ref-node :value_expr)
-              })
-            })
-          })
-        ])
-      })
-      
-      :expand
-      (make-node :clojure/kernel/quote {
-        :body
-        (make-node :clojure/kernel/app {
-          :expr
-          (make-node :clojure/kernel/extern { :name "meta.core/node-value" })
-          
-          :args
-          (make-node :clojure/kernel/args [
-            (make-node :clojure/kernel/unquote {
-              :body
-              (make-node :clojure/kernel/var {
-                :ref (ref-node :value_expr)
-              })
-            })
-          ])
         })
       })
     })

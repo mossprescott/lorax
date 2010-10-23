@@ -91,23 +91,32 @@
                   true ]))]
       (first (reduce-plus root f false)))))
 
-
+(defn- parentIdAndAttr
+  ; find the node by id and return a vector [ parentId attr ]
+  [root id] 
+  (first (filter #(not (nil? %))
+    (for [n (visitNode root)]
+      (first (for [a (node-attrs n) :when (= id (node-id (node-attr n a)))] 
+                [(node-id n) a]))))))
+                
 (defn swap-nodes
   "Change the positions of two nodes appearing anywhere in the tree, given their ids."
   [root id1 id2]
   (let [n1 (find-node root id1)
         n2 (find-node root id2)
-        parentIdAndAttr (fn [id] 
-                          (first (filter #(not (nil? %))
-                            (for [n (visitNode root)]
-                              (first (for [a (node-attrs n) :when (= id (node-id (node-attr n a)))] 
-                                        [(node-id n) a]))))))
-        [parentId1 attr1] (parentIdAndAttr id1)
-        [parentId2 attr2] (parentIdAndAttr id2)]
+        [parentId1 attr1] (parentIdAndAttr root id1)
+        [parentId2 attr2] (parentIdAndAttr root id2)]
     (-> root (delete-node id1)
               (delete-node id2)
               (insert-node parentId2 attr2 n1)
               (insert-node parentId1 attr1 n2))))
+
+(defn replace-node
+  "Remove an existing node and add a new one in its place."
+  [root oldNodeId newNode]
+  (let [ [parentId attr] (parentIdAndAttr root oldNodeId)]
+    (-> root (delete-node oldNodeId)
+            (insert-node parentId attr newNode))))
 
 ; Tests
 (deftest delete1

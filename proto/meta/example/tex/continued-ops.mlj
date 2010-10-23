@@ -1,0 +1,449 @@
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(make-node :grammar/language [
+
+  ; ip (floor)
+  (make-node :grammar/mapNode {
+    :doc 
+    (make-node :grammar/doc { :str "Floor (integer part) taking an expression evaluating to a c.f. and yielding an integer." })
+
+    :type
+    (make-node :grammar/type :cf/ip)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :floor_expr {
+        :name
+        (make-node :grammar/name :cf/ip/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/delimited {
+        :left :lfloor
+        :right :rfloor
+        :content
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :floor_expr)
+          })
+        })
+      })
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :cf/match2 {
+        :expr
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :floor_expr)
+          })
+        })
+        
+        :coeff
+        (make-node :clojure/kernel/bind :coeff_floor { :name "n" })
+        
+        :cont
+        (make-node :clojure/kernel/bind :cont_floor {})
+        
+        :then ; eval?
+        (make-node :clojure/kernel/var {
+          :ref (ref-node :coeff_floor)
+        })
+        
+        :else
+        (make-node :cf/match1 {
+          :expr
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :floor_expr)
+            })
+          })
+        
+          :coeff
+          (make-node :clojure/kernel/bind :coeff_1_floor { :name "m" })
+                
+          :then ; eval?
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :coeff_1_floor)
+          })
+        
+          :else
+          (make-node :clojure/core/fail)
+        })
+      })
+    })
+  })
+  
+  ; fp (fraction-part)
+  (make-node :grammar/mapNode {
+    :doc 
+    (make-node :grammar/doc { :str "Fraction part taking an expression evaluating to a c.f. and yielding a c.f." })
+
+    :type
+    (make-node :grammar/type :cf/fp)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :fp_expr {
+        :name
+        (make-node :grammar/name :cf/fp/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/delimited {
+        :left "{"
+        :right "}"
+        :content
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :fp_expr)
+          })
+        })
+      })
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :cf/match2 {
+        :expr
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :fp_expr)
+          })
+        })
+        
+        :coeff
+        (make-node :clojure/kernel/bind :coeff_fp { :name "n" })
+        
+        :cont
+        (make-node :clojure/kernel/bind :cont_fp {})
+        
+        :then
+        (make-node :cf/fraction {
+          :coeff
+          (make-node :clojure/kernel/int { :value 0 })
+        
+          :cont
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :cont_fp)
+          })
+        })
+        
+        :else
+        (make-node :cf/match1 {
+          :expr
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :fp_expr)
+            })
+          })
+        
+          :coeff
+          (make-node :clojure/kernel/bind :coeff_1_fp { :name "m" })
+                
+          :then
+          (make-node :cf/fraction {
+            :coeff
+            (make-node :clojure/kernel/int { :value 0 })
+          })
+          
+          :else
+          (make-node :clojure/core/fail)
+        })
+      })
+    })
+  })
+  
+  ; recip
+  (make-node :grammar/mapNode {
+    :doc 
+    (make-node :grammar/doc { :str "Reciprocal for continued fraction values" })
+
+    :type
+    (make-node :grammar/type :cf/recip)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :recip_expr {
+        :name
+        (make-node :grammar/name :cf/recip/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/scripted {
+        :nucleus
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :recip_expr)
+          })
+        })
+        
+        :super
+        (make-node :clojure/core/unaryminus {
+          :expr
+          (make-node :clojure/kernel/int { :value 1 })
+        })
+      })
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :cf/match2 {
+        :expr
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :recip_expr)
+          })
+        })
+        
+        :coeff
+        (make-node :clojure/kernel/bind :coeff_recip { :name "n" })
+        
+        :cont
+        (make-node :clojure/kernel/bind :cont_recip {})
+        
+        :then ; if (n = 0) then cont else 0 + 1(n + 1/cont)
+        (make-node :clojure/kernel/if {
+          :test
+          (make-node :clojure/core/equal {
+            :left
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :coeff_recip)
+            })
+            
+            :right
+            (make-node :clojure/kernel/int { :value 0 })
+          })
+          
+          :then
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :cont_recip)
+          })
+          
+          :else
+          (make-node :cf/fraction {
+            :coeff
+            (make-node :clojure/kernel/int { :value 0 })
+            
+            :cont
+            (make-node :cf/fraction {
+              :coeff
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :coeff_recip)
+              })
+              
+              :cont
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :cont_recip)
+              })
+            })              
+          })
+        })
+        
+        :else
+        (make-node :cf/match1 {
+          :expr
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :recip_expr)
+            })
+          })
+        
+          :coeff
+          (make-node :clojure/kernel/bind :coeff_1_recip { :name "m" })
+                
+          :then
+          (make-node :cf/fraction {
+            :coeff
+            (make-node :clojure/kernel/int { :value 0 })
+            
+            :cont
+            (make-node :cf/fraction {
+              :coeff
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :coeff_1_recip)
+              })
+            })
+          })
+        
+          :else
+          (make-node :clojure/core/fail)
+        })
+      })
+    })
+  })
+    
+  ; plus
+  (make-node :grammar/mapNode {
+    :doc 
+    (make-node :grammar/doc { :str "Add an integer (on the left) to a continued fraction" })
+
+    :type
+    (make-node :grammar/type :cf/plus)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :plus_left {
+        :name
+        (make-node :grammar/name :cf/plus/int)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      })
+      (make-node :grammar/attr :plus_right {
+        :name
+        (make-node :grammar/name :cf/plus/cf)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/relation [
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :plus_left)
+          })
+        })
+        (make-node :view/expr/symbol { :str :oplus })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :plus_right)
+          })
+        })
+      ])
+    })
+    
+    :expand ; TODO
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/kernel/nil)
+    })
+  })
+
+  ; negate
+  (make-node :grammar/mapNode {
+    :doc 
+    (make-node :grammar/doc { :str "Negate for continued fraction values" })
+
+    :type
+    (make-node :grammar/type :cf/negate)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :negate_expr {
+        :name
+        (make-node :grammar/name :cf/negate/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/core/unaryminus {
+        :expr
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :negate_expr)
+          })
+        })
+      })
+    })
+    
+    :expand ; TODO
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/kernel/nil)
+    })
+  })
+    
+])

@@ -199,7 +199,7 @@
 
           :options
           (make-node :grammar/options [
-            (node :grammar/string)  ; TODO: what represents a name?
+            (node :grammar/nameValue)
           ])
       
           :optional
@@ -351,6 +351,17 @@
       
       :attrs
       (make-node :grammar/attrs [
+        (make-node :grammar/attr :unquote_levels {
+          :name
+          (make-node :grammar/name :clojure/kernel/unquote/levels)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/int)
+          ])
+          
+          :optional true
+        })
         (make-node :grammar/attr :unquote_body {
           :name
           (make-node :grammar/name :clojure/kernel/unquote/body)
@@ -366,10 +377,50 @@
         })
       ])
       
+      ; TODO: show # of levels?
       :display
       (make-node :clojure/kernel/quote {
         :body
-        (make-node :view/expr/unbed {
+        (make-node :view/expr/disembed {
+          :levels
+          ; Note: this is awful--want to keep the levels attr optional for now
+          ; but can't use any syntax in this grammar, so have to everything 
+          ; using raw kernel syntax...
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/if {
+              :test
+              (make-node :clojure/kernel/app {
+                :expr
+                (make-node :clojure/kernel/extern { :name "=" })
+                
+                :args
+                (make-node :clojure/kernel/args [
+                  (make-node :clojure/kernel/app {
+                    :expr
+                    (make-node :clojure/kernel/extern { :name "node-type" })
+                    
+                    :args
+                    (make-node :clojure/kernel/args [
+                      (make-node :clojure/kernel/var {
+                        :ref (ref-node :unquote_levels)
+                      })
+                    ])
+                  })
+                  (make-node :clojure/kernel/name { :value :view/expr/missing })
+                ])
+              })
+                          
+              :then
+              (make-node :clojure/kernel/int { :value 1 })
+            
+              :else
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :unquote_levels)
+              })
+            })
+          })
+
           :content
           (make-node :clojure/kernel/unquote {
             :body

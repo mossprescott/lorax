@@ -107,6 +107,9 @@
     })
   })
 
+  ; TODO: match for list
+  
+  
   ; first (primitive)
   ; Note: this is the same syntax as any other "built-in" fn. Could use an
   ; extension for the grammar lang.
@@ -999,4 +1002,96 @@
   })
   
   ; TODO: take, drop, [i..j]
+  
+  ;
+  ; Sets and operations on them:
+  ;
+  
+  ; set (constructor)
+  (make-node :grammar/mapNode {
+    :doc 
+    (make-node :grammar/doc { :str "Construct a set with elements from a sequence." })
+
+    :type
+    (make-node :grammar/type :clojure/core/set)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :set_expr {
+        :name
+        (make-node :grammar/name :clojure/core/set/seq)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type
+              :clojure/kernel/expr
+            })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/juxt [
+        (make-node :view/delimited {
+          :left "{"
+          :right "}"
+        
+          :content
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+             :ref
+             (ref-node :set_expr) 
+            })
+          })
+        })
+      ])
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/kernel/app {
+        :expr
+        (make-node :clojure/kernel/extern { :name "set" })
+        
+        :args
+        (make-node :clojure/kernel/args [
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+             :ref
+             (ref-node :set_expr) 
+            })
+          })
+        ])
+      })
+    })
+  })
+
+  ; in (really contains)
+  (make-node :grammar/binaryNode {
+    :doc 
+    (make-node :grammar/doc { :str "Set membership" })
+    
+    :type
+    (make-node :grammar/type :clojure/core/in)
+    
+    :op
+    (make-node :view/expr/symbol { :str :ni })
+    
+    :fn
+    (make-node :clojure/kernel/extern { :name "contains?"})
+  })
+
 ])

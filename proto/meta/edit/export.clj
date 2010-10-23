@@ -27,10 +27,8 @@
 
 (def USE_CSS true)
 (def TEXT_AS_SHAPES false)
-
-; SVGGeneratorContext ctx = SVGGeneratorContext.createDefault(document);
-; ctx.setEmbeddedFontsOn(true);
-; SVGGraphics2D g2d = new SVGGraphics2D(ctx, true);
+(def EDIT_PANEL_MARGIN 10)  ; HACK: should match MARGIN in draw.clj!
+(def EXPORT_MARGIN 2)
 
 (defn render-to-svg
   "Render the given component to an SVG file in vector format. Note: images
@@ -41,6 +39,8 @@
         document (.createDocument domImpl svgNS "svg" nil)
         ctx (SVGGeneratorContext/createDefault document)
         ^SVGGraphics2D svgGenerator (SVGGraphics2D. ctx TEXT_AS_SHAPES)]
+    (.translate svgGenerator (int (- EXPORT_MARGIN EDIT_PANEL_MARGIN))
+                             (int (- EXPORT_MARGIN EDIT_PANEL_MARGIN)))
     (.paint comp svgGenerator)
     (let [^Writer out (OutputStreamWriter. (FileOutputStream. fname)  "UTF-8")] ; HACK
       (.stream svgGenerator out (boolean USE_CSS))
@@ -56,8 +56,8 @@
         (.setSources (into-array [fname]))
         (.setDst (File. pdfName))
         (.setDestinationType DestinationType/PDF)
-        (.setWidth (-> comp .getPreferredSize .getWidth))
-        (.setHeight (-> comp .getPreferredSize .getHeight))
+        (.setWidth (- (-> comp .getPreferredSize .getWidth) (* 2 (- EDIT_PANEL_MARGIN EXPORT_MARGIN))))
+        (.setHeight (- (-> comp .getPreferredSize .getHeight) (* 2 (- EDIT_PANEL_MARGIN EXPORT_MARGIN))))
         (.execute))
     (println "Wrote PDF file:" pdfName)))
 

@@ -116,41 +116,119 @@
   ; "+" [ "\u002b" :times ]
   "+" [ "+" :cmr10 ]
 
-  "-" [ "\u00c0" :cmsy10 ]  ; 0x00
-   
   ; :times [ "\u00d7" :times ]
   ; !!! Should be x02, according to the table on the jsMath site, even, but 
   ; this works and matches what jsMath actually does
-  :times [ "\u00c2" :cmsy10 ]
   
   "!" [ "!" :cmr10 ]
   
   :from [ "\u00ef" :cmsy10 ]  ; aka leftarrow; should be 0x20, according the the table
   :to [ "\u0021" :cmsy10 ]  ; aka rightarrow
 
-  :longrightarrow [ "\u00c0\u0021" :cmsy10 ]  ; BUG: there's a space between for some reason
-  :longleftarrow [ "\u0021\u00ef" :cmsy10 ]
+  ; long arrows, built from a '-' and arrow char run together
+  :longleftarrow [ "\u00ef\u00c0" :cmsy10 ]  ; TODO: need a -3mu kern between the chars (how?)
+  :longrightarrow [ "\u00c0\u0021" :cmsy10 ]
   
+  :alpha  [ "\u00cb" :cmmi10 ]
+  :beta   [ "\u00cc" :cmmi10 ]
+  :delta  [ "\u00ce" :cmmi10 ]
+  :epsilon [ "\u00cf" :cmmi10 ]
+  :theta  [ "\u00d2" :cmmi10 ]
   :lambda [ "\u00d5" :cmmi10 ]
+  :mu     [ "\u00d6" :cmmi10 ]
+  :pi     [ "\u00d9" :cmmi10 ]
+  :rho    [ "\u00da" :cmmi10 ]
+  :omega  [ "\u00db" :cmmi10 ]
+  :sigma  [ "\u00dc" :cmmi10 ]
+  :tau    [ "\u00b6" :cmmi10 ]
+  :phi    [ "!" :cmmi10 ]
+  :star   [ "?" :cmmi10 ]
   
   "?" [ "?" :cmr10 ]
   "|" [ "\u006a" :cmsy10 ]
-  "*" [ "*" :cmr10 ]  ; cmsy has a centered asterisk at 0x03
+  "*" [ "*" :cmr10 ]
   
   :mapsto [ "\u0037\u0021" :cmsy10 ]  ; \mapstochar + \rightarrow
-  
-  :neg [ "\u003a" :cmsy10 ]
   
   ">" [ ">" :cmmi10 ]
   "<" [ "<" :cmmi10 ]
   
   "." [ "." :cmr10 ]
   
-  :in [ "2" :cmsy10 ]
+  :leftarrow    [ "\u00ef" :cmsy10 ]  ; see :from
+  :rightarrow   [ "\u0021" :cmsy10 ]
+  :uparrow      [ "\u0022" :cmsy10 ]
+  :downarrow    [ "\u0023" :cmsy10 ]
+  :leftrightarrow   [ "\u0024" :cmsy10 ]
+  :nearrow      [ "\u0025" :cmsy10 ]
+  :searrow      [ "\u0026" :cmsy10 ]
+  :simeq        [ "\u0027" :cmsy10 ]
+  :Leftarrow    [ "\u0028" :cmsy10 ]
+  :Rightarrow   [ "\u0029" :cmsy10 ]
+  :Uparrow      [ "\u002a" :cmsy10 ]
+  :Downarrow    [ "\u002b" :cmsy10 ]
+  :Leftrightarrow [ "\u002c" :cmsy10 ]
+  :nwarrow      [ "\u002d" :cmsy10 ]
+  :swarrow      [ "\u002e" :cmsy10 ]
+  :propto       [ "\u002f" :cmsy10 ]
   
-  :prime [ "\u0030" :cmsy10 ]
+  :prime   [ "\u0030" :cmsy10 ]
+  :infty   [ "\u0031" :cmsy10 ]
+  :in      [ "\u0032" :cmsy10 ]
+  :ni      [ "\u0033" :cmsy10 ]
+  :not     [ "\u0036" :cmsy10 ]
+  :forall  [ "\u0038" :cmsy10 ]
+  :exists  [ "\u0039" :cmsy10 ]
+  :neg     [ "\u003a" :cmsy10 ]
+  :emptyset [ "\u003b" :cmsy10 ]
+  :top     [ "\u003e" :cmsy10 ]
+  :bot     [ "\u003f" :cmsy10 ]
   
-  :cdot [ "\u00c1" :cmsy10 ]
+  :cup     [ "\u005b" :cmsy10 ]
+  :cap     [ "\u005c" :cmsy10 ]
+  :uplus   [ "\u005d" :cmsy10 ]
+  :vee     [ "\u005e" :cmsy10 ]
+  :wedge   [ "\u005f" :cmsy10 ]
+  :vdash   [ "\u0060" :cmsy10 ]
+  :dashv   [ "\u0061" :cmsy10 ]
+
+  :gg      [ "\u00b5" :cmsy10 ]
+  
+  "-"      [ "\u00c0" :cmsy10 ]  ; 0x00   
+  :cdot    [ "\u00c1" :cmsy10 ]
+  :times   [ "\u00c2" :cmsy10 ]
+  :ast     [ "\u00c3" :cmsy10 ]
+  :div     [ "\u00c4" :cmsy10 ]
+  :diamond [ "\u00c5" :cmsy10 ]
+  :pm      [ "\u00c6" :cmsy10 ]
+  :mp      [ "\u00c7" :cmsy10 ]
+  :oplus   [ "\u00c8" :cmsy10 ]
+  :ominus  [ "\u00c9" :cmsy10 ]
+  :otimes  [ "\u00ca" :cmsy10 ]
+  :oslash  [ "\u00cb" :cmsy10 ]
+  :odot    [ "\u00cc" :cmsy10 ]
+  :bigcirc [ "\u00cd" :cmsy10 ]
+  :circ    [ "\u00ce" :cmsy10 ]
+  :bullet  [ "\u00cf" :cmsy10 ]
+
+  :equiv  [ "\u00d1" :cmsy10 ]
+  :sim    [ "\u00d8" :cmsy10 ]
+  :approx [ "\u00d9" :cmsy10 ]
+  :ll     [ "\u00dc" :cmsy10 ]
+
+  ; :Sigma ??
+  ; :Pi ??
+  
+  :sum [ "\u0050" :cmex10 ]
+  :displaysum [ "\u0058" :cmex10 ]
+  :prod [ "\u0051" :cmex10 ]
+  :displayprod [ "\u0059" :cmex10 ]
+  :bigwedge [ "\u0056" :cmex10 ]
+  :displaybigwedge [ "\u005e" :cmex10 ]
+  :bigvee [ "\u0057" :cmex10 ]
+  :displaybigvee [ "\u005f" :cmex10 ]
+  
+  ; TODO: the rest of the symbols from tables on p. 435-437
 })
 
 ;
@@ -413,24 +491,25 @@
                 (node-attr n :content))
               [mode (inc level)] ])
               
-          :view/expr/unbed
+          :view/expr/disembed
           (fn [n [mode level]]
             (let [; _ (print-node n) _ (println "[m l]" [mode level])
-                  level (if (< level 1) 
+                  inner (if (< level 1) ; HACK: this will fail if :levels is > 1
                           (do (println "warning: embedding error at node " (node-id n)) 1) 
-                          level)]
+                          level)
+                  outer (- inner (node-attr-value n :levels))]
               [(node :view/border
                   :weight 1
                   :margin 3
             
-                  :view/drawable/colors [ (nth EMBED_BORDER_COLORS level) ]
+                  :view/drawable/colors [ (nth EMBED_BORDER_COLORS inner) ]
             
                   :fill
-                  (nth EMBED_COLORS (dec level))
+                  (nth EMBED_COLORS outer)
               
                   :item
                   (node-attr n :content))
-                [mode (dec level)] ]))
+                [mode outer] ]))
                 
             :view/over
             (fn [n [mode level]]
@@ -643,6 +722,6 @@
     :view/expr/embed
     (borderize 0.7 "embed" :content)
 
-    :view/expr/unbed
-    (borderize 0.7 "unbed" :content)
+    :view/expr/disembed
+    (borderize 0.7 "disembed" :content)
   }))

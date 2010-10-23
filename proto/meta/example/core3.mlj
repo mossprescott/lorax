@@ -160,18 +160,53 @@
     })
   })
     
-    ; ; set:
-    ; (node :clojure/core/in
-    ;   :item
-    ;   (node :clojure/kernel/int :value 137)
-    ;   
-    ;   :set
-    ;   (node :clojure/core/set
-    ;     :coll
-    ;     (node :clojure/core/range
-    ;       :start 
-    ;       (node :clojure/kernel/int :value 0)
-    ;       
-    ;       :end
-    ;       (node :clojure/kernel/int :value 99))))
+  ; set:
+  (make-node :clojure/core/in {
+    :grammar/binaryNode/right
+    (make-node :clojure/kernel/int { :value 137 })
+    
+    :grammar/binaryNode/left
+    (make-node :clojure/core/set {
+      :seq
+      (make-node :clojure/core/range {
+        :min
+        (make-node :clojure/kernel/int { :value 0 })
+        
+        :max
+        (make-node :clojure/kernel/int { :value 99 })
+      })
+    })
+  })
+    
+  ; set:
+  (make-node :clojure/core/in {
+    :grammar/binaryNode/right
+    (make-node :clojure/kernel/int { :value 7569 })
+    
+    :grammar/binaryNode/left
+    (make-node :clojure/core/set {
+      :seq
+      (make-node :clojure/core/for {
+        :x
+        (make-node :clojure/kernel/bind :z_for { :name "z" })
+    
+        :seq
+        (make-node :clojure/core/range {
+          :min
+          (make-node :clojure/kernel/int { :value 1 })
+  
+          :max
+          (make-node :clojure/kernel/int { :value 100 })
+        })
+    
+        :expr
+        (make-node :clojure/core/square {
+          :expr
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :z_for)
+          })
+        })
+      })
+    })
+  })
 ])
