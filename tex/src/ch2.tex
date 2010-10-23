@@ -76,7 +76,7 @@ XML and other related \emp{markup languages}, are designed to augment textual da
 \item The XML format does not natively offer any equivalent of references, although many schemes for referring to nodes have been implemented in various derived formats.
 \end{enumerate}
 
-XML's undesirability as a concrete syntax for programs has been well-established, and stands as an example of the usability challenges posed by representing source code as structured data\cite{?}. We believe this this failure largely results from the use of the textual representation as the editing interface.
+XML's undesirability as a concrete syntax for programs has been well-established, and stands as an example of the usability challenges posed by representing source code as structured data\cite{holub}\cite{xml-bad-ant}. We believe this this failure largely results from the use of the textual representation as the editing interface.
 
 \subsection{Compared to S-expressions}
 Most Lisp programs are written in \emp{S-expressions}, a simple data structure offering only lists, symbols (i.e. names), and a handful of types of primitive values. Because of this simplicity, a simple encoding of S-expressions (using parentheses for grouping and white-space to separate tokens) is sufficient to allow them to be ``parsed'' from text with minimal effort. This approach gives considerable generality and flexibility, but the use of s-expressions directly in lieu of a concrete syntax has been a highly divisive choice, essentially separating the population of programmers into two ``camps''---those who are put off by sequences of nested parentheses and those who appreciate the beauty of having the structure of the code plainly visible on the page\cite{?}.

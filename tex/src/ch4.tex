@@ -2,7 +2,7 @@
 \label{prototype}
 
 \section{The Host Platform}
-The prototype system is implemented in Clojure \cite{hickey}, a language in the Lisp family which runs on the Java Virtual Machine \cite{gosling}. Clojure also fills the role of the host kernel language. Some characteristics of Clojure that make it a good choice include:
+The prototype system is implemented in Clojure \cite{clojure}, a language in the Lisp family which runs on the Java Virtual Machine \cite{jvm}. Clojure also fills the role of the host kernel language. Some characteristics of Clojure that make it a good choice include:
 \begin{enumerate}
 \item Similar notion of a kernel language. The prototype simply adopts (a subset of) the special forms of Clojure as its kernel language.
 \item Functional orientation. Clojure is a non-pure functional language; it allows side-effects but (in contrast to most Lisps) all of its bindings and data structures are immutable. %Destructive assignment is supported only for special \emp{reference} objects which enforce certain semantics (and which do not play any real role in this system). This approach fits quite well with the idea of transformation of immutable trees, and in fact inspired many ideas such as the approach to tree reduction.
@@ -13,16 +13,16 @@ The prototype system is implemented in Clojure \cite{hickey}, a language in the 
 
 A handful of node representations are implemented for different purposes. First, a Lisp-style ADT for nodes is implemented as a series of functions \clojure{make-node}, \clojure{node?}, \clojure{node-type}, etc., which allow Clojure programs to construct and manipulate nodes, independent of the concrete representation. The prototype uses only these functions to work with nodes.
 
-The implementation of the node ADT uses Clojure's \clojure{deftype} construct to represent nodes as instances of a \clojure{nodetype} class at the JVM level. This reduces the overhead for simple nodes to the minimum. Map- and sequence-valued nodes use Clojure's built-in persistent hash map and persistent vector (array-mapped trie [?]) data structures to store their children.
+The implementation of the node ADT uses Clojure's \clojure{deftype} construct to represent nodes as instances of a \clojure{nodetype} class at the JVM level. This reduces the overhead for simple nodes to the minimum. Map- and sequence-valued nodes use Clojure's built-in persistent hash map and persistent vector data structures (based on Bagwell's array mapped tries\cite{bagwell}) to store their children.
 
-The \clojure{make-node} function provides a convenient serialized form for nodes: s-expressions. A \clojure{print-node} function turns a node object back into text which can be read and evaluated to re-constitute the node.
+The \clojure{make-node} function provides a convenient serialized form for nodes: s-expressions. A \clojure{print-node} function turns a node object back into text which can be read and evaluated to re-constitute the node. This low-level representation is never seen by the user of the system.
 
 
 \section{The Host Language}
 \label{host}
 The host language is composed of a kernel based on the primitive constructs and values of Clojure together with a core language built via syntax extension on top of the kernel language.
 
-The kernel language, shown in Figure \ref{fig-kernel}, consists of six kinds of primitive values, six node types corresponding to Clojure's special forms, two nodes for quotation, and a node for making external references to the platform.
+The kernel language, shown in Figure \ref{fig-kernel}, consists of six kinds of primitive values, six node types corresponding to Clojure's special forms, two nodes for quotation, and a node for making external references to the platform. Virtually every node is an instance of the abstract \keyword{expr} type, yielding some kind of value as a function of its arguments; there are no statements and no mutating assignments.
 
 The kernel language is somewhat simplified relative to the complete list of Clojure's special forms. A few forms which are not currently used are left out, and several of the nodes are somewhat less flexible in form than the corresponding Clojure syntax.
 
@@ -61,17 +61,17 @@ $n$-ary functions are included in the kernel language as they are in Clojure to 
 
 \keyword{app} is (call-by-value) function application. An \keyword{exprList} node contains expressions to be evaluated from left to right.
 
+Simple conditionals are provided by \keyword{if}.
+
 \keyword{let} evaluates an expression, binds a name to the resulting value and then evaluates its body with that binding in scope. \Meta\ provides only a single-binding \emp{let} form, and no \emp{letrec} (Clojure provides a separate \clojure{letfn}, which is not currently available in \Meta). 
 
 A \keyword{var} node is a reference to the value bound by the parameter of a lambda, by the lambda itself, or by a let expression. 
 
-Simple conditionals are provided by \keyword{if}.
-
 Variables are lexically-scoped, and lambdas capture all bindings in scope at their point of declaration.
 
-An \keyword{extern} node refers to a variable at the Clojure level. This allows any function or value defined by the Clojure platform or \Meta\ runtime to be accessed. Use of these external facilities is minimized in order to make the core language as self-contained as possible. 
+An \keyword{extern} node refers to a variable at the Clojure level. This allows any function or value defined by the Clojure platform or \Meta\ runtime to be accessed. Use of these external facilities is minimized in order to make the core language as self-contained as possible. \keyword{fail} 
 
-\keyword{quote} and \keyword{unquote} are handled by the meta-compiler as described below.
+\keyword{quote} and \keyword{unquote} are given special treatment by the meta-compiler.
 
 \subsection{Meta-compilation}
 Given a program in the kernel language, a function \clojure{meta-compile} translates the nodes to Clojure s-expressions in a mostly straight-forward way, due to the close correspondence between kernel nodes and Clojure's special forms. Only a few types of nodes need special consideration. %Then Clojure's \clojure{eval} function is invoked, and the program is compiled to Java bytecode, loaded into the JVM, and executed. Because the kernel language maps so closely to Clojure's forms, the meta-compilation process is mostly trivial.
@@ -89,6 +89,22 @@ Once a kernel language program has been meta-compiled, the standard Clojure func
 
 %\subsection{Limitations}
 %When nodes are translated to s-expressions, all information about the origin of the code is lost. This means that exceptions and stack traces cannot identify the source locations.
+
+\subsection{Core Language}
+The host core language provides common facilities built via syntax extension on top of the kernel language. That is, nodes of the core language are reduced to kernel language nodes prior to meta-compilation. The core language currently provides a subset of the features of Clojure's Core API\cite{clojure-and}, plus primitives for constructing and manipulating AST nodes. A few nodes expose features provided by the platform. One such primitive is \keyword{cons} (rendered as an infix `:'), which constructs a lazy sequence given head and tail expressions; the head is evaluated immediately, and the tail expression is wrapped in a thunk---it will be evaluated the first time the tail of the resulting sequence is needed. This simple mechanism allows lazy infinite sequences to be used in core language programs, as seen in some of the examples in Figure \ref{fig-core}.
+
+\begin{figure}
+	\todo{finalize}
+	
+	\begin{center}
+	\includegraphics[scale=0.8]{src/image/core3.pdf}
+	\end{center}
+	
+	
+	\caption{Example core language expressions and their values.}
+	\label{fig-core}
+\end{figure}
+
 
 
 %
@@ -125,13 +141,13 @@ The renderer also provides hit-testing for nodes, identifying a list of \keyword
 %\caption{\label{fig-view} Grammar for the low-level \keyword{view} language.}
 %\end{figure}
 
-The nodes of the \keyword{view} language parallel the nodes of \keyword{expr} (see Figure \ref{fig-view}), but logical nodes have been reduced to a concrete representation. For example, for the various atom types, there's a single \keyword{chars} node, which contains a string and font. \keyword{sequence} is used to represent all horizontal sequences without any implied spacing. \keyword{section} is a simple vertical arrangement of left-aligned nodes.
+The nodes of the \keyword{view} language parallel the nodes of \keyword{expr}, with logical nodes have been reduced to a concrete representation. For example, for the various atom types, there's a single \keyword{chars} node, which contains a string and names a font to draw it with. \keyword{sequence} is used to represent all horizontal sequences without any implied spacing. \keyword{section} is a simple vertical arrangement of left-aligned nodes.
 
 The \keyword{scripted}, \keyword{over}, \keyword{radical},and \keyword{delimited} nodes were described earlier. \keyword{border} draws its content with a background color, surrounded by a rectangular border with a configurable weight.
 
 Nodes which draw glyphs can have a \keyword{color} attribute, which causes the single node to be drawn with a different foreground color.
 
-For layout purposes, the renderer calculates a size for each node, consisting of width, height, and baseline height (which may be undefined). A baseline is calculated for each \keyword{chars} node based on its font, and certain other nodes calculate a baseline based on their contents. \keyword{sequence} nodes' children are laid out so that nodes with baseline heights are aligned to a mutual baseline, and nodes without baseline heights are aligned to their vertical center (and the overall vertical center of all baseline-aligned siblings). This is sufficient to get simple expressions to render well, but the current algorithm lacks \TeX's second alignment step (the \emp{axis}), which would be needed to get certain sub-expressions such as fractions to be properly aligned.
+For layout purposes, the renderer calculates a size for each node, consisting of width, height, and optional baseline height. A baseline is calculated for each \keyword{chars} node based on its font, and certain other nodes calculate a baseline based on their contents. \keyword{sequence} nodes' children are laid out so that nodes with baseline heights are aligned to a mutual baseline, and nodes without baseline heights are aligned to their vertical center (and the overall vertical center of all baseline-aligned siblings). This is sufficient to get simple expressions to render well, but the current algorithm lacks \TeX's second alignment step (the \emp{axis}), so some expressions are not quite properly aligned (e.g. fraction lines are not aligned with the vertical centers of $+$ and $-$ operators).
  
 \keyword{radical} and \keyword{delimited} nodes are laid out by first sizing the content node, then selecting the appropriate glyph(s) from a list of variously-sized alternatives, and finally calculating sizes and positions based on the selected glyph. \TeX's fonts are used for these glyphs, as well as for most symbols reduced from \keyword{expr/symbol}. 
 
@@ -140,9 +156,9 @@ For layout purposes, the renderer calculates a size for each node, consisting of
 
 The renderer makes several passes over the tree to draw different layers. The first pass draws only \keyword{border} nodes, which therefore appear ``behind'' all other elements. The nodes are drawn in pre-order, so that parent borders and their background fill are drawn behind any child borders. On the second pass, an indicator of the selected node is drawn, so that it will appear above the border rects, but behind the actual content. The final pass renders all non-border nodes. \todo{error indicator?} 
 
-The renderer is written in a simple functional style, freely traversing the node tree as much as necessary. However because size calculations are relatively expensive, this na\"{\i}ve \todo{wc?} approach initially led to poor performance of drawing and hit-testing (on the order of 2-500ms to render a small program). This was easily improved by simply memo-izing two kinds of functions. The function that calculates the size of a text glyph given the characters and font is simply memo-ized, so that no more than one call is ever made for each unique glyph. The functions that calculate size and position for each node are also cached, but only for the duration of a single rendering pass. That way the renderer performs well (10-20ms) despite being written in the most direct way, making no attempt to reduce redundant calculations. Clojure's functional nature and macro facility made it easy to implement this algorithmic change ``after the fact,'' without requiring the renderer to be re-written.
+The renderer is written in a simple functional style, freely traversing the node tree as much as necessary. However because some of the necessary calculations are relatively expensive, the rendered initially performed poorly, taking on the order of 2-500ms to render a small program. This was easily improved by taking advantage of the fact that two kinds of referentially-transparent functions . The function that calculates the size of a text glyph given the characters and font is simply memo-ized, so that no more than one call is ever made for each unique glyph. The functions that calculate the position of each node are also cached, but only for the duration of a single rendering pass (mostly to avoid consuming arbitrary memory for no-longer-needed cached values when a succession of updated trees is rendered one after the other). That way the renderer performs well (10-20ms) despite being written in the most direct way, making no attempt to avoid redundant calculations. Clojure's functional nature and macro facility made it easy to implement this algorithmic change ``after the fact,'' without requiring the renderer to be re-written.
 
-The renderer currently violates good functional programming style by performing the actual drawing via side-effecting operations during the traversal of the node tree. In hindsight, it would have been better t0 have the traversal yield a list of drawing commands to be executed later. For instance the layering of different kinds of visual elements could have been handled explicitly, rather than as a side-effect of traversal order. If the renderer was implemented as a reduction to an even lower-level language consisting of nodes corresponding directly to the drawing operations of Java2D, it would nicely unify the layers of the system.
+The renderer currently violates good functional programming style by performing the actual drawing via side-effecting operations during the traversal of the node tree. In hindsight, it would have been better to have the traversal yield a list of drawing commands to be executed later. For instance the layering of different kinds of visual elements could have been handled explicitly, rather than as a side-effect of traversal order. If the renderer was implemented as a reduction to an even lower-level language consisting of nodes corresponding directly to the drawing operations of Java2D, it would nicely unify the layers of the system.
 
 
 \subsection{Reducing \keyword{expr} to \keyword{view}}
@@ -176,11 +192,11 @@ $$
 \caption{\label{fig-modes} Program fragment with multiple modes.}
 \end{figure}
 
-As the example in Figure \ref{fig-modes} shows, the smaller modes quickly become hard to read for anything but very simple expressions (especially on relatively low-resolution displays), so wise language designers (and programmers) will use them sparingly. The \TeX book\cite{knuth} gives much good advice about how to use them effectively. The most clear application of the smaller modes in ordinary programs is for decorating variable names with small integer subscripts and primes.
+As the example in Figure \ref{fig-modes} shows, the smaller modes quickly become hard to read for anything but very simple expressions (especially on relatively low-resolution displays), so wise language designers (and programmers) will use them sparingly. The \TeX book\cite{knuth} gives much good advice about how to use them effectively. The most clear application of the smaller modes in ordinary programs is for decorating variable names with small integer subscripts and ``prime'' symbols, as in $x' = x + a_0$.
 
-The meta-level is a non-negative integer indicating the level of nesting of the current node. It begins at zero and is incremented whenever an \keyword{embed} node is encountered and decremented on \keyword{disembed}. The \keyword{embed} node itself is reduced to a \keyword{border} which draws a light-colored background behind the embedded nodes, and a darker border of the same hue. An \keyword{disembed} node becomes a border with the hue of the lower level and the background of the outer level, making a visual connection between the outer and nested nodes that are at the same level. A fixed series of colors is used that can unambiguously indicate nesting of up to a half-dozen levels. Examples appear in figures \ref{fig-flarp} and \ref{fig-zeb}.
+The meta-level is a non-negative integer indicating the level of nesting of the current node. It begins at zero and is incremented whenever an \keyword{embed} node is encountered and decremented on \keyword{disembed}. The \keyword{embed} node itself is reduced to a \keyword{border} which draws a light-colored background behind the embedded nodes, and a darker border of the same hue. A \keyword{disembed} node becomes a border with the hue of the lower level and the background of the outer level, making a visual connection between the outer and nested nodes that are at the same level. A fixed series of colors is used that can unambiguously indicate nesting of up to a half-dozen levels. An example of multi-level embedding appears in Figure \ref{fig-binary}, where the declaration is at level 0 (white background). The embedded right-side reduction is at level 1 (blue background), and it in turn contains a pair of embedded reductions (level 2, green background). The \emp{left} and \emp{right} attributes of the inner declaration are un-quoted (dis-embedded) back to level 1 within the level-2 reductions, while the \emp{op} and \emp{fn} are un-quoted twice.
 
-To compute the mode and meta-level at each node, the reduction function is extended to take the two values as additional parameters, and to return the pair of values along with the reduced node each time it is invoked. As the tree is visited, the values that were computed for a given node are passed to the reduction for its children. This allows the reduction function to compute values based on the shape of the tree, which would otherwise be impossible due to the lack of any reference from a sub-tree to its parent node. Effectively, the ``inherited'' value allows the reduction function to accumulate some information about the otherwise inaccessible ancestors. This simple extension is sufficient for this reduction (the most complicated yet encountered), and it does mean that this reduction could not be implemented in a grammar as almost all other reductions in \Meta\ are. It would be possible to define a grammar language that would support this kind of reduction, perhaps by adopting some of the semantics of attribute grammars\ref{attribute-grammar}.
+To compute the mode and meta-level at each node, the reduction function is extended to take the two values as additional parameters, and to return the pair of values along with the reduced node each time it is invoked. As the tree is visited, the values that were computed for a given node are passed to the reduction for its children. This allows the reduction function to compute values based on the shape of the tree, which would otherwise be impossible due to the lack of any reference from a sub-tree to its parent node. Effectively, the ``inherited'' value allows the reduction function to accumulate some information about the otherwise inaccessible ancestors. This simple extension is sufficient for this reduction (the most complicated yet encountered), and it does mean that this reduction could not be implemented in a grammar as almost all other reductions in \Meta\ are. A more sophisticated grammar language could support this kind of reduction, perhaps represented as an attribute grammar\ref{attribute-grammar}.
 
 
 \subsection{Meta-reduction of \keyword{expr}}
@@ -226,7 +242,25 @@ To convert a program into \keyword{view} nodes for rendering, the editor applies
 \begin{figure}[ht]
   \todo{draw something; graphviz?}
 
-  \emp{source} : $S$ $\to$ (insert missing nodes) $\to$ $S$ + \keyword{expr/missing} $\to$ (reduce names to expr) $\to$ $S$ + \keyword{expr} $\to$ (meta-reduce source expr nodes [grammars only]) $\to$ (reduce via grammar) $\to$ \keyword{expr} + unreduced nodes $\to$ (reduce un-reduced nodes) $\to$ \keyword{expr} $\to$ (expr-to-view reduction) $\to$ \keyword{view} $\to$ (renderer)
+	\emp{source}
+	
+	\quad names, missing nodes
+	
+	\quad display (grammar-derived)
+	
+	\keyword{expr}
+	
+	\quad parens, general
+	
+	\quad expr$\to$view
+	
+	\keyword{view}
+	
+	\quad render
+	
+	\emp{Java2D}
+	
+%  \emp{source} : $S$ $\to$ (insert missing nodes) $\to$ $S$ + \keyword{expr/missing} $\to$ (reduce names to expr) $\to$ $S$ + \keyword{expr} $\to$ (meta-reduce source expr nodes [grammars only]) $\to$ (reduce via grammar) $\to$ \keyword{expr} + unreduced nodes $\to$ (reduce un-reduced nodes) $\to$ \keyword{expr} $\to$ (expr-to-view reduction) $\to$ \keyword{view} $\to$ (renderer)
 
   \caption{Reductions in the rendering pipeline.}
   \label{fig-pipeline} 
@@ -242,7 +276,7 @@ Once the target program is produced, along with the mapping of origins, the edit
 
 The \emp{parent} node is simply the parent in the usual sense. The editor assumes that every ancestor of every visible node is itself visible. Only the root node has no parent.
 
-The \emp{visible children} of a node are the subset of the node's children for which there is some \keyword{view} node, ordered by their visual position. That is, the visible children do not include any child nodes which were ignored by the presentation reduction, and the otherwise unordered children of a map-valued node are ordered according to how they appear in the visual representation of the node. The order is from left to right (sequences) and top to bottom (sections). The children of a \keyword{subscript} node are ordered as follows: nucleus, superscript, subscript.
+The \emp{visible children} of a node are the subset of the node's children for which there is some \keyword{view} node, ordered by their visual position. That is, the visible children do not include any child nodes which were ignored by the presentation reduction, and the otherwise unordered children of a map-valued node are ordered according to how they appear in the visual representation of the node. The order is from left to right (sequences) and top to bottom (sections and fractions). The children of a \keyword{subscript} node are ordered as follows: nucleus, superscript, subscript.
 
 The \emp{visible siblings} of a node are the visible children of the node's parent. The \emp{next} sibling is defined in the obvious way for all nodes which are not the last visible child of their parent. The \emp{previous} sibling is similarly defined (except for the first visible child). An example of each of these relationships is diagrammed in Figures \ref{fig-position} and \ref{fig-position-tree}.
 
@@ -263,7 +297,7 @@ The \emp{visible siblings} of a node are the visible children of the node's pare
 \end{figure}
 
 \subsection{Selection}
-One of the main tasks of the editor is to make the structure of the program visible to the programmer. By rendering the nodes of the program in a rich, familiar notation enhances readability but may not always make the structure of nodes very clear. In order to make a change to the AST, the programmer needs to be aware of this structure. The editor's UI for selection facilitates this awareness by visually emphasizing the relationship between a single selected node and its children, and by providing a way to move between nodes that is defined in terms of the source AST. Thus the structure becomes visible once it is salient, but is left somewhat implicit or even obscured otherwise.
+One of the main tasks of the editor is to make the structure of the program visible to the programmer. Rendering the nodes of the program in a rich, familiar notation enhances readability but may not always make the structure of nodes very clear. In order to make a change to the AST, the programmer needs to be aware of this structure. The editor's UI for selection facilitates this awareness by visually emphasizing the relationship between a single selected node and its children, and by providing a way to move between nodes that is defined in terms of the source AST. Thus the structure becomes visible once it is salient, but is left somewhat implicit or even obscured otherwise.
 
 Unlike a text editor, where the typical unit of selection is a character position (i.e. the lowest level of the program text), in \Meta\ the selection identifies a single source-program node which can be at any level of the source tree. A new node can be selected by clicking anywhere in the view. The new selection node is the deepest node whose boundary encloses the clicked location. Once a selection has been established, a new node can be selected by invoking an action to move the selection to a neighboring node using the notion of relative position defined in the previous section. Currently there are actions to select the parent, next or previous sibling, or the first visible child.
 
@@ -271,7 +305,7 @@ Unlike a text editor, where the typical unit of selection is a character positio
 
 The selected node is the target of all editing operations.
 
-Identifying program elements this way effectively exposes the tree structure of the program to the programmer in a tangible way. requires the programmer to think about the program in terms of its tree structure, so whether or not they feel natural or are easy to understand represents one test of the overall concept of editing the AST.
+Identifying program elements this way effectively exposes the tree structure of the program to the programmer in a tangible way and encourages the programmer to think about the program in terms of this structure. Whether or not this feels natural or is easy to understand represents one test of the overall concept of editing the AST.
 
 
 \subsection{Edit Actions}

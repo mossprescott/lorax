@@ -34,14 +34,17 @@ A grammar so-defined is not capable of specifying every interesting property of 
 
 
 \subsection{Reductions}
-A grammar may supply one or two reductions for each node type. These reductions are code fragments which are used to construct reduction functions (see section \ref{reduction}) which take a program in the source language defined by the grammar and reduce it to a derived program. Using a meta-programming approach, the reductions are economical and simple to define, but the full host language is available for use in reductions when needed. %See Figure \ref{fig-and}.
+A grammar may supply one or two reductions for each node type. These reductions are code fragments which are used to construct reduction functions (see section \ref{reduction}) which take a program in the source language defined by the grammar and reduce it to a derived program. Using a meta-programming approach, the reductions are economical and simple to define, but the full host language is available for use in reductions when needed.
 
 \begin{figure}[ht]
-%  \includegraphics[scale=0.8]{src/image/not.png}  % 72dpi/0.8 = 90dpi for display
-
-  \includegraphics{src/image/and.pdf}
-  \caption[Declaration of the \keyword{and} node of the core language.]{Declaration of the \keyword{and} node, taken from the grammar for the \Meta\ core language. \keyword{and} is an subtype of the abstract type \keyword{expr}, has two required attributes, \emp{left} and \emp{right}, both \keyword{expr}s. It is displayed with the infix keyword ``and'', and reduces to an expression using the primitives \keyword{let} and \keyword{if}.}
-  \label{fig-and}
+	\begin{center}
+	\includegraphics[scale=0.8]{src/image/and.pdf}
+	\end{center}
+	
+	Taken from the grammar for the \Meta\ core language. \keyword{and} is a subtype of the abstract type \keyword{expr}, and has two required attributes, \emp{left} and \emp{right}, both \keyword{expr}s. On the left is the presentation reduction, which puts the string ``and'' in keyword style between the two expressions. An \keyword{and} node reduces to an expression which evaluates the left argument, tests to see if is a ``false'' value, returns it if not, and otherwise evaluates the right argument and returns that. This kind of short-circuiting evaluation returning the first false value is commonly used in scripting languages\cite{python-and}\cite{clojure-and}\cite{javascript}.
+	
+	\caption{Declaration of the \keyword{and} node of the core language.}
+	\label{fig-and}
 \end{figure}
 
 A \keyword{display} reduction (shown on the left in Figure \ref{fig-and}) reduces a node to a presentation language node. This reduction will always be present except in certain special cases which will be described later.
@@ -86,103 +89,106 @@ To serve the needs of different kinds of languages, multiple presentation langua
 
 \subsection{The \keyword{expr} Language}
 
-%\begin{figure}
-%\todo{capture from the implementation}
-%$$\keyword{keyword} = \mathit{str} : \keyword{string}$$
-%$$\keyword{int} = \mathit{str} : \keyword{string}$$
-%$$\dots$$
-%\caption{\label{fig-expr} Grammar for the \keyword{expr} language.}
-%\end{figure}
+\Meta's \keyword{expr} language is well-suited to representing the expressions that make up the declarative portion of a typical modern programming language. It can also reproduce much of the familiar notation of algebraic expressions. An \keyword{expr} program is a tree made up of \emp{box} nodes. Each box node occupies a rectangular area of the rendering surface and always encloses the areas occupied by any child boxes. Several kinds of boxes are available in \keyword{expr}.
 
-\Meta's \keyword{expr} language is well-suited to representing the expressions that make up the declarative portion of a typical modern programming language and it can also reproduce much of the familiar notation of algebraic expressions. An \keyword{expr} program is a tree made up of \emp{box} nodes. Each box node occupies a rectangular area of the rendering surface and always encloses the areas occupied by any child boxes. Several kinds of boxes are available in \keyword{expr}.
+An \emp{atom} is a box that renders a sequence of characters and/or symbols using the normal spacing for text. Several types of atoms are available, each conveying what kind of entity the characters are meant to represent. When atoms are reduced to lower-level nodes, a distinctive typographical treatment is applied to each, as shown in Table \ref{tab-atoms}. The list of atom types is meant to be expanded to serve the needs of any conceivable source language; the effort to add a new type is typically small (most simply specify a font and/or face), and in any case the total number of types in any one language is probably limited to a dozen or so, with much in common across languages, so we conjecture that the universe of useful atom types is not much larger than what \keyword{expr} currently provides. 
 
-An \emp{atom} is a box that renders a sequence of characters and/or symbols using the normal spacing for text. Several types of atoms are available, each conveying what kind of entity the characters are meant to represent. When atoms are reduced to lower-level nodes, a distinctive typographical treatment is applied to each, as shown in Table \ref{fig-atoms}. The list of atom types is meant to be expanded to serve the needs of any conceivable source language; the effort to add a new type is typically small (most simply specify a font and/or face), and in any case the total number of types in any one language is probably limited to a dozen or so, with much in common across languages, so we conjecture that the universe of useful atom types is not much larger than what \keyword{expr} currently provides. 
 
 \begin{table}
-\begin{tabular}{llll}
-Type & Treatment & Examples & Typical use
-\\
-\hline
-\keyword{keyword}
- & boldface
- & \keyword{true}
- & fixed language syntax
-\\ & & \keyword{if} &   % Ugly hack! how to do proper multi-line cells in tabular env.?
-\\
-\hline
-\keyword{var}
- & italic
- & $x$
- & names (user-provided or generated)
-\\ & & $g$ & 
-\\ & & $\mathit{fib}$ & 
-\\
-\hline
-\keyword{num}
- & \textit{none}
- & 1
- & numerical literals
-\\ & & 2.0 & 
-\\ & & 3,000 & 
-\\
-\hline
-\keyword{string}
- & sans serif
- & \textsf{abc} 
- & character literals (note special
-\\
- & & \textsf{Hello,\textvisiblespace world} &  % open box: \u2423
-  treatment of the space character)
-\\
-%\hline
-%\keyword{name}
-% & boldface, italic
-% & \textbf{\emp{a}}
-% & name literals
-%\\ & & \textbf{\emp{foo}} & 
-%\\
-\hline
-\keyword{mono}
- & monospaced
- & \texttt{nil}
- & external references
-\\ & & \texttt{cons} & 
-\\
-\hline
-\keyword{prod}
- & monospaced, italic
- & \texttt{\emp{expr}}
- & node types in grammars
-\\ & & \texttt{\emp{left}} & 
-\\
-\hline
-\keyword{symbol}
- & \textit{none}
- & $\to$
- & mathematical symbols
-\\ & & $\in$ & 
-\\ & & $\sum$ & 
-\\
-\hline
-\end{tabular}
 
-\vspace{6pt}
+	\begin{center}
+	\begin{tabular}{llll}
+	Type & Treatment & Examples & Typical use
+	\\
+	\hline
+	\keyword{keyword}
+	 & boldface
+	 & \keyword{true}
+	 & fixed language syntax
+	\\ & & \keyword{if} &   % Ugly hack! how to do proper multi-line cells in tabular env.?
+	\\
+	\hline
+	\keyword{var}
+	 & italic
+	 & $x$
+	 & names (user-provided or generated)
+	\\ & & $g$ & 
+	\\ & & $\mathit{fib}$ & 
+	\\
+	\hline
+	\keyword{num}
+	 & \textit{none}
+	 & 1
+	 & numerical literals
+	\\ & & 2.0 & 
+	\\ & & 3,000 & 
+	\\
+	\hline
+	\keyword{string}
+	 & sans serif
+	 & \textsf{abc} 
+	 & character literals (note special
+	\\
+	 & & \textsf{Hello,\textvisiblespace world} &  % open box: \u2423
+	  treatment of the space character)
+	\\
+	%\hline
+	%\keyword{name}
+	% & boldface, italic
+	% & \textbf{\emp{a}}
+	% & name literals
+	%\\ & & \textbf{\emp{foo}} & 
+	%\\
+	\hline
+	\keyword{mono}
+	 & monospaced
+	 & \texttt{nil}
+	 & external references
+	\\ & & \texttt{cons} & 
+	\\
+	\hline
+	\keyword{prod}
+	 & monospaced, italic
+	 & \texttt{\emp{expr}}
+	 & node types in grammars
+	\\ & & \texttt{\emp{left}} & 
+	\\
+	\hline
+	\keyword{symbol}
+	 & \textit{none}
+	 & $\to$
+	 & mathematical symbols
+	\\ & & $\in$ & 
+	\\ & & $\sum$ & 
+	\\
+	\hline
+	\end{tabular}
+	\end{center}
+	
+	\vspace{6pt}
+	Note: the actual character content of each type of atom is arbitrary, except \keyword{symbol}, which handles a pre-defined set of available symbol.
 
-\caption{Types of atoms in \keyword{expr}, and the typographical treatment that is applied to them when \keyword{expr} is reduced. Note: the actual character content of each type of atom is arbitrary, except \keyword{symbol}, which provides a pre-defined set of available symbols.}
-\label{fig-atoms}
+	\caption{Types of atoms in the \keyword{expr} language.}
+	\label{tab-atoms}
 \end{table}
 
-The diversity of atom types provides a measure of visual sophistication for programs, with a very small effort on the part of the language designer. Simply by identifying a visual style for each piece of syntax, some information about the meaning of each node is conveyed to the programmer. The particular treatment is meant to match the readability and high aesthetic standards of the pseudocode that might be found in a journal article or a good CS textbook.
+The diversity of atom types provides a measure of visual sophistication for programs, with a very small effort on the part of the language designer. Simply by identifying a visual style for each piece of syntax, some information about the meaning of each node is conveyed to the programmer. The particular treatment is meant to match the readability and high aesthetic standards of the pseudocode that might be found in a journal article or a good Computer Science textbook, and may be judged by the reader by inspecting any of the figures in this paper, most of which were captured directly from the prototype editor as vector graphics. The rendering of these fonts on screen at relatively low resolution of 100 dots per inch or less is not really optimal, but given the trend toward more dense displays (as of late 2010, laptop displays approaching 150 dpi are common and handheld devices can be much higher than that), it is likely that acceptable rendering of multiple fonts even at small sizes will soon be quite achievable. In any case, the actual choice of how to present each type of atom is unrestricted; a more conventional approach would be to use just a few fonts and instead use color to distinguish different elements in the conventional ``syntax-highlighting'' manner.\cite{lexx} These issues have been explored heavily in the field of Integrated Development Environments, but few published studies seem to exist. One reference is Harward, et al.\cite{insitu}
 
-A similar idea leads to the \emp{syntax-coloring} behavior of many text editors, with a more cartoonish and less elegant result (see Figure \ref{fig-syntax-coloring}). In \Meta, using a single color for all syntax allows color differences to be used for other purposes.
+%A similar idea leads to the \emp{syntax-coloring} behavior of many text editors, with a more cartoonish and less elegant result (see Figure \ref{fig-syntax-coloring}). In \Meta, using a single color for all syntax allows color differences to be used for other purposes.
 
-\begin{figure}[ht]
-  \includegraphics[scale=0.8]{src/image/if.png}
+%\begin{figure}[t]
+%  \begin{center}
+%  \includegraphics[scale=0.8]{src/image/if.png}  % 72dpi/0.8 = 88.75, actually
+%  
+%  \includegraphics[scale=0.8]{src/image/if-text.png}
+%  \end{center}
+%  
+%  A simple Java expression, rendered by \Meta\ and by a typical programmer's editor (TextMate), both at 90dpi. Note that the colored version is rendered using sub-pixel anti-aliasing, which looks better on screen than on the page.
+
+%  \caption{Typographically-rich notation compared to ``syntax coloring.''}
+%  \label{fig-syntax-coloring}
   
-  \includegraphics[scale=0.8]{src/image/if-text.png}
-
-  \caption{\label{fig-syntax-coloring}Comparison of visual rendering of a simple Java expression, at 90 dpi. }
-\end{figure}
+%\end{figure}
 
 \emp{Composite} boxes contain child boxes which they arrange in a certain way. A \emp{sequence} is a horizontal arrangement of nodes separated by a certain amount of space. There are a handful of sequence types, each implying a certain amount of inter-node space. The amount of space is a visual indication of how tightly the sub-expression represented by the sequence binds, as we'll discuss in the next subsection. A \keyword{scripted} node contains a \emp{nucleus} and one or both of a \keyword{sub}- and \keyword{super}-script node. \emp{Special signs} are similar to composites but also draw a glyph surrounding the child node(s). Examples are \keyword{radical} and \keyword{fraction}, used in particular mathematical contexts.
 
@@ -192,11 +198,11 @@ An \keyword{embed} node encloses its contents in a visual indication of being a 
 
 Because the \keyword{expr} language preserves the hierarchical structure of expressions and specifies the visual layout of each sub-expression, it's possible for the system to identify cases where the nesting of expressions could lead to confusion, and to insert parentheses automatically in these cases. This is done \emp{after} the reduction of the program to the \keyword{expr} language, so it's applied consistently to any language construct, without special effort at the point of definition of a node. 
 
-The \keyword{expr} language provides enough levels of spacing (four) to handle a moderately complex expression without parentheses. For example, in the expression\begin{center}
+The \keyword{expr} language provides enough levels of spacing (four) to handle a moderately complex expression without parentheses. For example, in the expression
+\begin{center}
 %$$\keyword{if} \:\ \: x \: < \: y + 4! \:\ \: \keyword{then} \:\ \: \dots$$ 
 \includegraphics{src/image/space.pdf}
-\end{center}
-% too much space here!
+\end{center}  % too much space here (actually part of the pdf?), and an unfortunate page break, currently.
 the factorial operator binds most tightly ($!$, no space), then addition is performed ($+$, indicated by a thin space), then comparison ($<$, medium space), and finally the conditional (\keyword{if}, thick space). Examples of how this works will be presented later.
 
 
@@ -214,113 +220,26 @@ The grammar language, host language, and presentation language work together to 
 
 Because a grammar is a \Meta\ program, the same tools for syntax extension are available for use in grammars, so the \keyword{grammar} language should be viewed as a starting point. It is meant to be general enough to define typical languages, to handle most common needs for defining syntax, and to serve as a kernel language for grammars.
 
-As an example, consider the variety of binary infix operators that we may wish to define. If defined in terms of the kernel grammar language, each declaration will echo the definition of \keyword{and} shown in Figure \ref{fig-and}, varying only in the symbol used to represent the operator, and the name of the function to invoke (assuming many of these are simply wrapping some primitive operation supplied by the platform). This kind of duplication is a clear opportunity for language extension, as shown in Figures \ref{fig-binary} and \ref{fig-binary-examples}.
+As an example, consider the variety of 2-argument, infix operators that we may wish to define. If defined in terms of the kernel grammar language, each declaration will echo the definition of \keyword{and} shown in Figure \ref{fig-and}, varying only in the symbol used to represent the operator, and the name of a function to invoke. This kind of duplication is a clear opportunity for language extension, as shown in Figures \ref{fig-binary}.
 
-\begin{figure}[h]
-  \todo{capture: binary \{ type: name, symbol: name, fn: string \} xxx $\to$ [expr $\leftarrow$ [name] ...]}
+\begin{figure}[th]
+	\begin{center}
+	\includegraphics[scale=0.8]{src/image/binaryNode.pdf}
+	\end{center}
+
+	The display reduction (the blue, quoted box on the left) for these declarations mimics the regular node declaration syntax but with several fixed elements and just four embedded attributes. The expansion on the right is a quoted declaration, which will be evaluated to produce an ordinary node declaration.
   
-  \caption{Definition of the \keyword{binaryNode} extension to the grammar syntax.}
-  \label{fig-binary}
+	\caption{Definition of \keyword{binaryNode} as an extension of the grammar syntax.}
+	\label{fig-binary}
 \end{figure}
 
-\begin{figure}[h]
-  \todo{capture: plus, minus, in, :, ++, ?, \%}
-  
+\begin{figure}[th]
+	\begin{center}
+	\includegraphics[scale=0.8]{src/image/binary.pdf}
+	\end{center}
+
   \caption{Some infix operators defined using \keyword{binaryNode}.}
   \label{fig-binary-examples}
 \end{figure}
 
-Note that the presentation for the new node visually approximates the original declaration, but it is in fact much simplified. This simplification becomes apparent when you edit one of these nodes---only the three unique elements can be edited, and the rest of the visualization is provided by the reduction. Like much syntax extension, the new node embodies the well-known Don't Repeat Yourself principle\cite{dry} by eliminating code duplication. Still, the meaning is clear at a glance because the presentation supplies cues which are easily recognized by their visual resemblance to the lower-level form.
-
-%\section{JUNK: More Stuff}
-
-%\subsection{Parentheses}
-%Of particular interest is the handling of parentheses. At the AST level, it is never necessary for the programmer to use parentheses to make the meaning of an expression clear, because the intended order of operations is explicit in the structure of nodes. However, some indication of grouping may be needed at the presentation level to produce an unambiguous visual representation. In \Meta, these parentheses are introduced automatically after the program is reduced to the \keyword{expr} language. 
-
-%Thus the role of parentheses is turned around: instead of being provided by the programmer as a hint to the parser about how the expression should be constructed, they're provided by the system, as a form of feedback to the programmer about the structure of the program that's being written/read. \temp{...reflects the reality of the programmer/editor interaction, which is about iteratively making edits and then reading the resulting text -- it's not a question of coming up with the program in your head and then typing it out in a stream.}
-
-%The insertion of parentheses is handled in a language-independent way, taking advantage of the way expressions are represented in the \keyword{expr} language. Pairs of parentheses (in the form of a \keyword{delim} node) are inserted around a sequence if it is nested within another node in such a way that the resulting notation would otherwise be misleading. By taking over the notational details, \Meta\ relieves the programmer of a sometimes tedious task, but more importantly ensures that the visual form of the program always corresponds closely to the actual meaning.
-
-%For example, consider the following pair of related expressions:
-%$$n! - 1 \qquad \qquad \qquad \lsyn n - 1 \rsyn !$$
-%In the first expression, $n$ factorial is calculated first, and then 1 is subtracted from that. The tighter binding of the factorial operation is visually suggested by the juxtaposition of $n$ and $!$ with no space between. The second operation is displayed with thick spaces interposed, suggesting looser binding. Thus the visualization matches the expression's structure without any additional fuss. In contrast, in the second expression, the usually tighter-binding operation is performed second, so a pair of parentheses is inserted around $n-1$ to indicate the proper order. 
-
-%A handful of simple rules determine when parentheses are inserted, depending on the type of the parent and child node, and a few special cases (for example, a \keyword{nucleus} needs parens, but \keyword{super} and \keyword{sub} nodes do not). Figure \ref{fig-parens} shows several additional examples that cover most of the cases\footnote{Knuth in the TeXbook (p.\:140): ``\dots takes a bit of mathematical knowhow, since parentheses sometimes need to be inserted in order to preserve the meaning of the formula\dots If you are a typist without mathematical training, it's best to ask \dots for help.'' If Knuth had implemented this algorithm, his typists would have been spared this chore. However making the process manual does give the author a greater degree of control, which is probably appropriate in the context of publishing.}.
-
-%
-%\begin{figure}[ht]
-%\todo{use my own output, which will be a better demonstration anyway}
-%$$
-%\begin{array}{ccc}
-%\lsyn 1+2 \rsyn \!\cdot\!3 & 
-%  \mathrm{\it vs.} & 
-%  1 + 2\!\cdot\!3
-%\\
-%\vspace{6pt}
-%\\
-%{\lsyn x+2 \rsyn}^i &
-%  \mathrm{\it vs.} & 
-%  x^{i+2}
-%\\
-%\vspace{6pt}
-%\\
-%{\lsyn a+b \rsyn}/2 & 
-%  \mathrm{\it vs.} & 
-%  {{a+b} \over 2}
-%\\
-%\vspace{6pt}
-%\\
-%{\lsyn y-1 \rsyn}^{1/2} + 2 & 
-%  \mathrm{\it vs.} & 
-%  \sqrt{y-1} + 2
-%\end{array}
-%$$
-%\caption{Examples of expressions that require parentheses (on the left), and related expressions where the notation is unambiguous and no parentheses are needed (on the right). Note that in cases where the meaning is equivalent, one or the other form might be preferable from an aesthetic point of view, but the transformation from one to the other is not necessarily trivial (see footnote). All examples are output from \Meta, with parentheses inserted automatically.}
-%\label{fig-parens}
-%\end{figure}
-
-%From the point of view of the language-definer, the impact is that there's no need to define or to document rules about operator precedence; you simply supply the desired notation. The \keyword{expr} language provides enough levels of spacing (four) to handle a moderately complex expression without parentheses. For example \todo{use actual output?}:
-%$$\keyword{if} \quad x \: < \: y + c! \quad \keyword{then} \quad \dots$$
-%Contrast this with textual languages: C has about 15 fixed precedence levels for its infix operators, C++ has 18, and Haskell allows new operators to be defined at any of 9 levels. This apparent bounty is misguided; it allows the programmer to avoid a little typing but is a ``notorious source of bugs''\cite{realworldhaskell} when the compiler and human reader don't agree on an expression's meaning.
-
-%% ``Even more importantly, complex expressions that rely completely on operator precedence are notorious sources of bugs. A compiler and a human can easily end up with different notions of what even a short, parenthesis-free expression is supposed to do.
-%%``There is no need to remember all of the precedence and associativity rules numbers: it is simpler to add parentheses if you are unsure.'' - Real World Haskell
-
-%
-
-%\subsection{Embedding (Quotations) [todo]}
-
-%\temp{how embedding makes meta-programs comprehensible}
-
-%\temp{dual interpretation: code vs. visual template}
-
-%\temp{example of a presentation reduction with a conditional first? n-ary AND?}
-
-%
-%\subsection{Names [todo]}
-%Another element of programs that gets special treatment 
-
-%
-
-%\section{ASTs at Runtime}\todo{}
-
-%\temp{how much is there to say here? leave it to example 3?}
-
-%
-%\temp{random comment: Note that grammars are currently defined as discrete programs, but in a real language the grammar might be constructed as the program is loaded and syntax declarations are processed.}
-
-%%
-%%
-%%
-
-%
-%By contrast, in a conventional language the concrete and abstract syntaxes are defined implicitly by the parser, and the semantics is defined somewhere inside the compiler. If there's any documentation, it has to be produced by a separate effort\footnote{If a \emp{parser generator} is used, then it may be able to produce some documentation of the syntax from the grammar. However in practice this kind of generated documentation tends to be difficult to use, due to the relative complexity of grammars that are meant to be used for parsing.}.
-
-
-%\subsection{Extending the Grammar Language}
-%Because a grammar is a \Meta\ program, the same tools for syntax extension are available for use in grammars, so the \keyword{grammar} language just described should be viewed as a starting point. It is meant to be general enough to define typical languages, and to handle most basic common needs for defining syntax. There are a couple of ways this language could be extended to provide additional power.
-
-%Using syntax extension, new kinds of node declarations could be supported. For example, an \keyword{infix} node declaration would require only an operator symbol and an expression to evaluate given two arguments. It would reduce to a declaration of a sequence node type,  requiring 2 or more argument expressions, a presentation reduction taking care of interposing the operator, and a left-to-right reduction of the arguments. \todo{actually, that would be awesome. should I implement it?}
-
-%Going further, a richer grammar language could provide additional specifications which would be consumed by a new checker. An example would typing rules. In this case, the enriched grammar would be reduced to the \keyword{grammar} language by discarding the extra information.
-
+Note that the presentation for the new node visually approximates the original declaration, but it is in fact much simplified. This simplification becomes apparent when you edit one of these nodes---only the four embedded elements are actually present in the AST (and therefore editable), and the rest of the visualization is just a fixed scaffolding provided by the reduction. The expanded declaration contains about 16 nodes. Like much syntax extension, the new node embodies the well-known goal of eliminating code duplication\cite{dry}. Still, the meaning is clear at a glance because the presentation is easily recognized by its visual resemblance to the lower-level form. As seen in Figure~\ref{fig-binary-examples}, node types defined using this new syntax are significantly simplified.

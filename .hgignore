@@ -1,3 +1,19 @@
 syntax: glob
 
 .DS_Store
+nbproject
+*~
+
+tex/cu
+tex/draft
+
+tex/*.aux
+tex/*.log
+tex/*.pdf
+tex/*.gz
+tex/*.toc
+tex/*.bbl
+tex/*.blg
+tex/*.dvi
+tex/*.lot
+tex/*.lof
