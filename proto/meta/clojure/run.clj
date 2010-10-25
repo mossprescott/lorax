@@ -157,14 +157,14 @@
     (vec (for [x (node-children n)]
             (if (#{ :clojure/core/doc :clojure/core/comment } (node-type x))
               x
-              (let [ ; _ (println "x:") _ (print-node x true)
+              (let [ ; _ (println "x:") _ (print-node x true) ; HACK
                      [xp o] (try (meta-reduce2 x exp)
                                  (catch Throwable x
                                         (println x)
                                         (make-node :clojure/kernel/nil))) ; HACK
                   
-                    ; _ (println "xp:") _ (print-node xp true)
-                    ; _ (println "cxp:" (meta-compile xp))
+                    ; _ (println "xp:") _ (print-node xp true) ; HACK
+                    ; _ (println "cxp:" (meta-compile xp)) ; HACK
                     r (try (unread (meta-eval xp))
                            (catch Throwable x 
                                   (println x)

@@ -3,6 +3,8 @@
 (make-node :clojure/core/program [
   (make-node :clojure/core/doc { :string "Continued fractions:"})
    
+  ; (make-node :cf/inf)
+   
   ; (make-node :cf/fraction {
   ;   :coeff
   ;   (make-node :clojure/kernel/int { :value 2 })
@@ -11,6 +13,9 @@
   ;   (make-node :cf/fraction {
   ;     :coeff
   ;     (make-node :clojure/kernel/int { :value 3 })
+  ;     
+  ;     :cont
+  ;     (make-node :cf/inf)
   ;   })
   ; })
    
@@ -185,6 +190,12 @@
   ;   (make-node :clojure/core/fail)
   ; })
 
+
+  ;
+  ; Real examples...
+  ;
+  
+
   (make-node :clojure/kernel/let {
     :bind
     (make-node :clojure/kernel/bind :f1 { :name "c" })
@@ -193,6 +204,9 @@
     (make-node :cf/fraction {
       :coeff
       (make-node :clojure/kernel/int { :value 2 })
+      
+      :cont
+      (make-node :cf/inf)
     })
     
     :body
@@ -240,11 +254,14 @@
     (make-node :cf/fraction {
       :coeff
       (make-node :clojure/kernel/int { :value 0 })
-
+  
       :cont
       (make-node :cf/fraction {
         :coeff
         (make-node :clojure/kernel/int { :value 3 })
+      
+        :cont
+        (make-node :cf/inf)
       })
     })
     
@@ -293,11 +310,14 @@
     (make-node :cf/fraction {
       :coeff
       (make-node :clojure/kernel/int { :value 2 })
-
+  
       :cont
       (make-node :cf/fraction {
         :coeff
         (make-node :clojure/kernel/int { :value 3 })
+      
+        :cont
+        (make-node :cf/inf)
       })
     })
     
@@ -344,6 +364,9 @@
       (make-node :cf/fraction {
         :coeff
         (make-node :clojure/kernel/int { :value 3 })
+      
+        :cont
+        (make-node :cf/inf)
       })
     })
     (make-node :cf/ratio {
@@ -356,6 +379,9 @@
         (make-node :cf/fraction {
           :coeff
           (make-node :clojure/kernel/int { :value 3 })
+      
+          :cont
+          (make-node :cf/inf)
         })
       })
     })
@@ -374,6 +400,9 @@
           (make-node :cf/fraction {
             :coeff
             (make-node :clojure/kernel/int { :value 3 })
+      
+            :cont
+            (make-node :cf/inf)
           })
         })
       })

@@ -146,6 +146,7 @@
   
   "?" [ "?" :cmr10 ]
   "|" [ "\u006a" :cmsy10 ]
+  "||" [ "\u006b" :cmsy10 ]
   "*" [ "*" :cmr10 ]
   
   :mapsto [ "\u0037\u0021" :cmsy10 ]  ; \mapstochar + \rightarrow

@@ -294,8 +294,8 @@
               ; _ (println "mdf:")  ; HACK
               ; _ (print-node mdf true)  ; HACK
               cl (meta-compile mdf)
-              ; _ (when (= :clojure/core/square (node-attr-value rule :type)) 
-              ;     (print-node mdf true)
+              ; _ (when (= :clojure/core/where (node-attr-value rule :type)) ; HACK
+              ;     (print-node mdf true) ; HACK
               ;     (println "cl:" cl))  ; HACK
               ; _ (println "cl:" cl)  ; HACK
               df (eval cl)
