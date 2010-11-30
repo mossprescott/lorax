@@ -740,7 +740,7 @@
               :ref (ref-node :times_left)
             })
           })
-          (make-node :view/expr/symbol { :str :times })
+          (make-node :view/expr/symbol { :str :cdot }) ; :times
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
@@ -1099,6 +1099,104 @@
         })
       })
     })
+
+  ; and
+  (make-node :grammar/mapNode {
+    :type
+    (make-node :grammar/type :clojure/core/and)
+    
+    :supers 
+    (make-node :grammar/types [ 
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :and_left {
+        :name
+        (make-node :grammar/name :clojure/core/and/left)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type :clojure/kernel/expr
+            })
+        ])
+      })
+      (make-node :grammar/attr :and_right {
+        :name
+        (make-node :grammar/name :clojure/core/and/right)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type :clojure/kernel/expr
+            })
+        ])
+      })
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/relation [
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :and_left)
+          })
+        })
+        (make-node :view/expr/keyword { :str "or" })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :and_right)
+          })
+        })
+      ])
+    })
+
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/kernel/let {
+        :bind 
+        (make-node :clojure/kernel/bind :l_and {})
+        
+        :expr
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :and_left)
+          })
+        })
+        
+        :body
+        (make-node :clojure/kernel/if {
+          :test
+          (make-node :clojure/core/not {
+            :expr
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :l_and)
+            })
+          })
+          
+          :then
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :l_and)
+          })
+          
+          :else
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :and_right)
+            })
+          })
+        })
+      })
+    })
+  })
 
     ; ; binary AND
     ; (node :grammar/rule
@@ -2043,4 +2141,125 @@
       })
     })  
     
+    ; let2
+    (make-node :grammar/mapNode {
+      :doc
+      (make-node :grammar/doc { :str "Just a syntactic variation." })
+      
+      :type
+      (make-node :grammar/type :clojure/core/let2)
+      
+      :supers
+      (make-node :grammar/types [ 
+        (make-node :grammar/type :clojure/kernel/expr)
+      ])
+      
+      :attrs
+      (make-node :grammar/attrs [
+        (make-node :grammar/attr :let2_bind {
+          :name
+          (make-node :grammar/name :clojure/core/let2/bind)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/bind
+              })
+          ])
+          
+          :optional false
+        })
+        (make-node :grammar/attr :let2_expr {
+          :name
+          (make-node :grammar/name :clojure/core/let2/expr)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+          
+          :optional false
+        })
+        (make-node :grammar/attr :let2_body {
+          :name
+          (make-node :grammar/name :clojure/core/let2/body)
+          
+          :options
+          (make-node :grammar/options [
+            (make-node :grammar/node {
+                :type :clojure/kernel/expr
+              })
+          ])
+          
+          :optional false
+        })
+      ])
+
+      :display
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :view/section [
+          (make-node :view/expr/flow [
+            (make-node :view/expr/keyword { :str "let" })
+            (make-node :clojure/kernel/unquote {
+              :body 
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :let2_bind)
+              })
+            })
+            (make-node :view/expr/symbol { :str "=" })
+            (make-node :clojure/kernel/unquote {
+              :body 
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :let2_expr)
+              })
+            })
+          ])
+          (make-node :view/sequence [
+            (make-node :view/quad)
+            ; HACK: don't use :flow, which would provoke parens
+            (make-node :view/expr/keyword { :str "in" })
+            (make-node :view/thickspace)
+            (make-node :clojure/kernel/unquote {
+              :body 
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :let2_body)
+              })
+            })
+          ])
+        ])
+      })
+      
+      :expand 
+      (make-node :clojure/kernel/quote {
+        :body
+        (make-node :clojure/kernel/let {
+          :bind
+          (make-node :clojure/kernel/unquote {
+            :body 
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :let2_bind)
+            })
+          })
+          
+          :expr
+          (make-node :clojure/kernel/unquote {
+            :body 
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :let2_expr)
+            })
+          })
+          
+          :body
+          (make-node :clojure/kernel/unquote {
+            :body 
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :let2_body)
+            })
+          })
+        })
+      })
+    })
 ])

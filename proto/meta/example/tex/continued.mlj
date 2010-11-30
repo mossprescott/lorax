@@ -1,7 +1,7 @@
 (use 'meta.core)
 
 (make-node :clojure/core/program [
-  (make-node :clojure/core/doc { :string "Continued fractions:"})
+  ; (make-node :clojure/core/doc { :string "Continued fractions:"})
    
   ; (make-node :cf/inf)
    
@@ -33,6 +33,23 @@
   ;     (make-node :cf/fraction {
   ;       :coeff
   ;       (make-node :clojure/kernel/int { :value 4 })
+  ;     })
+  ;   })
+  ; })
+
+  ; (make-node :cf/recip {
+  ;   :expr
+  ;   (make-node :cf/fraction {
+  ;     :coeff
+  ;     (make-node :clojure/kernel/int { :value 0 })
+  ; 
+  ;     :cont
+  ;     (make-node :cf/fraction {
+  ;       :coeff
+  ;       (make-node :clojure/kernel/int { :value 2 })
+  ; 
+  ;       :cont
+  ;       (make-node :cf/inf)
   ;     })
   ;   })
   ; })

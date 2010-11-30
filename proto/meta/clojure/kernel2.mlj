@@ -18,7 +18,19 @@
         (make-node :grammar/types [])
        
         :attrs
-        (make-node :grammar/attrs [])
+        (make-node :grammar/attrs [
+            (make-node :grammar/attr :bind_name {
+                :name
+                (make-node :grammar/name :clojure/kernel/bind/name)
+              
+                :options
+                (make-node :grammar/options [
+                    (make-node :grammar/string)
+                  ])
+    
+                :optional true
+              })
+          ])
     
         ; Note: this reduction never actually occurs, because bindings, like 
         ; all nodes that introduce names, are reduced by the special name 
@@ -488,25 +500,25 @@
       })
     })
               
-    ; bind
-    (make-node :grammar/mapNode {
-      :type 
-      (make-node :grammar/type :clojure/kernel/fail)
-     
-      :supers
-      (make-node :grammar/types [
-        (make-node :grammar/type :clojure/kernel/expr)
-      ])
-     
-      :attrs
-      (make-node :grammar/attrs [])
-  
-      :display
-      (make-node :clojure/kernel/quote {
-        :body
-        (make-node :view/expr/keyword { :str "fail" })
-      })
-    })
+    ; ; fail
+    ; (make-node :grammar/mapNode {
+    ;   :type 
+    ;   (make-node :grammar/type :clojure/kernel/fail)
+    ;  
+    ;   :supers
+    ;   (make-node :grammar/types [
+    ;     (make-node :grammar/type :clojure/kernel/expr)
+    ;   ])
+    ;  
+    ;   :attrs
+    ;   (make-node :grammar/attrs [])
+    ;   
+    ;   :display
+    ;   (make-node :clojure/kernel/quote {
+    ;     :body
+    ;     (make-node :view/expr/keyword { :str "fail" })
+    ;   })
+    ; })
     
     ; TODO: loop
   ])

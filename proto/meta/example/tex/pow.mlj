@@ -1,0 +1,37 @@
+(use 'meta.core)
+
+(make-node :grammar/mapNode {
+  :type
+  (make-node :grammar/type :pow)
+
+  :supers 
+  (make-node :grammar/types [
+    (make-node :grammar/type :expr)
+  ])
+  
+  :attrs
+  (make-node :grammar/attrs [
+    (make-node :grammar/attr :e {
+      :name
+      (make-node :grammar/name :pow/e)
+      
+      :options
+      (make-node :grammar/options [
+        (make-node :grammar/node { :type :expr })
+      ])
+      
+      :optional false
+    }) 
+    (make-node :grammar/attr :n {
+      :name
+      (make-node :grammar/name :pow/n)
+      
+      :options
+      (make-node :grammar/options [
+        (make-node :grammar/int)
+      ])
+      
+      :optional false
+    }) 
+  ])
+})

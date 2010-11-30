@@ -111,11 +111,14 @@
 ;         {}))))
 
 (def core-grammar-sources [
+  ; Note: core-ast is first (even before kernel), so it can be used in kernel
+  ; presentation reductions.
+  "meta/clojure/core-ast.mlj"
   "meta/clojure/kernel1.mlj" 
   "meta/clojure/kernel2.mlj" 
-  "meta/clojure/core-ast.mlj"
   "meta/example/tex/binaryNode.mlj" ; HACK
   "meta/clojure/core.mlj"
+  "meta/example/tex/cons.mlj"  ; HACK
   "meta/clojure/core-seq.mlj"
   "meta/example/tex/and.mlj"  ; HACK
   "meta/example/tex/continued-grammar.mlj"  ; HACK

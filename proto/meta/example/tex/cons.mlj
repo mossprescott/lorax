@@ -1,0 +1,562 @@
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(make-node :grammar/language [
+  ; cons (primitive)
+  (make-node :grammar/mapNode {
+    ; :doc
+    ; (make-node :grammar/doc { :str "[primitive] New lazy sequence by appending an element to a sequence. The sequence is not evaluated until it is accessed." })
+    
+    :type
+    (make-node :grammar/type :clojure/core/cons)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :cons_first {
+        :name
+        (make-node :grammar/name :clojure/core/cons/first)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type
+              :clojure/kernel/expr
+            })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :cons_rest {
+        :name
+        (make-node :grammar/name :clojure/core/cons/rest)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type
+              :clojure/kernel/expr
+            })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/relation [
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+           :ref
+           (ref-node :cons_first) 
+          })
+        })
+        (make-node :view/expr/keyword { :str ":" })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+           :ref
+           (ref-node :cons_rest) 
+          })
+        })
+      ])
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/kernel/app {
+        :expr
+        (make-node :clojure/kernel/extern { :name "cons" })
+        
+        :args
+        (make-node :clojure/kernel/args [
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+             :ref
+             (ref-node :cons_first) 
+            })
+          })
+          (make-node :clojure/kernel/app {
+            :expr
+            (make-node :clojure/kernel/extern { :name "lazy-seq" })
+        
+            :args
+            (make-node :clojure/kernel/args [
+              (make-node :clojure/kernel/unquote {
+                :body
+                (make-node :clojure/kernel/var {
+                 :ref
+                 (ref-node :cons_rest) 
+                })
+              })
+            ])
+          })
+        ])
+      })
+    })
+  })
+
+  ; match-cons
+  (make-node :grammar/mapNode {
+    ; :doc
+    ; (make-node :grammar/doc { :str "" })
+    
+    :type
+    (make-node :grammar/type :clojure/core/match-cons)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :match-cons_expr {
+        :name
+        (make-node :grammar/name :clojure/core/match-cons/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-cons_first {
+        :name
+        (make-node :grammar/name :clojure/core/match-cons/first)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/bind })
+        ])
+        
+        :optional false
+      })
+      (make-node :grammar/attr :match-cons_rest {
+        :name
+        (make-node :grammar/name :clojure/core/match-cons/rest)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/bind })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-cons_body {
+        :name
+        (make-node :grammar/name :clojure/core/match-cons/body)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-cons_else {
+        :name
+        (make-node :grammar/name :clojure/core/match-cons/else)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/flow [
+        (make-node :view/expr/keyword { :str "match" })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+           :ref (ref-node :match-cons_expr) 
+          })
+        })
+        (make-node :view/expr/keyword { :str "with" })
+        (make-node :view/expr/relation [
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+             :ref (ref-node :match-cons_first) 
+            })
+          })
+          (make-node :view/expr/keyword { :str ":" })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+             :ref (ref-node :match-cons_rest) 
+            })
+          })
+        ])
+        (make-node :view/expr/symbol { :str :to })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+           :ref (ref-node :match-cons_body) 
+          })
+        })
+        (make-node :view/expr/keyword { :str "else" })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+           :ref (ref-node :match-cons_else) 
+          })
+        })
+      ])
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      ; (make-node :clojure/core/where {
+      (make-node :clojure/core/let2 {
+        :bind
+        (make-node :clojure/kernel/bind :match-cons_x { :name "x" })
+        
+        :expr
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+           :ref (ref-node :match-cons_expr) 
+          })
+        })
+
+        :body
+        (make-node :clojure/kernel/if {
+          :test
+          (make-node :clojure/kernel/app {
+            :expr
+            (make-node :clojure/kernel/extern { :name "seq" })
+            
+            :args
+            (make-node :clojure/kernel/args [
+              (make-node :clojure/kernel/var {
+               :ref (ref-node :match-cons_x) 
+              })
+            ])
+          })
+        
+          :then
+          (make-node :clojure/core/where {
+            
+          ; (make-node :clojure/kernel/let {
+          ;   :bind
+          ;   (make-node :clojure/kernel/unquote {
+          ;     :body
+          ;     (make-node :clojure/kernel/var {
+          ;      :ref (ref-node :match-cons_first) 
+          ;     })
+          ;   })
+          ;   
+          ;   :expr
+          ;   (make-node :clojure/kernel/app {
+          ;     :expr
+          ;     (make-node :clojure/kernel/extern { :name "first" })
+          ;   
+          ;     :args
+          ;     (make-node :clojure/kernel/args [
+          ;       (make-node :clojure/kernel/var {
+          ;        :ref (ref-node :match-cons_x) 
+          ;       })
+          ;     ])
+          ;   })
+          ;   
+          ;   :body
+          ;   (make-node :clojure/kernel/let {
+          ;     :bind
+          ;     (make-node :clojure/kernel/unquote {
+          ;       :body
+          ;       (make-node :clojure/kernel/var {
+          ;        :ref (ref-node :match-cons_rest) 
+          ;       })
+          ;     })
+          ;   
+          ;     :expr
+          ;     (make-node :clojure/kernel/app {
+          ;       :expr
+          ;       (make-node :clojure/kernel/extern { :name "rest" })
+          ;   
+          ;       :args
+          ;       (make-node :clojure/kernel/args [
+          ;         (make-node :clojure/kernel/var {
+          ;          :ref (ref-node :match-cons_x) 
+          ;         })
+          ;       ])
+          ;     })
+            
+            :body
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+               :ref (ref-node :match-cons_body) 
+              })
+            })
+            
+            :vars
+            (make-node :clojure/core/whereVars [
+              (make-node :clojure/core/whereVar {
+                :bind
+                (make-node :clojure/kernel/unquote {
+                  :body
+                  (make-node :clojure/kernel/var {
+                   :ref (ref-node :match-cons_first) 
+                  })
+                })
+            
+                :expr
+                (make-node :clojure/kernel/app {
+                  :expr
+                  (make-node :clojure/kernel/extern { :name "first" })
+            
+                  :args
+                  (make-node :clojure/kernel/args [
+                    (make-node :clojure/kernel/var {
+                     :ref (ref-node :match-cons_x) 
+                    })
+                  ])
+                })
+              })
+
+              (make-node :clojure/core/whereVar {
+                :bind
+                (make-node :clojure/kernel/unquote {
+                  :body
+                  (make-node :clojure/kernel/var {
+                   :ref (ref-node :match-cons_rest) 
+                  })
+                })
+          
+                :expr
+                (make-node :clojure/kernel/app {
+                  :expr
+                  (make-node :clojure/kernel/extern { :name "rest" })
+          
+                  :args
+                  (make-node :clojure/kernel/args [
+                    (make-node :clojure/kernel/var {
+                     :ref (ref-node :match-cons_x) 
+                    })
+                  ])
+                })
+              })
+            ])
+          })
+        
+          :else
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+             :ref (ref-node :match-cons_else) 
+            })
+          })
+        })
+        
+        ; :vars
+        ; (make-node :clojure/core/whereVars [
+        ;   (make-node :clojure/core/whereVar {
+        ;     :bind
+        ;     (make-node :clojure/kernel/bind :match-cons_x { :name "x" })
+        ;     
+        ;     :expr
+        ;     (make-node :clojure/kernel/unquote {
+        ;       :body
+        ;       (make-node :clojure/kernel/var {
+        ;        :ref (ref-node :match-cons_expr) 
+        ;       })
+        ;     })
+        ;   })
+        ; ])
+      })
+    })
+  })
+
+  ; for
+  (make-node :grammar/mapNode {
+    ; :doc
+    ; (make-node :grammar/doc { :str "Sequence comprehension, with a single binding" })
+    
+    :type
+    (make-node :grammar/type :clojure/core/for)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :for_x {
+        :name
+        (make-node :grammar/name :clojure/core/for/x)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type
+              :clojure/kernel/bind
+            })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :for_seq {
+        :name
+        (make-node :grammar/name :clojure/core/for/seq)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type
+              :clojure/kernel/expr
+            })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :for_expr {
+        :name
+        (make-node :grammar/name :clojure/core/for/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+              :type
+              :clojure/kernel/expr
+            })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/flow [
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :for_expr)
+          })
+        })        
+        (make-node :view/expr/symbol { :str "|" })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :for_x)
+          })
+        })
+        (make-node :view/expr/symbol { :str :from })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :for_seq)
+          })
+        })
+      ])
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/core/where {
+        :body
+        (make-node :clojure/kernel/app {
+          :expr
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :for0)
+          })
+        
+          :args 
+          (make-node :clojure/kernel/args [
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :for_seq)
+              })
+            })
+          ])
+        })
+
+        :vars
+        (make-node :clojure/core/whereVars [
+          (make-node :clojure/core/whereVar {
+            :bind
+            (make-node :clojure/kernel/bind :for0 { :name "f" })
+      
+            :expr
+            (make-node :clojure/kernel/lambda :f_for {
+              :params 
+              (make-node :clojure/kernel/params [
+                (make-node :clojure/kernel/bind :for1 { :name "s" })
+              ])
+        
+              :body
+              (make-node :clojure/core/match-cons {
+                :expr
+                (make-node :clojure/kernel/var {
+                  :ref (ref-node :for1)
+                })
+
+                :first
+                (make-node :clojure/kernel/unquote {
+                  :body
+                  (make-node :clojure/kernel/var {
+                    :ref (ref-node :for_x)
+                  })
+                })
+
+                :rest
+                (make-node :clojure/kernel/bind :for_xs { :name "xs" })
+            
+                :body
+                (make-node :clojure/core/cons {
+                  :first
+                  (make-node :clojure/kernel/unquote {
+                    :body
+                    (make-node :clojure/kernel/var {
+                      :ref (ref-node :for_expr)
+                    })
+                  })
+            
+                  :rest
+                  (make-node :clojure/kernel/app {
+                    :expr
+                    (make-node :clojure/kernel/var {
+                      :ref (ref-node :f_for)
+                    })
+              
+                    :args
+                    (make-node :clojure/kernel/params [
+                      (make-node :clojure/kernel/var {
+                        :ref (ref-node :for_xs)
+                      })
+                    ])
+                  })
+                })
+
+                :else
+                (make-node :clojure/kernel/nil)
+              })
+            })
+          })
+        ])
+      })
+    })
+  })
+])

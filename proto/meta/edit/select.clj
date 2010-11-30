@@ -20,7 +20,8 @@
       Line2D 
       Line2D$Float
       Rectangle2D$Float
-      RoundRectangle2D$Float)))
+      RoundRectangle2D$Float
+      Area)))
 
 ; TODO: why no HSV out of the box?!
 (defn rgb [r g b] (Color. (float r) (float g) (float b)))
@@ -116,7 +117,49 @@
       (.dispose))
     
     (.drawImage g img x0 y0 nil)))
+
       
+(defn vector-hilite
+  "Doesn't fuck up Batik. Jaggy on screen, since the Java2D rasterizer on
+  OS X doesn't anti-alias clips, but looks good in the SVG/PDF."
+  [^Graphics2D g w h cs]
+  (do
+    ; Start with the entire rect:
+    (let [a (Area. (RoundRectangle2D$Float. -2 -2 (+ w 4) (+ h 4) OUTER_RADIUS_X OUTER_RADIUS_Y))]
+      ; Subtract each child rect:
+      (doseq [ [cx cy cw ch] cs ]
+        (.subtract a (Area. (RoundRectangle2D$Float. cx cy (inc cw) (inc ch) INNER_RADIUS_X INNER_RADIUS_Y))))
+      ; Add back a 2-pixel border:
+      (let [b (Area. (RoundRectangle2D$Float. -2 -2 (+ w 5) (+ h 5) OUTER_RADIUS_X OUTER_RADIUS_Y))]
+        (.subtract b (Area. (RoundRectangle2D$Float. 0 0 (+ w 1) (+ h 1) OUTER_RADIUS_X OUTER_RADIUS_Y))) ; TODO: fix the radii
+        (.add a b))
+      ; (println (.getBounds a))
+      (doto g
+        (.setClip a)
+        (.setColor SELECTED_COLOR)
+        
+        (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC_OVER 0.8))
+        (.setStroke (BasicStroke. 4))
+        (.draw (RoundRectangle2D$Float. -2 -2 (+ w 5) (+ h 5) OUTER_RADIUS_X OUTER_RADIUS_Y))
+        (.setStroke (BasicStroke. 3)))
+      (doseq [ [cx cy cw ch] cs]
+        (.draw g (RoundRectangle2D$Float. cx cy (inc cw) (inc ch) INNER_RADIUS_X INNER_RADIUS_Y)))
+      (doto g
+        (.setComposite (AlphaComposite/getInstance AlphaComposite/SRC_OVER 0.4))
+        (.fillRect -10 -10 (+ w 20) (+ h 20))
+        
+        (.setClip nil)
+        (.setPaintMode)  ; unset the composite
+        ))))
+    ; (doto g
+    ;   (.setColor SELECTED_COLOR)
+    ;   (.setStroke (BasicStroke. 2))
+    ;   (.draw (Rectangle2D$Float. -2 -2 (+ w 4) (+ h 4)))
+    ;   (.setStroke (BasicStroke. 1)))
+    ; ; (println "cs:" cs)
+    ; (doseq [ [x y w h] cs ] 
+    ;   (.draw g (Rectangle2D$Float. (+ x -2) (+ y -2) (+ w 4) (+ h 4))))))
+
 
 (defn draw-selection-hilite
   "Draw the graphics which indicates the selected node, at position 0, 0 in 
@@ -126,4 +169,5 @@
   cs - seq of bounds rects of children of the selected node"
   [g w h cs]
   ; (simple-hilite g w h cs))
-  (fancy-hilite g w h cs))
+  ; (fancy-hilite g w h cs))
+  (vector-hilite g w h cs))

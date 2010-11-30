@@ -1,11 +1,12 @@
-; Snippet of the core grammar containing only the "and" node; for use as an example.
+; Snippet of the core grammar containing only the "or" node; for use as an example.
 
 (use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
 
 (make-node :grammar/language [
+  ; or
   (make-node :grammar/mapNode {
     :type
-    (make-node :grammar/type :clojure/core/and)
+    (make-node :grammar/type :clojure/core/or)
     
     :supers 
     (make-node :grammar/types [ 
@@ -14,9 +15,9 @@
     
     :attrs
     (make-node :grammar/attrs [
-      (make-node :grammar/attr :and_left {
+      (make-node :grammar/attr :or_left {
         :name
-        (make-node :grammar/name :clojure/core/and/left)
+        (make-node :grammar/name :clojure/core/or/left)
         
         :options
         (make-node :grammar/options [
@@ -25,9 +26,9 @@
             })
         ])
       })
-      (make-node :grammar/attr :and_right {
+      (make-node :grammar/attr :or_right {
         :name
-        (make-node :grammar/name :clojure/core/and/right)
+        (make-node :grammar/name :clojure/core/or/right)
         
         :options
         (make-node :grammar/options [
@@ -45,14 +46,14 @@
         (make-node :clojure/kernel/unquote {
           :body
           (make-node :clojure/kernel/var {
-            :ref (ref-node :and_left)
+            :ref (ref-node :or_left)
           })
         })
-        (make-node :view/expr/keyword { :str "and" })
+        (make-node :view/expr/keyword { :str "or" })
         (make-node :clojure/kernel/unquote {
           :body
           (make-node :clojure/kernel/var {
-            :ref (ref-node :and_right)
+            :ref (ref-node :or_right)
           })
         })
       ])
@@ -63,36 +64,33 @@
       :body
       (make-node :clojure/kernel/let {
         :bind 
-        (make-node :clojure/kernel/bind :l_and {})
+        (make-node :clojure/kernel/bind :l_or {})
         
         :expr
         (make-node :clojure/kernel/unquote {
           :body
           (make-node :clojure/kernel/var {
-            :ref (ref-node :and_left)
+            :ref (ref-node :or_left)
           })
         })
         
         :body
         (make-node :clojure/kernel/if {
           :test
-          (make-node :clojure/core/not {
-            :expr
-            (make-node :clojure/kernel/var {
-              :ref (ref-node :l_and)
-            })
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :l_or)
           })
           
           :then
           (make-node :clojure/kernel/var {
-            :ref (ref-node :l_and)
+            :ref (ref-node :l_or)
           })
           
           :else
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :and_right)
+              :ref (ref-node :or_right)
             })
           })
         })

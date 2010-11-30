@@ -160,6 +160,7 @@
   [r]
   (cond
     ; Note: this is a little wierd. Why not let the node just be the node?
+    ; Yes, for now...
     (node? r)
     ; (make-node :clojure/kernel/quote {
     ;     :body
@@ -176,12 +177,14 @@
     (make-node :clojure/kernel/false {})
     
     (integer? r)
-    (if (< r 0)
-      (make-node :clojure/core/unaryminus {
-        :expr
-        (make-node :clojure/kernel/int { :value (- r) })
-      })
-      (make-node :clojure/kernel/int { :value r }))
+    ; HACK: don't use unaryminus, because it means this resut is not in the kernel language...
+    ; (if (< r 0)
+    ;   (make-node :clojure/core/unaryminus {
+    ;     :expr
+    ;     (make-node :clojure/kernel/int { :value (- r) })
+    ;   })
+    ;   (make-node :clojure/kernel/int { :value r }))
+    (make-node :clojure/kernel/int { :value r })
     
     (rational? r)
     (make-node :clojure/core/fraction {

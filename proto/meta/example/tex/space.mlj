@@ -17,7 +17,7 @@
         (make-node :view/expr/symbol { :str "!" })
       ])
     ])
-    (make-node :view/expr/var { :str "then" })
-    (make-node :view/expr/int { :str "..." })  ; HACK
   ])
+  (make-node :view/expr/keyword { :str "then" })
+  (make-node :view/expr/int { :str "..." })  ; HACK
 ])

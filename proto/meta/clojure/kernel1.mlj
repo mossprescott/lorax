@@ -112,18 +112,19 @@
               :args 
               (make-node :clojure/kernel/args [
                 (make-node :clojure/kernel/string { :value "%,d" })
-                ; (make-node :clojure/core/value {
-                ;   :expr
-                (make-node :clojure/kernel/app {
+                (make-node :clojure/core/value {
                   :expr
-                  (make-node :clojure/kernel/extern { :name "meta.core/node-value" })
-                      
-                  :args 
-                  (make-node :clojure/kernel/args [
+                ; (make-node :clojure/kernel/app {
+                ;   :expr
+                ;   (make-node :clojure/kernel/extern { :name "meta.core/node-value" })
+                ;       
+                ;   :args 
+                ;   (make-node :clojure/kernel/args [
                     (make-node :clojure/kernel/var {
                       :ref (ref-node :int_value) 
                     })
-                  ])
+                ;   ])
+                ; })
                 })
               ])
             })
@@ -181,7 +182,7 @@
       })
     })
       
-    ; name (is this still in?)
+    ; name
     (make-node :grammar/mapNode {
       :type
       (make-node :grammar/type :clojure/kernel/name)
@@ -210,7 +211,7 @@
       :display
       (make-node :clojure/kernel/quote {
         :body
-        (make-node :view/expr/keyword {
+        (make-node :view/expr/name {
           ; TODO: color? raw keyword isn't right; a color attribute here
           ; is not propagated through the reduction to :view, though
           ; (make-node :clojure/kernel/name { :value :view/drawable/color })

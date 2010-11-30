@@ -1,0 +1,15 @@
+(use 'meta.core)
+
+(make-node :clojure/core/program [
+  ; for
+  (make-node :clojure/core/for {
+    :expr
+    (make-node :view/expr/missing)
+
+    :x
+    (make-node :clojure/kernel/bind :x_for { :name "x" })
+    
+    :seq
+    (make-node :view/expr/missing)
+  })
+])

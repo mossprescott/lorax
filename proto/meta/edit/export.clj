@@ -28,7 +28,7 @@
 (def USE_CSS true)
 (def TEXT_AS_SHAPES false)
 (def EDIT_PANEL_MARGIN 10)  ; HACK: should match MARGIN in draw.clj!
-(def EXPORT_MARGIN 2)
+(def EXPORT_MARGIN 4)
 
 (defn render-to-svg
   "Render the given component to an SVG file in vector format. Note: images

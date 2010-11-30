@@ -68,28 +68,6 @@
     
     (make-node :clojure/kernel/let {
       :bind 
-      (make-node :clojure/kernel/bind :y_1 {})
-      
-      :expr
-      (make-node :clojure/kernel/int { :value 12 })
-      
-      :body
-      (make-node :clojure/kernel/app {
-        :expr
-        (make-node :clojure/kernel/extern { :name "+" })
-     
-        :args
-        (make-node :clojure/kernel/args [
-          (make-node :clojure/kernel/var {
-            :ref (ref-node :y_1)
-          })
-          (make-node :clojure/kernel/int { :value 3 })
-        ]) 
-      })
-    })
-    
-    (make-node :clojure/kernel/let {
-      :bind 
       (make-node :clojure/kernel/bind :dec {})
       
       :expr
@@ -128,44 +106,4 @@
       })
     })
     
-    (make-node :clojure/kernel/let {
-      :bind 
-      (make-node :clojure/kernel/bind :inc {})
-      
-      :expr
-      (make-node :clojure/kernel/lambda { 
-        :params
-        (make-node :clojure/kernel/params [
-          (make-node :clojure/kernel/bind :n_ {})
-        ])
-        
-        :body
-        (make-node :clojure/kernel/app {
-          :expr
-          (make-node :clojure/kernel/extern { :name "+" })
-     
-          :args
-          (make-node :clojure/kernel/args [
-            (make-node :clojure/kernel/var {
-              :ref (ref-node :n_)
-            })
-            (make-node :clojure/kernel/int { :value 1 })
-          ])
-        })
-      })
-      
-      :body
-      (make-node :clojure/kernel/app {
-        :expr
-        (make-node :clojure/kernel/var {
-          :ref (ref-node :inc)
-        })
-     
-        :args
-        (make-node :clojure/kernel/args [
-          (make-node :clojure/kernel/int { :value 4 })
-        ]) 
-      })
-    })
-
   ])

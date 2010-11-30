@@ -84,9 +84,9 @@
       (for [a (node-attrs n)]
         (cons a p))
         
-      (vector? n)
-      (for [i (range (count n))]
-        (cons i p))
+      ; (vector? n)
+      ; (for [i (range (count n))]
+      ;   (cons i p))
       
       true
       ())))

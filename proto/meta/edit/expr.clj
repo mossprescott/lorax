@@ -107,7 +107,7 @@
           :view/scripted reduceScripted
         }]
     ; (print-node n)
-    (first (meta-reduce2 n (reduceByType rules)))))
+    (meta-reduce2 n (reduceByType rules))))
 
 
 (def SYMBOLS {
@@ -279,6 +279,7 @@
 
 (def FONTS_BY_STYLE_AND_MODE {
   :keyword { :T :cmbx10, :S :cmbx10-script, :SS :cmbx10-scriptscript }
+  :name { :T :cmbx10-it, :S :cmbx10-it-script, :SS :cmbx10-it-scriptscript }
   :symbol { :T :cmsy10, :S :cmsy10-script, :SS :cmsy10-scriptscript }
   ; :var { :T :cmmi10, :S :cmmi10-script, :SS :cmmi10-scriptscript }
   :var { :T :cmti10, :S :cmti10-script, :SS :cmti10-scriptscript }  ; use text italics, which have sensible spacing
@@ -354,6 +355,14 @@
             [ (make-node :view/chars {
                 :str (as-string (node-attr n :str))
                 :font (-> FONTS_BY_STYLE_AND_MODE :keyword mode)
+              })
+              [mode level] ])
+
+          :view/expr/name
+          (fn [n [mode level]]
+            [ (make-node :view/chars {
+                :str (as-string (node-attr n :str))
+                :font (-> FONTS_BY_STYLE_AND_MODE :name mode)
               })
               [mode level] ])
 
@@ -677,7 +686,11 @@
                                   val)
                                   
                                 :super
-                                (node :view/chars :str title :font :tiny)) ]
+                                (make-node :view/chars {
+                                  :str title 
+                                  :font :tiny
+                                  :view/drawable/color (make-node :view/gray { :brightness b })
+                                })) ]
                       [ np (disj v id) ])
                     [ nil v ]))))]
   {  
@@ -710,6 +723,9 @@
 
     :view/expr/string
     (borderize 0.7 "str" :str)
+
+    :view/expr/name
+    (borderize 0.7 "name" :str)
 
     :view/expr/mono
     (borderize 0.7 "mono" :str)

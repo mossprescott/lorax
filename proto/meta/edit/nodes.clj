@@ -89,13 +89,84 @@
 ; jsMath's Computer Modern fonts:
 ;
 
-(def TEXT_SIZE 14)
-(def SCRIPT_SIZE 11)  ; Note: Knuth says 0.7x, which is more like 9.8
-(def SCRIPT_SCRIPT_SIZE 9)  ; Note: Knuth says 0.5x, which is 7
+; (def TEXT_SIZE 14)
+; (def SCRIPT_SIZE 11)  ; Note: Knuth says 0.7x, which is more like 9.8
+; (def SCRIPT_SCRIPT_SIZE 9)  ; Note: Knuth says 0.5x, which is 7
 
 ; (def TEXT_SIZE 12)
 ; (def SCRIPT_SIZE 10)  ; Note: Knuth says 0.7x, which is more like 9.8
 ; (def SCRIPT_SCRIPT_SIZE (* TEXT_SIZE 0.5))
+
+; (def FONTS_OLD {
+;   ;
+;   ; TeX fonts, used for most purposes:
+;   ;
+;   
+;   ; extended symbols
+;   :cmex10 (Font. "jsMath-cmex10" Font/PLAIN TEXT_SIZE)
+; 
+;   ; math italics
+;   :cmmi10 (Font. "jsMath-cmmi10" Font/PLAIN TEXT_SIZE)
+;   :cmmi10-script (Font. "jsMath-cmmi10" Font/PLAIN SCRIPT_SIZE)
+;   :cmmi10-scriptscript (Font. "jsMath-cmmi10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+; 
+;   ; text italics
+;   :cmti10 (Font. "jsMath-cmti10" Font/PLAIN TEXT_SIZE)
+;   :cmti10-script (Font. "jsMath-cmti10" Font/PLAIN SCRIPT_SIZE)
+;   :cmti10-scriptscript (Font. "jsMath-cmti10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+; 
+;   ; math roman
+;   :cmr10 (Font. "jsMath-cmr10" Font/PLAIN TEXT_SIZE)
+;   :cmr10-script (Font. "jsMath-cmr10" Font/PLAIN SCRIPT_SIZE)
+;   :cmr10-scriptscript (Font. "jsMath-cmr10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+; 
+;   ; bold extended (keywords)
+;   :cmbx10 (Font. "jsMath-cmbx10" Font/PLAIN TEXT_SIZE)
+;   :cmbx10-script (Font. "jsMath-cmbx10" Font/PLAIN SCRIPT_SIZE)
+;   :cmbx10-scriptscript (Font. "jsMath-cmbx10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+; 
+;   ; bold extended (keywords)
+;   :cmbx10-it (Font. "jsMath-cmbx10" Font/ITALIC TEXT_SIZE)
+;   :cmbx10-it-script (Font. "jsMath-cmbx10" Font/ITALIC SCRIPT_SIZE)
+;   :cmbx10-it-scriptscript (Font. "jsMath-cmbx10" Font/ITALIC SCRIPT_SCRIPT_SIZE)
+; 
+;   ; math symbol
+;   ; For some reason, glyphs do not appear for any char < 0x2x,
+;   ; although the jsMath site claims they are present.
+;   :cmsy10 (Font. "jsMath-cmsy10" Font/PLAIN TEXT_SIZE)
+;   :cmsy10-script (Font. "jsMath-cmsy10" Font/PLAIN SCRIPT_SIZE)
+;   :cmsy10-scriptscript (Font. "jsMath-cmsy10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+;   
+;   ;
+;   ; Other fonts, for special purposes:
+;   ;
+; 
+;   :tiny (Font. "Lucida Grande" Font/PLAIN 9)  ; this is the most legible at small sizes?
+;   
+;   ; Times, a unicode font...
+;   ; Unfortunately the spacing is quite different than the jsMath fonts
+;   :times (Font. "Times New Roman" Font/PLAIN TEXT_SIZE)
+;   :timesItalic (Font. "Times New Roman" Font/ITALIC TEXT_SIZE)
+;   
+;   ; used for monospace in a few places
+;   :courier (Font. "Courier New" Font/PLAIN TEXT_SIZE)
+;   :courierItalic (Font. "Courier New" Font/ITALIC TEXT_SIZE)
+;   
+;   :sans (Font. "Lucida Grande" Font/PLAIN 12);TEXT_SIZE)
+;   :sans-script (Font. "Lucida Grande" Font/PLAIN 10);SCRIPT_SIZE)
+;   :sans-scriptscript (Font. "Lucida Grande" Font/PLAIN 7);SCRIPT_SCRIPT_SIZE)
+; })
+
+; Global multiplier for the font size. 1.0 gets you something nice for 
+; reading up close. 2.0 is probably better for across a room.
+(def font-multiplier 2.0)
+
+(def TEXT_SIZE_BASE 14)
+(def FONT_SCALES {
+  :text          1.0
+  :script        0.8  ; truncates to 11
+  :script-script 0.65 ; truncates to 9
+})
 
 (def FONTS {
   ;
@@ -103,54 +174,68 @@
   ;
   
   ; extended symbols
-  :cmex10 (Font. "jsMath-cmex10" Font/PLAIN TEXT_SIZE)
+  :cmex10 ["jsMath-cmex10" Font/PLAIN :text]
 
   ; math italics
-  :cmmi10 (Font. "jsMath-cmmi10" Font/PLAIN TEXT_SIZE)
-  :cmmi10-script (Font. "jsMath-cmmi10" Font/PLAIN SCRIPT_SIZE)
-  :cmmi10-scriptscript (Font. "jsMath-cmmi10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+  :cmmi10 ["jsMath-cmmi10" Font/PLAIN :text]
+  :cmmi10-script ["jsMath-cmmi10" Font/PLAIN :script]
+  :cmmi10-scriptscript ["jsMath-cmmi10" Font/PLAIN :script-script]
 
   ; text italics
-  :cmti10 (Font. "jsMath-cmti10" Font/PLAIN TEXT_SIZE)
-  :cmti10-script (Font. "jsMath-cmti10" Font/PLAIN SCRIPT_SIZE)
-  :cmti10-scriptscript (Font. "jsMath-cmti10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+  :cmti10 ["jsMath-cmti10" Font/PLAIN :text]
+  :cmti10-script ["jsMath-cmti10" Font/PLAIN :script]
+  :cmti10-scriptscript ["jsMath-cmti10" Font/PLAIN :script-script]
 
   ; math roman
-  :cmr10 (Font. "jsMath-cmr10" Font/PLAIN TEXT_SIZE)
-  :cmr10-script (Font. "jsMath-cmr10" Font/PLAIN SCRIPT_SIZE)
-  :cmr10-scriptscript (Font. "jsMath-cmr10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+  :cmr10 ["jsMath-cmr10" Font/PLAIN :text]
+  :cmr10-script ["jsMath-cmr10" Font/PLAIN :script]
+  :cmr10-scriptscript ["jsMath-cmr10" Font/PLAIN :script-script]
 
   ; bold extended (keywords)
-  :cmbx10 (Font. "jsMath-cmbx10" Font/PLAIN TEXT_SIZE)
-  :cmbx10-script (Font. "jsMath-cmbx10" Font/PLAIN SCRIPT_SIZE)
-  :cmbx10-scriptscript (Font. "jsMath-cmbx10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+  :cmbx10 ["jsMath-cmbx10" Font/PLAIN :text]
+  :cmbx10-script ["jsMath-cmbx10" Font/PLAIN :script]
+  :cmbx10-scriptscript ["jsMath-cmbx10" Font/PLAIN :script-script]
+
+  ; bold extended (keywords)
+  :cmbx10-it ["jsMath-cmbx10" Font/ITALIC :text]
+  :cmbx10-it-script ["jsMath-cmbx10" Font/ITALIC :script]
+  :cmbx10-it-scriptscript ["jsMath-cmbx10" Font/ITALIC :script-script]
 
   ; math symbol
   ; For some reason, glyphs do not appear for any char < 0x2x,
   ; although the jsMath site claims they are present.
-  :cmsy10 (Font. "jsMath-cmsy10" Font/PLAIN TEXT_SIZE)
-  :cmsy10-script (Font. "jsMath-cmsy10" Font/PLAIN SCRIPT_SIZE)
-  :cmsy10-scriptscript (Font. "jsMath-cmsy10" Font/PLAIN SCRIPT_SCRIPT_SIZE)
+  :cmsy10 ["jsMath-cmsy10" Font/PLAIN :text]
+  :cmsy10-script ["jsMath-cmsy10" Font/PLAIN :script]
+  :cmsy10-scriptscript ["jsMath-cmsy10" Font/PLAIN :script-script]
   
   ;
   ; Other fonts, for special purposes:
   ;
 
-  :tiny (Font. "Lucida Grande" Font/PLAIN 9)  ; this is the most legible at small sizes?
+  :tiny ["Lucida Grande" Font/PLAIN :script]  ; this is the most legible at small sizes?
   
   ; Times, a unicode font...
   ; Unfortunately the spacing is quite different than the jsMath fonts
-  :times (Font. "Times New Roman" Font/PLAIN TEXT_SIZE)
-  :timesItalic (Font. "Times New Roman" Font/ITALIC TEXT_SIZE)
+  :times ["Times New Roman" Font/PLAIN :text]
+  :timesItalic ["Times New Roman" Font/ITALIC :text]
   
   ; used for monospace in a few places
-  :courier (Font. "Courier New" Font/PLAIN TEXT_SIZE)
-  :courierItalic (Font. "Courier New" Font/ITALIC TEXT_SIZE)
+  :courier ["Courier New" Font/PLAIN :text]
+  :courierItalic ["Courier New" Font/ITALIC :text]
   
-  :sans (Font. "Lucida Grande" Font/PLAIN 12);TEXT_SIZE)
-  :sans-script (Font. "Lucida Grande" Font/PLAIN 10);SCRIPT_SIZE)
-  :sans-scriptscript (Font. "Lucida Grande" Font/PLAIN 7);SCRIPT_SCRIPT_SIZE)
+  :sans ["Lucida Grande" Font/PLAIN :text] ; 12 would be better
+  :sans-script ["Lucida Grande" Font/PLAIN :script] ; 10
+  :sans-scriptscript ["Lucida Grande" Font/PLAIN :script-script] ; 7
 })
+
+(defn resolve-font-size 
+  [scale]
+  (int (* font-multiplier TEXT_SIZE_BASE scale)))
+  
+(defn resolve-font
+  [kw]
+  (let [ [name style mode] (FONTS kw) ]
+    (Font. name style (resolve-font-size (FONT_SCALES mode)))))
 
 ;
 ; Color interpretation:
@@ -270,7 +355,7 @@
   ; the actual characters present. 
   (memoize2
     (fn [s f #^Graphics2D g]
-      (let [fm (.getFontMetrics g (FONTS f))]
+      (let [fm (.getFontMetrics g (resolve-font f))]
         (.getStringBounds fm s g)))))
 
 (def glyph-bounds
@@ -307,7 +392,7 @@
   [n #^Graphics2D g ctx]
   (let [s (as-string (node-attr n :str))
         f (node-attr-value n :font)
-        ; fm (.getFontMetrics g (FONTS f))
+        ; fm (.getFontMetrics g (resolve-font f))
         ; _ (println "str:" (node-id n) s)
         ; bounds (.getStringBounds fm s g)]
         #^Rectangle2D bounds (string-bounds s f g)]
@@ -324,7 +409,7 @@
 (defmethod draw-impl :view/chars
   [n #^Graphics2D g ctx debug?]
   (let [ [w h b] (size n g ctx)
-          font (FONTS (node-attr-value n :font))
+          font (resolve-font (node-attr-value n :font))
           #^String s (as-string (node-attr n :str))
           ; _ (println "chars:" s) ; HACK
           angle 0.0 ];(.getItalicAngle font) ]
@@ -358,33 +443,36 @@
 ;
 ; Space:
 ;
-(def QUAD_WIDTH (* 1.0 TEXT_SIZE))  ; HACK: this is the quad width for cmmi
+ ; TODO: scale with multiplier
+; (def QUAD_WIDTH (* 1.0 TEXT_SIZE))  ; HACK: this is the quad width for cmmi
 
 ; TODO: reduce these spaces from expr, using different sizes for each mode
 (defmethod size-impl :view/thinspace [n & more] 
-  (let [ quadWidth QUAD_WIDTH ]
+  ; (let [ quadWidth QUAD_WIDTH ]
   ; [(* quadWidth (float 1/6)) 0 0]))  ; 3mu; see Knuth, p167
-  [2 0 0]))
+  [(resolve-font-size 0.15) 0 0]) ; truncates to 2
 (defmethod layout-impl :view/thinspace [n & more] [])
 (defmethod draw-impl :view/thinspace [n & more] nil)
 
 (defmethod size-impl :view/mediumspace [n & more]
-  (let [ quadWidth QUAD_WIDTH ]
+  ; (let [ quadWidth QUAD_WIDTH ]
   ; [(* quadWidth (float 2/9)) 0 0]))  ; 4mu; see Knuth, p167
-  [5 0 0]))
+  [(resolve-font-size 0.36) 0 0]) ; truncates to 5
 (defmethod layout-impl :view/mediumspace [n & more] [])
 (defmethod draw-impl :view/mediumspace [n & more] nil)
 
 (defmethod size-impl :view/thickspace [n & more]
-  (let [ quadWidth QUAD_WIDTH ]
+  ; (let [ quadWidth QUAD_WIDTH ]
   ; [(* quadWidth (float 5/18)) 0 0]))  ; 5mu; see Knuth, p167
-  [8 0 0]))
+  ; [8 0 0]))
+  [(resolve-font-size 0.58) 0 0]) ; truncates to 8
 (defmethod layout-impl :view/thickspace [n & more] [])
 (defmethod draw-impl :view/thickspace [n & more] nil)
 
 (defmethod size-impl :view/quad [n & more]
   ; TODO: calculate from the "current" font?
-  [ QUAD_WIDTH 0 0 ])
+  ; [ QUAD_WIDTH 0 0 ])
+  [(resolve-font-size 1.0) 0 0])
 (defmethod layout-impl :view/quad [n & more] [])
 (defmethod draw-impl :view/quad [n & more] nil)
 
@@ -570,7 +658,7 @@
   [n g ctx]
   (let [x (node-attr n :radicand)
         [xw xh xb] (size x g ctx)]
-    (pick-glyph (+ RADICAL_SPACE xh RADICAL_SPACE) RADICALS (FONTS :cmex10) g)))
+    (pick-glyph (+ RADICAL_SPACE xh RADICAL_SPACE) RADICALS (resolve-font :cmex10) g)))
 
 (defmethod size-impl :view/radical
   [n #^Graphics2D g ctx]
@@ -600,7 +688,7 @@
         [[x xx xy xw xh]] (layout n g ctx)]
     (doto g
       (.setColor (node-color n))
-      (.setFont (FONTS :cmex10))
+      (.setFont (resolve-font :cmex10))
       (.drawString rst 0 0)
       (.setStroke (BasicStroke. 1))  ; Note: should take the weight from the font somehow
       (.draw (Line2D$Float. (+ 0.5 (int (.getWidth rr))) -0.5
@@ -638,8 +726,8 @@
         c (node-attr n :content)
         r (node-attr-value n :right)
         [cw ch cb] (size c g ctx)
-        [lst ^Rectangle2D lr] (pick-glyph ch (DELIMS l) (FONTS :cmex10) g)
-        [rst ^Rectangle2D rr] (pick-glyph ch (DELIMS r) (FONTS :cmex10) g)
+        [lst ^Rectangle2D lr] (pick-glyph ch (DELIMS l) (resolve-font :cmex10) g)
+        [rst ^Rectangle2D rr] (pick-glyph ch (DELIMS r) (resolve-font :cmex10) g)
         dh (max (.getHeight lr) (.getHeight rr))
         cy (/ (max (- dh ch) 0) 2)]
     [ (+ (.getWidth lr) DELIM_SPACE cw DELIM_SPACE (.getWidth rr)) 
@@ -652,8 +740,8 @@
         c (node-attr n :content)
         r (node-attr-value n :right)
         [cw ch cb] (size c g ctx)
-        [lst ^Rectangle2D lr] (pick-glyph ch (DELIMS l) (FONTS :cmex10) g)
-        [rst ^Rectangle2D rr] (pick-glyph ch (DELIMS r) (FONTS :cmex10) g)
+        [lst ^Rectangle2D lr] (pick-glyph ch (DELIMS l) (resolve-font :cmex10) g)
+        [rst ^Rectangle2D rr] (pick-glyph ch (DELIMS r) (resolve-font :cmex10) g)
         dh (max (.getHeight lr) (.getHeight rr))
         cx (+ (.getWidth lr) DELIM_SPACE 1) ; not sure why I need this extra pixel, but it helps
         cy (/ (max (- dh ch) 0) 2)]
@@ -665,12 +753,12 @@
         c (node-attr n :content)
         r (node-attr-value n :right)
         [cw ch cb] (size c g ctx)
-        [^String lst ^Rectangle2D lr] (pick-glyph ch (DELIMS l) (FONTS :cmex10) g)
-        [^String rst ^Rectangle2D rr] (pick-glyph ch (DELIMS r) (FONTS :cmex10) g)
+        [^String lst ^Rectangle2D lr] (pick-glyph ch (DELIMS l) (resolve-font :cmex10) g)
+        [^String rst ^Rectangle2D rr] (pick-glyph ch (DELIMS r) (resolve-font :cmex10) g)
         [w h b] (size n g ctx)]
     (doto g
       (.setColor (node-color n))
-      (.setFont (FONTS :cmex10))
+      (.setFont (resolve-font :cmex10))
       (.drawString lst 
                    (float 0) 
                    (float (- (/ (- h (.getHeight lr)) 2) (.getMinY lr))))

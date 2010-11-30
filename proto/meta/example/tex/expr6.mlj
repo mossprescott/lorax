@@ -1,0 +1,18 @@
+(use 'meta.core)
+
+(make-node :clojure/core/program [
+  ; a simple expr
+  (make-node :clojure/core/times {
+    :left
+    (make-node :clojure/core/plus {
+      :left
+      (make-node :clojure/kernel/int { :value 1 })
+
+      :right
+      (make-node :clojure/kernel/int { :value 2 })
+    })
+
+    :right
+    (make-node :view/expr/missing)
+  })
+])

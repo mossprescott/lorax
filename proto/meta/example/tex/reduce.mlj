@@ -1,0 +1,44 @@
+; Example reduction function (for the kernel/string node).
+; This is in :expr for no particularly good reason, except that it might use 
+; some syntax that's not actually real?
+
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(make-node :view/expr/flow [
+  (make-node :view/expr/keyword { :str "fn" })
+  (make-node :view/expr/var { :str "n" })
+  (make-node :view/expr/symbol { :str :to })
+  (make-node :view/expr/keyword { :str "let" })
+  (make-node :view/expr/var { :str "value" })
+  (make-node :view/expr/symbol { :str "=" })
+  (make-node :view/expr/juxt [
+    (make-node :view/expr/keyword { :str "attr" })
+    (make-node :view/delimited {
+      :left "["
+      :right "]"
+      :content
+      (make-node :view/sequence [
+        (make-node :view/expr/var { :str "n" })
+        (make-node :view/expr/keyword { :str "," })  ; HACK
+        (make-node :view/thickspace)
+        (make-node :view/expr/name { :str "value" })
+      ])
+    })
+  ])
+  (make-node :view/expr/keyword { :str "in" })
+  (make-node :view/expr/embed { 
+    :content
+    (make-node :view/scripted {
+      :nucleus
+      (make-node :view/expr/disembed {
+        :levels 1
+        
+        :content
+        (make-node :view/expr/var { :str "value" })
+      })
+      
+      :super
+      (make-node :view/chars { :str "str" :font :tiny })
+    })
+ })
+])

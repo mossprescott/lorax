@@ -7,7 +7,7 @@
 ;         (meta.clojure kernel)))
 
 ; Set the app name early (has to happen before Swing gets initialized, maybe)
-(System/setProperty "com.apple.mrj.application.apple.menu.about.name" "Maml Editor")
+(System/setProperty "com.apple.mrj.application.apple.menu.about.name" "Lorax Editor")
 
 ; Note: using raw 'use' insted of a proper namesapace because it's easier to 
 ; use in the REPL that way.

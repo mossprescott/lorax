@@ -42,7 +42,8 @@
       Line2D 
       Line2D$Float
       Rectangle2D$Float)
-    (java.io File)))
+    (java.io File)
+    (java.util Collection)))
   
 ; (defn celsius []
 ;   (let [frame (JFrame. "Celsius Converter")
@@ -412,10 +413,10 @@
   [sourceId root sourceIdsInViewOrder]
   (if-let [p (idToPath sourceId root)]
     (let [paths (sibling-paths root p)
-          ; _ (println "paths:" paths)  ; HACK
+          _ (println "paths:" paths)  ; HACK
           ids (for [p paths] (node-id (node-at-path root p)))
-          ; _ (println "ids (unsorted):" ids)  ; HACK
-          ; _ (println "siivo:" sourceIdsInViewOrder)  ; HACK
+          _ (println "ids (unsorted):" ids)  ; HACK
+          _ (println "siivo:" sourceIdsInViewOrder)  ; HACK
           ]
       (sortAs ids sourceIdsInViewOrder))))
   
@@ -470,20 +471,23 @@
                   (let [ _ (if PRINT_ALL (do (print "source: ") (print-node n true)) )
                         [np o] (@primaryA n)
                         _ (if PRINT_ALL (do (print "expr: ") (print-node np true) 
-                                            (println "o:" o)) )
+                                            (println "o:" o) ))
                         [npp op] (meta-reduce2 np reduceAny)
-                        _ (if PRINT_ALL (do (print "general: ") (print-node npp true)) )
-                        nppp (if p (parenthesize npp) npp)
-                        _ (if PRINT_ALL (do (print "parens: ") (print-node nppp true)) )
-                        [npppp opp] (exprToView nppp)
-                        _ (if PRINT_ALL (do (print "view: ") (print-node npppp true)) )
+                        _ (if PRINT_ALL (do (print "general: ") (print-node npp true)
+                                            (println "op:" op) ))
+                        [nppp opp] (if p (parenthesize npp) [npp op])
+                        _ (if PRINT_ALL (do (print "parens: ") (print-node nppp true)
+                                            (println "opp:" opp) ))
+                        [npppp oppp] (exprToView nppp)
+                        _ (if PRINT_ALL (do (print "view: ") (print-node npppp true) 
+                                            (println "oppp:" oppp) )) 
                         ; ids (deep-node-ids npppp)  ; HACK
                         ; counts (reduce (fn [m id] (assoc m id (inc (get m id 0)))) {} ids)  ; HACK
                         ; _ (doseq [ [k v] counts :when (> v 1)] (println k "->" v))  ; HACK
                         ]
                     ; (print-node nppp true)  ; HACK
                     ; (println "foo")  ; HACK
-                    [npppp [opp op o]]))
+                    [npppp [oppp opp op o]]))
         [np o] (display @rootA PARENS_DEFAULT)
         nref (ref np)  ; contains the reduced program
         oref (ref o)   ; contains a list of maps of reduced program node ids to pre-reduction ids
@@ -518,21 +522,21 @@
         sourceIdsInViewOrder (fn [] 
                                 (filter #(not (nil? %))
                                   (map #(resolveOne % @oref)
-                                     ; (deep-node-ids @nref))))
-                                    (apply concat
-                                      (visitNode @nref
-                                        (fn [n] 
-                                          (cond
-                                            (= (node-type n) :view/over)
-                                            [ (node-id (node-attr n :top)) (node-id (node-attr n :bottom)) ]
-                                            
-                                            (= (node-type n) :view/scripted)
-                                            [ (node-id (node-attr n :nucleus)) (node-id (node-attr n :super)) ] ; TODO: sub!
-                                            
-                                            ; Note: the default uses the naive ordering, which only 
-                                            ; makes sense if the node is a sequence, actually.
-                                            true
-                                            (map node-id (node-children n)))))))))
+                                     (deep-node-ids @nref))))  ; temporary: the following isn't pre-order!
+                                    ; (apply concat
+                                    ;   (visitNode @nref
+                                    ;     (fn [n] 
+                                    ;       (cond
+                                    ;         (= (node-type n) :view/over)
+                                    ;         [ (node-id (node-attr n :top)) (node-id (node-attr n :bottom)) ]
+                                    ;         
+                                    ;         (= (node-type n) :view/scripted)
+                                    ;         [ (node-id (node-attr n :nucleus)) (node-id (node-attr n :super)) ] ; TODO: sub!
+                                    ;         
+                                    ;         ; Note: the default uses the naive ordering, which only 
+                                    ;         ; makes sense if the node is a sequence, actually.
+                                    ;         true
+                                    ;         (map node-id (node-children n)))))))))
        
         selectionButton (fn [f ^String title ^String accel]
                           (doto (JMenuItem. title)
@@ -560,8 +564,8 @@
                   (.setEnabled editable)
                   (.setAccelerator (KeyStroke/getKeyStroke "DELETE")))
         add (doto (JMenuItem. "Add") 
-                (.setEnabled false)
-                (.setAccelerator (KeyStroke/getKeyStroke "PLUS")))
+                (.setEnabled editable)
+                (.setAccelerator (KeyStroke/getKeyStroke "meta alt A")))
         swapPrevious (doto (JMenuItem. "Swap with Previous Sibling")
                     (.setEnabled editable)
                     (.setAccelerator (KeyStroke/getKeyStroke "meta alt LEFT")))
@@ -586,16 +590,17 @@
                           (.add swapNext)))
         
         parens (doto (JCheckBoxMenuItem. "Parens") 
-                  (.setSelected PARENS_DEFAULT)
-                  (.setAccelerator (KeyStroke/getKeyStroke "meta shift P")))
+                  (.setSelected PARENS_DEFAULT))
         debug (doto (JCheckBoxMenuItem. "Outlines")
                   (.setAccelerator (KeyStroke/getKeyStroke "meta shift O")))
         _ (.add menubar (doto (JMenu. "Options")
                           (.add parens)
                           (.add debug)))
         
-        svg (JMenuItem. "Export to SVG...")
-        pdf (JMenuItem. "Export to PDF...")
+        svg (doto (JMenuItem. "Export to SVG...")
+              (.setAccelerator (KeyStroke/getKeyStroke "meta shift S")))
+        pdf (doto (JMenuItem. "Export to PDF...")
+              (.setAccelerator (KeyStroke/getKeyStroke "meta shift P")))
         _ (.add menubar (doto (JMenu. "Tools")
                           (.add svg)
                           (.add pdf)))
@@ -635,6 +640,27 @@
       (proxy [ActionListener] []
         (actionPerformed [evt]
           (swap! rootA delete-node (first @sref)))))
+
+    ; Add a new node after the selected node:
+    (.addActionListener add
+      (proxy [ActionListener] []
+        (actionPerformed [evt]
+          (let [n (make-node :view/expr/missing)
+                p (idToPath (first @sref) @rootA)
+                _ (println (path-to-str p))
+                _ (doseq [cp (sibling-paths @rootA p)] (println "cp:" (path-to-str cp)))
+                pp (parent-path p)
+                pn (node-at-path @rootA pp)
+                ^Collection s (sibling-paths @rootA p)
+                index (inc (.indexOf s p))]
+            (swap! rootA insert-node (node-id pn)
+                                      index
+                                      n)
+            (dosync
+              (ref-set sref #{ (node-id n) })
+              (ref-set snref n))))))
+    
+    ; TODO: action to add a child to selected node (in case there aren't any yet)
 
     (.addActionListener swapPrevious
       (proxy [ActionListener] []
@@ -714,11 +740,95 @@
   ;           KeyEvent/VK_RIGHT (.doClick right)
   ;           KeyEvent/VK_UP (.doClick up)
   ;           KeyEvent/VK_DOWN (.doClick down)
-            (println "not handled: " (.getKeyCode evt))))
+            KeyEvent/VK_BACK_SPACE
+            (let [val-node (node-attr @snref :value)
+                  val (node-value val-node)]
+              (if (integer? val)
+                (let [new-val (int (/ val 10))]
+                  (swap! rootA replace-node (node-id val-node) 
+                                            (make-node (node-type val-node)
+                                                       (node-id val-node)
+                                                       new-val)))))
+
+            (println "not handled; code: " (.getKeyCode evt))))
         (keyTyped [#^KeyEvent evt]
           (let [ch (.getKeyChar evt)]
-            (println "typed:" ch)
-            (if (and @snref (has-attr? @snref :value) (value-node? (node-attr @snref :value)))
+            (print "char: ") (prn ch)
+            (println "code:" (.getKeyCode evt))
+            (cond
+              ; Big hack for introducing "+" nodes
+              (and @snref (= ch \+))
+              (let [rt (make-node :view/expr/missing)]
+                (swap! rootA replace-node (node-id @snref) 
+                                          (make-node :clojure/core/plus {
+                                            :left
+                                            @snref  ; the formerly selected node
+                                          
+                                            :right
+                                            rt
+                                          }))
+                (if (not= :view/expr/missing (node-type @snref))
+                  (dosync 
+                    (ref-set sref #{ (node-id rt) })
+                    (ref-set snref rt))))
+                            
+              ; Big hack for introducing "*" nodes
+              (and @snref (= ch \*))
+              (let [rt (make-node :view/expr/missing)]
+                (swap! rootA replace-node (node-id @snref) 
+                                          (make-node :clojure/core/times {
+                                            :left
+                                            @snref  ; the formerly selected node
+                                          
+                                            :right
+                                            rt
+                                          }))
+                (if (not= :view/expr/missing (node-type @snref))
+                  (dosync 
+                    (ref-set sref #{ (node-id rt) })
+                    (ref-set snref rt))))
+                            
+              ; Big hack for introducing "-" nodes
+              (and @snref (= ch \-))
+              (let [rt (make-node :view/expr/missing)]
+                (swap! rootA replace-node (node-id @snref) 
+                                          (make-node :clojure/core/minus {
+                                            :left
+                                            @snref  ; the formerly selected node
+                                          
+                                            :right
+                                            rt
+                                          }))
+                (if (not= :view/expr/missing (node-type @snref))
+                  (dosync 
+                    (ref-set sref #{ (node-id rt) })
+                    (ref-set snref rt))))
+                            
+                            
+              ; Big hack for introducing fraction nodes
+              (and @snref (= ch \/))
+              (let [rt (make-node :view/expr/missing)]
+                (swap! rootA replace-node (node-id @snref) 
+                                          (make-node :clojure/core/fraction {
+                                            :num
+                                            @snref  ; the formerly selected node
+                                          
+                                            :denom
+                                            rt
+                                          }))
+                (if (not= :view/expr/missing (node-type @snref))
+                  (dosync 
+                    (ref-set sref #{ (node-id rt) })
+                    (ref-set snref rt))))
+
+              ; Big hack for entering new integer nodes
+              (and @snref (= :view/expr/missing (node-type @snref)))
+              (if (contains? (set "0123456789") ch)
+                (let [n (make-node :clojure/kernel/int (node-id @snref) { :value (Integer/parseInt (str ch)) })]
+                  (swap! rootA replace-node (node-id @snref) n))
+                (println "not handled (on missing child)"))
+                            
+              (and @snref (has-attr? @snref :value) (value-node? (node-attr @snref :value)))
               (let [val-node (node-attr @snref :value)
                     val (node-value val-node)]
                 (println "val:" val)
@@ -729,9 +839,11 @@
                                               (make-node (node-type val-node)
                                                          (node-id val-node)
                                                          new-val)))
-                  
+                                                                           
                   true
-                  (println "not handled"))))))
+                  (println "not handled")))
+
+              )))
       ))
         
     nil)))

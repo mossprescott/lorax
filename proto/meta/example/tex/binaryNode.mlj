@@ -77,9 +77,7 @@
           })
         })
         (make-node :view/expr/flow [
-          ; (make-node :view/expr/keyword { :str "binary" })
-          ; (make-node :grammar/node { :type :clojure/kernel/expr })
-          ; (make-node :view/expr/symbol { :str :from })
+          (make-node :view/expr/keyword { :str "binary" })
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
@@ -88,39 +86,82 @@
           })
           (make-node :view/expr/embed {
             :content
-            (make-node :view/expr/binary [
-              (make-node :view/expr/var { :str "x"})
-              (make-node :clojure/kernel/unquote {
-                :body
-                (make-node :clojure/kernel/var {
-                  :ref (ref-node :binaryNode_operator)
-                })
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :binaryNode_operator)
               })
-              (make-node :view/expr/var { :str "y"})
-            ])
+            })
           })
           (make-node :view/expr/symbol { :str :to })
           (make-node :view/expr/embed {
             :content
-            (make-node :clojure/kernel/app {
-              :expr
-              (make-node :clojure/kernel/unquote {
-                :body
-                (make-node :clojure/kernel/var {
-                  :ref (ref-node :binaryNode_fn)
-                })
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :binaryNode_fn)
               })
-              
-              :args
-              (make-node :clojure/kernel/args [
-                (make-node :view/expr/var { :str "x"})
-                (make-node :view/expr/var { :str "y"})
-              ])
             })
           })
         ])
       ])
     })
+    ;;; Second try, still too busy for Jeremy:
+    ; (make-node :clojure/kernel/quote {
+    ;   :body
+    ;   (make-node :view/section [
+    ;     (make-node :clojure/kernel/unquote {
+    ;       :body
+    ;       (make-node :clojure/kernel/var {
+    ;         :ref (ref-node :binaryNode_doc)
+    ;       })
+    ;     })
+    ;     (make-node :view/expr/flow [
+    ;       ; (make-node :view/expr/keyword { :str "binary" })
+    ;       ; (make-node :grammar/node { :type :clojure/kernel/expr })
+    ;       ; (make-node :view/expr/symbol { :str :from })
+    ;       (make-node :clojure/kernel/unquote {
+    ;         :body
+    ;         (make-node :clojure/kernel/var {
+    ;           :ref (ref-node :binaryNode_type)
+    ;         })
+    ;       })
+    ;       (make-node :view/expr/embed {
+    ;         :content
+    ;         (make-node :view/expr/binary [
+    ;           (make-node :view/expr/var { :str "x"})
+    ;           (make-node :clojure/kernel/unquote {
+    ;             :body
+    ;             (make-node :clojure/kernel/var {
+    ;               :ref (ref-node :binaryNode_operator)
+    ;             })
+    ;           })
+    ;           (make-node :view/expr/var { :str "y"})
+    ;         ])
+    ;       })
+    ;       (make-node :view/expr/symbol { :str :to })
+    ;       (make-node :view/expr/embed {
+    ;         :content
+    ;         (make-node :clojure/kernel/app {
+    ;           :expr
+    ;           (make-node :clojure/kernel/unquote {
+    ;             :body
+    ;             (make-node :clojure/kernel/var {
+    ;               :ref (ref-node :binaryNode_fn)
+    ;             })
+    ;           })
+    ;           
+    ;           :args
+    ;           (make-node :clojure/kernel/args [
+    ;             (make-node :view/expr/var { :str "x"})
+    ;             (make-node :view/expr/var { :str "y"})
+    ;           ])
+    ;         })
+    ;       })
+    ;     ])
+    ;   ])
+    ; })
+    ;;; First try:
     ; (make-node :clojure/kernel/quote {
     ;   :body
     ;   (make-node :view/section [

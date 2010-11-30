@@ -459,8 +459,8 @@
             (make-node :view/expr/symbol { :str :from })
             (node-attr n :type)
             (make-node :view/delimited {
-              :left "{"
-              :right "}"
+              :left "["
+              :right "]"
               :content
               (make-node :view/scripted {
                   :nucleus

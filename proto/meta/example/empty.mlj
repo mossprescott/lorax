@@ -1,0 +1,5 @@
+(use 'meta.core)
+
+(make-node :clojure/core/program [
+  (make-node :view/expr/missing)
+])
