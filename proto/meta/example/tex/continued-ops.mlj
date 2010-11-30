@@ -49,7 +49,7 @@
     :expand
     (make-node :clojure/kernel/quote {
       :body
-      (make-node :cf/match2 {
+      (make-node :cf/match-xc {
         :expr
         (make-node :clojure/kernel/unquote {
           :body
@@ -70,7 +70,7 @@
         })
         
         :else
-        ; (make-node :cf/match1 {
+        ; (make-node :cf/match-v {
         ;   :expr
         ;   (make-node :clojure/kernel/unquote {
         ;     :body
@@ -141,7 +141,7 @@
     :expand
     (make-node :clojure/kernel/quote {
       :body
-      (make-node :cf/match2 {
+      (make-node :cf/match-xc {
         :expr
         (make-node :clojure/kernel/unquote {
           :body
@@ -169,7 +169,7 @@
         })
         
         :else
-    ;     ; (make-node :cf/match1 {
+    ;     ; (make-node :cf/match-v {
     ;     ;   :expr
     ;     ;   (make-node :clojure/kernel/unquote {
     ;     ;     :body
@@ -247,7 +247,7 @@
       :body
       (make-node :clojure/core/where {
         :body
-        (make-node :cf/match3 {
+        (make-node :cf/match-vc {
           :expr
           (make-node :clojure/kernel/var {
             :ref (ref-node :c_recip)
@@ -358,7 +358,7 @@
     :expand
     (make-node :clojure/kernel/quote {
       :body
-      (make-node :cf/match2 {
+      (make-node :cf/match-xc {
         :expr
         (make-node :clojure/kernel/unquote {
           :body
@@ -403,7 +403,7 @@
     })
   ;     (make-node :clojure/core/where {
   ;       :body
-  ;       (make-node :cf/match1 {
+  ;       (make-node :cf/match-v {
   ;         :expr
   ;         (make-node :clojure/kernel/var {
   ;           :ref (ref-node :plus_c)
@@ -429,7 +429,7 @@
   ;         })
   ;         
   ;         :else
-  ;         (make-node :cf/match2 {
+  ;         (make-node :cf/match-xc {
   ;           :expr
   ;           (make-node :clojure/kernel/var {
   ;             :ref (ref-node :plus_c)
@@ -543,7 +543,7 @@
     :expand
     (make-node :clojure/kernel/quote {
       :body
-      (make-node :cf/match2 {
+      (make-node :cf/match-xc {
         :expr
         (make-node :clojure/kernel/unquote {
           :body
@@ -559,7 +559,7 @@
         (make-node :clojure/kernel/bind :negate_d { :name "d" })
         
         :then
-        (make-node :cf/match1 {
+        (make-node :cf/match-v {
           :expr
           (make-node :clojure/kernel/var {
             :ref (ref-node :negate_d)
@@ -595,7 +595,7 @@
           })
           
           :else
-          (make-node :cf/match3 {
+          (make-node :cf/match-vc {
             :expr
             (make-node :clojure/kernel/var {
               :ref (ref-node :negate_d)
@@ -608,7 +608,7 @@
             (make-node :clojure/kernel/bind :negate_e1 { :name "e" })
         
             :then
-            (make-node :cf/match2 {
+            (make-node :cf/match-xc {
               :expr
               (make-node :clojure/kernel/var {
                 :ref (ref-node :negate_e1)
@@ -661,7 +661,7 @@
             })
           
             :else
-            (make-node :cf/match2 {
+            (make-node :cf/match-xc {
               :expr
               (make-node :clojure/kernel/var {
                 :ref (ref-node :negate_d)
@@ -737,5 +737,249 @@
       })
     })
   })
+   
+  ; negate
+  (make-node :grammar/mapNode {
+    :type
+    (make-node :grammar/type :cf/negate-2)
     
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :negate-2_expr {
+        :name
+        (make-node :grammar/name :cf/negate-2/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/juxt [
+        (make-node :view/expr/symbol { :str "-" })
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :negate-2_expr)
+          })
+        })
+      ])
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/core/where {
+        :body
+        (make-node :cf/match-x {
+          :expr
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :negate-2_c)
+          })
+          
+          :x
+          (make-node :clojure/kernel/bind :negate-2_n0 { :name "n" })
+          
+          :then
+          (make-node :cf/fraction {
+            :coeff
+            (make-node :clojure/core/unaryminus {
+              :expr
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :negate-2_n0)
+              })
+            })
+            
+            :cont
+            (make-node :cf/inf)
+          })
+          
+          :else
+          (make-node :cf/match-xv {
+            :expr
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :negate-2_c)
+            })
+          
+            :x
+            (make-node :clojure/kernel/bind :negate-2_n1 { :name "n" })
+          
+            :v
+            (make-node :clojure/kernel/int { :value 2 })
+            
+            :then
+            (make-node :cf/fraction {
+              :coeff
+              (make-node :clojure/core/minus {
+                :left
+                (make-node :clojure/core/unaryminus {
+                  :expr
+                  (make-node :clojure/kernel/var {
+                    :ref (ref-node :negate-2_n1)
+                  })
+                })
+                
+                :right
+                (make-node :clojure/kernel/int { :value 1 })
+              })
+            
+              :cont
+              (make-node :cf/fraction {
+                :coeff
+                (make-node :clojure/kernel/int { :value 2 })
+                
+                :cont
+                (make-node :cf/inf)
+              })
+            })
+            
+            :else
+            (make-node :cf/match-xvxc {
+              :expr
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :negate-2_c)
+              })
+          
+              :x
+              (make-node :clojure/kernel/bind :negate-2_n2 { :name "n" })
+          
+              :v
+              (make-node :clojure/kernel/int { :value 1 })
+            
+              :y
+              (make-node :clojure/kernel/bind :negate-2_n3 { :name "l" })
+          
+              :c
+              (make-node :clojure/kernel/bind :negate-2_c0 { :name "d" })
+          
+              :then
+              (make-node :cf/fraction {
+                :coeff
+                (make-node :clojure/core/minus {
+                  :left
+                  (make-node :clojure/core/unaryminus {
+                    :expr
+                    (make-node :clojure/kernel/var {
+                      :ref (ref-node :negate-2_n2)
+                    })
+                  })
+                
+                  :right
+                  (make-node :clojure/kernel/int { :value 1 })
+                })
+            
+                :cont
+                (make-node :cf/fraction {
+                  :coeff
+                  (make-node :clojure/core/plus {
+                    :left
+                    (make-node :clojure/kernel/var {
+                      :ref (ref-node :negate-2_n3)
+                    })
+                    
+                    :right
+                    (make-node :clojure/kernel/int { :value 1 })
+                  })
+                  
+                  :cont
+                  (make-node :clojure/kernel/var {
+                    :ref (ref-node :negate-2_c0)
+                  })
+                })
+              })
+              
+              :else
+              (make-node :cf/match-xxc {
+                :expr
+                (make-node :clojure/kernel/var {
+                  :ref (ref-node :negate-2_c)
+                })
+          
+                :x
+                (make-node :clojure/kernel/bind :negate-2_n4 { :name "n" })
+          
+                :y
+                (make-node :clojure/kernel/bind :negate-2_n5 { :name "m" })
+          
+                :c
+                (make-node :clojure/kernel/bind :negate-2_c1 { :name "d" })
+          
+                :then
+                (make-node :cf/fraction {
+                  :coeff
+                  (make-node :clojure/core/minus {
+                    :left
+                    (make-node :clojure/core/unaryminus {
+                      :expr
+                      (make-node :clojure/kernel/var {
+                        :ref (ref-node :negate-2_n4)
+                      })
+                    })
+                
+                    :right
+                    (make-node :clojure/kernel/int { :value 1 })
+                  })
+            
+                  :cont
+                  (make-node :cf/fraction {
+                    :coeff
+                    (make-node :clojure/kernel/int { :value 1 })
+
+                    :cont
+                    (make-node :cf/fraction {
+                      :coeff
+                      (make-node :clojure/core/minus {
+                        :left
+                        (make-node :clojure/kernel/var {
+                          :ref (ref-node :negate-2_n5)
+                        })
+                    
+                        :right
+                        (make-node :clojure/kernel/int { :value 1 })
+                      })
+                  
+                      :cont
+                      (make-node :clojure/kernel/var {
+                        :ref (ref-node :negate-2_c1)
+                      })
+                    })
+                  })
+                })
+              
+                :else
+                (make-node :clojure/core/fail)
+              })
+            })
+          })
+        })
+        
+        :vars
+        (make-node :clojure/core/whereVars [
+          (make-node :clojure/core/whereVar {
+            :bind
+            (make-node :clojure/kernel/bind :negate-2_c { :name "c" })
+            
+            :expr
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :negate-2_expr)
+              })
+            })
+          })
+        ])
+      })
+    })
+  })
 ])

@@ -160,7 +160,7 @@
   ;   ])
   ; })
   
-  ; (make-node :cf/match1 {
+  ; (make-node :cf/match-v {
   ;   :expr
   ;   (make-node :cf/fraction {
   ;     :coeff
@@ -185,7 +185,7 @@
   ;   (make-node :clojure/core/fail)
   ; })
   
-  ; (make-node :cf/match1 {
+  ; (make-node :cf/match-v {
   ;   :expr
   ;   (make-node :clojure/kernel/int { :value 2 })
   ;   

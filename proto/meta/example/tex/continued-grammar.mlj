@@ -331,13 +331,13 @@
       ; })
   })
 
-  ; ; match1
+  ; ; match-v
   ; (make-node :grammar/mapNode {
   ;   :doc 
   ;   (make-node :grammar/doc { :str "Pattern-match for a fraction with no continuation (i.e. representing an integer)" })
   ;   
   ;   :type
-  ;   (make-node :grammar/type :cf/match1)
+  ;   (make-node :grammar/type :cf/match-v)
   ;   
   ;   :supers 
   ;   (make-node :grammar/types [
@@ -346,9 +346,9 @@
   ;   
   ;   :attrs
   ;   (make-node :grammar/attrs [
-  ;     (make-node :grammar/attr :match1_expr {
+  ;     (make-node :grammar/attr :match-v_expr {
   ;       :name
-  ;       (make-node :grammar/name :cf/match1/expr)
+  ;       (make-node :grammar/name :cf/match-v/expr)
   ;       
   ;       :options
   ;       (make-node :grammar/options [
@@ -357,9 +357,9 @@
   ;       
   ;       :optional false
   ;     }) 
-  ;     (make-node :grammar/attr :match1_coeff {
+  ;     (make-node :grammar/attr :match-v_coeff {
   ;       :name
-  ;       (make-node :grammar/name :cf/match1/coeff)
+  ;       (make-node :grammar/name :cf/match-v/coeff)
   ;       
   ;       :options
   ;       (make-node :grammar/options [
@@ -368,9 +368,9 @@
   ;       
   ;       :optional false
   ;     }) 
-  ;     (make-node :grammar/attr :match1_then {
+  ;     (make-node :grammar/attr :match-v_then {
   ;       :name
-  ;       (make-node :grammar/name :cf/match1/then)
+  ;       (make-node :grammar/name :cf/match-v/then)
   ;       
   ;       :options
   ;       (make-node :grammar/options [
@@ -379,9 +379,9 @@
   ;       
   ;       :optional false
   ;     }) 
-  ;     (make-node :grammar/attr :match1_else {
+  ;     (make-node :grammar/attr :match-v_else {
   ;       :name
-  ;       (make-node :grammar/name :cf/match1/else)
+  ;       (make-node :grammar/name :cf/match-v/else)
   ;       
   ;       :options
   ;       (make-node :grammar/options [
@@ -401,7 +401,7 @@
   ;         (make-node :clojure/kernel/unquote {
   ;           :body
   ;           (make-node :clojure/kernel/var {
-  ;             :ref (ref-node :match1_expr)
+  ;             :ref (ref-node :match-v_expr)
   ;           })
   ;         })
   ;         (make-node :view/expr/symbol { :str "|" })
@@ -409,7 +409,7 @@
   ;           (make-node :clojure/kernel/unquote {
   ;             :body
   ;             (make-node :clojure/kernel/var {
-  ;               :ref (ref-node :match1_coeff)
+  ;               :ref (ref-node :match-v_coeff)
   ;             })
   ;           })
   ;           (make-node :view/expr/symbol { :str "+" })
@@ -419,7 +419,7 @@
   ;         (make-node :clojure/kernel/unquote {
   ;           :body
   ;           (make-node :clojure/kernel/var {
-  ;             :ref (ref-node :match1_then)
+  ;             :ref (ref-node :match-v_then)
   ;           })
   ;         })
   ;       ])        
@@ -429,7 +429,7 @@
   ;         (make-node :clojure/kernel/unquote {
   ;           :body
   ;           (make-node :clojure/kernel/var {
-  ;             :ref (ref-node :match1_else)
+  ;             :ref (ref-node :match-v_else)
   ;           })
   ;         })
   ;       ])
@@ -441,13 +441,13 @@
   ;     :body
   ;     (make-node :clojure/kernel/let {
   ;       :bind 
-  ;       (make-node :clojure/kernel/bind :x_match1 { :name "x" })
+  ;       (make-node :clojure/kernel/bind :x_match-v { :name "x" })
   ; 
   ;       :expr
   ;       (make-node :clojure/kernel/unquote {
   ;         :body
   ;         (make-node :clojure/kernel/var {
-  ;           :ref (ref-node :match1_expr)
+  ;           :ref (ref-node :match-v_expr)
   ;         })
   ;       })
   ;       
@@ -461,7 +461,7 @@
   ;             (make-node :clojure/core/type {
   ;               :node
   ;               (make-node :clojure/kernel/var {
-  ;                 :ref (ref-node :x_match1)
+  ;                 :ref (ref-node :x_match-v)
   ;               })
   ;             })
   ;             
@@ -475,7 +475,7 @@
   ;             (make-node :clojure/core/has? {
   ;               :node 
   ;               (make-node :clojure/kernel/var {
-  ;                 :ref (ref-node :x_match1)
+  ;                 :ref (ref-node :x_match-v)
   ;               })
   ;           
   ;               :name
@@ -490,7 +490,7 @@
   ;           (make-node :clojure/kernel/unquote {
   ;             :body
   ;             (make-node :clojure/kernel/var {
-  ;               :ref (ref-node :match1_coeff)
+  ;               :ref (ref-node :match-v_coeff)
   ;             })
   ;           })
   ;           
@@ -500,7 +500,7 @@
   ;             (make-node :clojure/core/attr {
   ;               :node 
   ;               (make-node :clojure/kernel/var {
-  ;                 :ref (ref-node :x_match1)
+  ;                 :ref (ref-node :x_match-v)
   ;               })
   ;           
   ;               :name
@@ -512,7 +512,7 @@
   ;           (make-node :clojure/kernel/unquote {
   ;             :body
   ;             (make-node :clojure/kernel/var {
-  ;               :ref (ref-node :match1_then)
+  ;               :ref (ref-node :match-v_then)
   ;             })
   ;           })
   ;         })
@@ -521,7 +521,7 @@
   ;         (make-node :clojure/kernel/unquote {
   ;           :body
   ;           (make-node :clojure/kernel/var {
-  ;             :ref (ref-node :match1_else)
+  ;             :ref (ref-node :match-v_else)
   ;           })
   ;         })
   ;       })
@@ -529,13 +529,13 @@
   ;   })
   ; })
 
-  ; match1
+  ; match-x
   (make-node :grammar/mapNode {
     :doc 
-    (make-node :grammar/doc { :str "Pattern-match for a fraction with no continuation and a specific coefficient (i.e. an integer)" })
+    (make-node :grammar/doc { :str "Pattern-match for a fraction with no continuation and arbitrary coefficient" })
     
     :type
-    (make-node :grammar/type :cf/match1)
+    (make-node :grammar/type :cf/match-x)
     
     :supers 
     (make-node :grammar/types [
@@ -544,9 +544,9 @@
     
     :attrs
     (make-node :grammar/attrs [
-      (make-node :grammar/attr :match1_expr {
+      (make-node :grammar/attr :match-x_expr {
         :name
-        (make-node :grammar/name :cf/match1/expr)
+        (make-node :grammar/name :cf/match-x/expr)
         
         :options
         (make-node :grammar/options [
@@ -555,9 +555,20 @@
         
         :optional false
       }) 
-      (make-node :grammar/attr :match1_coeff {
+      (make-node :grammar/attr :match-x_x {
         :name
-        (make-node :grammar/name :cf/match1/coeff)
+        (make-node :grammar/name :cf/match-x/x)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/bind })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-x_then {
+        :name
+        (make-node :grammar/name :cf/match-x/then)
         
         :options
         (make-node :grammar/options [
@@ -566,20 +577,9 @@
         
         :optional false
       }) 
-      (make-node :grammar/attr :match1_then {
+      (make-node :grammar/attr :match-x_else {
         :name
-        (make-node :grammar/name :cf/match1/then)
-        
-        :options
-        (make-node :grammar/options [
-          (make-node :grammar/node { :type :clojure/kernel/expr })
-        ])
-        
-        :optional false
-      }) 
-      (make-node :grammar/attr :match1_else {
-        :name
-        (make-node :grammar/name :cf/match1/else)
+        (make-node :grammar/name :cf/match-x/else)
         
         :options
         (make-node :grammar/options [
@@ -599,7 +599,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match1_expr)
+              :ref (ref-node :match-x_expr)
             })
           })
         ])
@@ -610,7 +610,7 @@
             (make-node :clojure/kernel/unquote {
               :body
               (make-node :clojure/kernel/var {
-                :ref (ref-node :match1_coeff)
+                :ref (ref-node :match-x_x)
               })
             })
             (make-node :view/expr/symbol { :str "+" })
@@ -625,7 +625,7 @@
             ;   (make-node :clojure/kernel/unquote {
             ;     :body
             ;     (make-node :clojure/kernel/var {
-            ;       :ref (ref-node :match3_cont)
+            ;       :ref (ref-node :match-vc_cont)
             ;     })
             ;   })
             ; })
@@ -634,7 +634,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match1_then)
+              :ref (ref-node :match-x_then)
             })
           })
         ])
@@ -645,7 +645,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match1_else)
+              :ref (ref-node :match-x_else)
             })
           })
         ])
@@ -657,13 +657,13 @@
       :body
       (make-node :clojure/kernel/let {
         :bind 
-        (make-node :clojure/kernel/bind :x_match1 { :name "x" })
+        (make-node :clojure/kernel/bind :x_match-x { :name "c" })
 
         :expr
         (make-node :clojure/kernel/unquote {
           :body
           (make-node :clojure/kernel/var {
-            :ref (ref-node :match1_expr)
+            :ref (ref-node :match-x_expr)
           })
         })
         
@@ -677,7 +677,254 @@
               (make-node :clojure/core/type {
                 :node
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :x_match1)
+                  :ref (ref-node :x_match-x)
+                })
+              })
+              
+              :right
+              (make-node :clojure/kernel/name { :value :cf/fraction })
+            })
+
+            ; :right
+            ; (make-node :clojure/core/and {
+            ;   :left  ; coeff. matches the given expr
+            ;   (make-node :clojure/core/equal {
+            ;     :left
+            ;     (make-node :clojure/kernel/unquote {
+            ;       :body
+            ;       (make-node :clojure/kernel/var {
+            ;         :ref (ref-node :match-v_coeff)
+            ;       })
+            ;     })
+            ;     
+            ;     :right
+            ;     (make-node :clojure/core/eval {
+            ;       :node
+            ;       (make-node :clojure/core/attr {
+            ;         :node 
+            ;         (make-node :clojure/kernel/var {
+            ;           :ref (ref-node :x_match-x)
+            ;         })
+            ;                 
+            ;         :name
+            ;         (make-node :clojure/kernel/name { :value :coeff })
+            ;       })
+            ;     })
+            ;   })
+
+              :right  ; cont. is inf
+              (make-node :clojure/core/equal {
+                :left
+                (make-node :clojure/core/attr {
+                  :node
+                  (make-node :clojure/kernel/var {
+                    :ref (ref-node :x_match-x)
+                  })
+          
+                  :name
+                  (make-node :clojure/kernel/name { :value :cont })
+                })
+                
+                :right
+                (make-node :cf/inf)
+              })
+            ; })
+          })
+          
+          :then
+          (make-node :clojure/kernel/let {
+            :bind
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :match-x_x)
+              })
+            })
+            
+            :expr
+            (make-node :clojure/core/eval {
+              :node
+              (make-node :clojure/core/attr {
+                :node 
+                (make-node :clojure/kernel/var {
+                  :ref (ref-node :x_match-x)
+                })
+            
+                :name
+                (make-node :clojure/kernel/name { :value :coeff })
+              })
+            })
+            
+            :body
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :match-x_then)
+              })
+            })
+          })
+          
+          :else
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-x_else)
+            })
+          })
+        })
+      })
+    })
+  })
+    
+  ; match-v
+  (make-node :grammar/mapNode {
+    :doc 
+    (make-node :grammar/doc { :str "Pattern-match for a fraction with no continuation and a specific coefficient (i.e. an integer)" })
+    
+    :type
+    (make-node :grammar/type :cf/match-v)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :match-v_expr {
+        :name
+        (make-node :grammar/name :cf/match-v/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-v_coeff {
+        :name
+        (make-node :grammar/name :cf/match-v/coeff)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-v_then {
+        :name
+        (make-node :grammar/name :cf/match-v/then)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-v_else {
+        :name
+        (make-node :grammar/name :cf/match-v/else)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/section [
+        (make-node :view/expr/flow [
+          (make-node :view/expr/keyword { :str "match" })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-v_expr)
+            })
+          })
+        ])
+        (make-node :view/expr/flow [
+          (make-node :view/sequence []) ; empty, so there's just one quad of indent
+          ; (make-node :view/expr/symbol { :str "|" })
+          (make-node :view/expr/binary [
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :match-v_coeff)
+              })
+            })
+            (make-node :view/expr/symbol { :str "+" })
+            (make-node :view/expr/symbol { :str :circ })
+            ; (make-node :view/over {
+            ;   :top
+            ;   (make-node :clojure/kernel/int { :value 1 })
+            ;   
+            ;   :weight 1
+            ;   
+            ;   :bottom
+            ;   (make-node :clojure/kernel/unquote {
+            ;     :body
+            ;     (make-node :clojure/kernel/var {
+            ;       :ref (ref-node :match-vc_cont)
+            ;     })
+            ;   })
+            ; })
+          ])
+          (make-node :view/expr/symbol { :str :to })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-v_then)
+            })
+          })
+        ])
+        (make-node :view/expr/flow [
+          (make-node :view/sequence []) ; empty, so there's just one quad of indent
+          (make-node :view/expr/keyword { :str "else" })
+          (make-node :view/expr/symbol { :str :to })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-v_else)
+            })
+          })
+        ])
+      ])
+    })
+    
+    :expand
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :clojure/kernel/let {
+        :bind 
+        (make-node :clojure/kernel/bind :x_match-v { :name "x" })
+
+        :expr
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :match-v_expr)
+          })
+        })
+        
+        :body
+        (make-node :clojure/kernel/if {
+          :test
+          (make-node :clojure/core/and {
+            :left  ; is a cf node
+            (make-node :clojure/core/equal {
+              :left
+              (make-node :clojure/core/type {
+                :node
+                (make-node :clojure/kernel/var {
+                  :ref (ref-node :x_match-v)
                 })
               })
               
@@ -693,7 +940,7 @@
                 (make-node :clojure/kernel/unquote {
                   :body
                   (make-node :clojure/kernel/var {
-                    :ref (ref-node :match1_coeff)
+                    :ref (ref-node :match-v_coeff)
                   })
                 })
                 
@@ -703,7 +950,7 @@
                   (make-node :clojure/core/attr {
                     :node 
                     (make-node :clojure/kernel/var {
-                      :ref (ref-node :x_match1)
+                      :ref (ref-node :x_match-v)
                     })
             
                     :name
@@ -718,7 +965,7 @@
                 (make-node :clojure/core/attr {
                   :node
                   (make-node :clojure/kernel/var {
-                    :ref (ref-node :x_match1)
+                    :ref (ref-node :x_match-v)
                   })
           
                   :name
@@ -735,7 +982,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match1_then)
+              :ref (ref-node :match-v_then)
             })
           })
 
@@ -743,7 +990,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match1_else)
+              :ref (ref-node :match-v_else)
             })
           })
         })
@@ -751,13 +998,13 @@
     })
   })
     
-  ; match2
+  ; match-xc
   (make-node :grammar/mapNode {
     :doc 
     (make-node :grammar/doc { :str "Pattern-match for a fraction with arbitrary coefficient and continuation." })
     
     :type
-    (make-node :grammar/type :cf/match2)
+    (make-node :grammar/type :cf/match-xc)
     
     :supers 
     (make-node :grammar/types [
@@ -766,9 +1013,9 @@
     
     :attrs
     (make-node :grammar/attrs [
-      (make-node :grammar/attr :match2_expr {
+      (make-node :grammar/attr :match-xc_expr {
         :name
-        (make-node :grammar/name :cf/match2/expr)
+        (make-node :grammar/name :cf/match-xc/expr)
         
         :options
         (make-node :grammar/options [
@@ -777,9 +1024,9 @@
         
         :optional false
       }) 
-      (make-node :grammar/attr :match2_coeff {
+      (make-node :grammar/attr :match-xc_coeff {
         :name
-        (make-node :grammar/name :cf/match2/coeff)
+        (make-node :grammar/name :cf/match-xc/coeff)
         
         :options
         (make-node :grammar/options [
@@ -788,9 +1035,9 @@
         
         :optional false
       }) 
-      (make-node :grammar/attr :match2_cont {
+      (make-node :grammar/attr :match-xc_cont {
         :name
-        (make-node :grammar/name :cf/match2/cont)
+        (make-node :grammar/name :cf/match-xc/cont)
         
         :options
         (make-node :grammar/options [
@@ -799,9 +1046,9 @@
         
         :optional false
       }) 
-      (make-node :grammar/attr :match2_then {
+      (make-node :grammar/attr :match-xc_then {
         :name
-        (make-node :grammar/name :cf/match2/then)
+        (make-node :grammar/name :cf/match-xc/then)
         
         :options
         (make-node :grammar/options [
@@ -810,9 +1057,9 @@
         
         :optional false
       }) 
-      (make-node :grammar/attr :match2_else {
+      (make-node :grammar/attr :match-xc_else {
         :name
-        (make-node :grammar/name :cf/match2/else)
+        (make-node :grammar/name :cf/match-xc/else)
         
         :options
         (make-node :grammar/options [
@@ -832,7 +1079,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match2_expr)
+              :ref (ref-node :match-xc_expr)
             })
           })
         ])
@@ -843,7 +1090,7 @@
             (make-node :clojure/kernel/unquote {
               :body
               (make-node :clojure/kernel/var {
-                :ref (ref-node :match2_coeff)
+                :ref (ref-node :match-xc_coeff)
               })
             })
             (make-node :view/expr/symbol { :str "+" })
@@ -857,7 +1104,7 @@
               (make-node :clojure/kernel/unquote {
                 :body
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :match2_cont)
+                  :ref (ref-node :match-xc_cont)
                 })
               })
             })
@@ -866,7 +1113,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match2_then)
+              :ref (ref-node :match-xc_then)
             })
           })
         ])
@@ -877,7 +1124,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match2_else)
+              :ref (ref-node :match-xc_else)
             })
           })
         ])
@@ -889,13 +1136,13 @@
       :body
       (make-node :clojure/kernel/let {
         :bind 
-        (make-node :clojure/kernel/bind :x_match2 { :name "x" })
+        (make-node :clojure/kernel/bind :x_match-xc { :name "x" })
 
         :expr
         (make-node :clojure/kernel/unquote {
           :body
           (make-node :clojure/kernel/var {
-            :ref (ref-node :match2_expr)
+            :ref (ref-node :match-xc_expr)
           })
         })
         
@@ -909,7 +1156,7 @@
               (make-node :clojure/core/type {
                 :node
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :x_match2)
+                  :ref (ref-node :x_match-xc)
                 })
               })
               
@@ -921,7 +1168,7 @@
             ;            (make-node :clojure/core/has? {
             ;              :node 
             ;              (make-node :clojure/kernel/var {
-            ;                :ref (ref-node :x_match2)
+            ;                :ref (ref-node :x_match-xc)
             ;              })
             ;          
             ;              :name
@@ -935,7 +1182,7 @@
             (make-node :clojure/kernel/unquote {
               :body
               (make-node :clojure/kernel/var {
-                :ref (ref-node :match2_coeff)
+                :ref (ref-node :match-xc_coeff)
               })
             })
             
@@ -945,7 +1192,7 @@
               (make-node :clojure/core/attr {
                 :node 
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :x_match2)
+                  :ref (ref-node :x_match-xc)
                 })
             
                 :name
@@ -959,7 +1206,7 @@
               (make-node :clojure/kernel/unquote {
                 :body
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :match2_cont)
+                  :ref (ref-node :match-xc_cont)
                 })
               })
             
@@ -967,7 +1214,7 @@
               (make-node :clojure/core/attr {
                 :node 
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :x_match2)
+                  :ref (ref-node :x_match-xc)
                 })
           
                 :name
@@ -978,7 +1225,7 @@
               (make-node :clojure/kernel/unquote {
                 :body
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :match2_then)
+                  :ref (ref-node :match-xc_then)
                 })
               })
             })
@@ -988,7 +1235,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match2_else)
+              :ref (ref-node :match-xc_else)
             })
           })
         })
@@ -996,13 +1243,13 @@
     })
   })
     
-  ; match3
+  ; match-vc
   (make-node :grammar/mapNode {
     :doc 
     (make-node :grammar/doc { :str "Pattern-match for a fraction with a continuation and a specific coefficient" })
     
     :type
-    (make-node :grammar/type :cf/match3)
+    (make-node :grammar/type :cf/match-vc)
     
     :supers 
     (make-node :grammar/types [
@@ -1011,9 +1258,9 @@
     
     :attrs
     (make-node :grammar/attrs [
-      (make-node :grammar/attr :match3_expr {
+      (make-node :grammar/attr :match-vc_expr {
         :name
-        (make-node :grammar/name :cf/match3/expr)
+        (make-node :grammar/name :cf/match-vc/expr)
         
         :options
         (make-node :grammar/options [
@@ -1022,9 +1269,9 @@
         
         :optional false
       }) 
-      (make-node :grammar/attr :match3_coeff {
+      (make-node :grammar/attr :match-vc_coeff {
         :name
-        (make-node :grammar/name :cf/match3/coeff)
+        (make-node :grammar/name :cf/match-vc/coeff)
         
         :options
         (make-node :grammar/options [
@@ -1033,9 +1280,9 @@
         
         :optional false
       }) 
-      (make-node :grammar/attr :match3_cont {
+      (make-node :grammar/attr :match-vc_cont {
         :name
-        (make-node :grammar/name :cf/match3/cont)
+        (make-node :grammar/name :cf/match-vc/cont)
         
         :options
         (make-node :grammar/options [
@@ -1044,9 +1291,9 @@
         
         :optional false
       }) 
-      (make-node :grammar/attr :match3_then {
+      (make-node :grammar/attr :match-vc_then {
         :name
-        (make-node :grammar/name :cf/match3/then)
+        (make-node :grammar/name :cf/match-vc/then)
         
         :options
         (make-node :grammar/options [
@@ -1055,9 +1302,9 @@
         
         :optional false
       }) 
-      (make-node :grammar/attr :match3_else {
+      (make-node :grammar/attr :match-vc_else {
         :name
-        (make-node :grammar/name :cf/match3/else)
+        (make-node :grammar/name :cf/match-vc/else)
         
         :options
         (make-node :grammar/options [
@@ -1077,7 +1324,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match3_expr)
+              :ref (ref-node :match-vc_expr)
             })
           })
         ])
@@ -1088,7 +1335,7 @@
             (make-node :clojure/kernel/unquote {
               :body
               (make-node :clojure/kernel/var {
-                :ref (ref-node :match3_coeff)
+                :ref (ref-node :match-vc_coeff)
               })
             })
             (make-node :view/expr/symbol { :str "+" })
@@ -1102,7 +1349,7 @@
               (make-node :clojure/kernel/unquote {
                 :body
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :match3_cont)
+                  :ref (ref-node :match-vc_cont)
                 })
               })
             })
@@ -1111,7 +1358,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match3_then)
+              :ref (ref-node :match-vc_then)
             })
           })
         ])
@@ -1122,7 +1369,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match3_else)
+              :ref (ref-node :match-vc_else)
             })
           })
         ])
@@ -1134,13 +1381,13 @@
       :body
       (make-node :clojure/kernel/let {
         :bind 
-        (make-node :clojure/kernel/bind :x_match3 { :name "x" })
+        (make-node :clojure/kernel/bind :x_match-vc { :name "x" })
 
         :expr
         (make-node :clojure/kernel/unquote {
           :body
           (make-node :clojure/kernel/var {
-            :ref (ref-node :match3_expr)
+            :ref (ref-node :match-vc_expr)
           })
         })
         
@@ -1154,7 +1401,7 @@
               (make-node :clojure/core/type {
                 :node
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :x_match3)
+                  :ref (ref-node :x_match-vc)
                 })
               })
               
@@ -1168,7 +1415,7 @@
             ;               (make-node :clojure/core/has? {
             ;                 :node 
             ;                 (make-node :clojure/kernel/var {
-            ;                   :ref (ref-node :x_match3)
+            ;                   :ref (ref-node :x_match-vc)
             ;                 })
             ;           
             ;                 :name
@@ -1181,7 +1428,7 @@
                 (make-node :clojure/kernel/unquote {
                   :body
                   (make-node :clojure/kernel/var {
-                    :ref (ref-node :match3_coeff)
+                    :ref (ref-node :match-vc_coeff)
                   })
                 })
                 
@@ -1191,7 +1438,7 @@
                   (make-node :clojure/core/attr {
                     :node 
                     (make-node :clojure/kernel/var {
-                      :ref (ref-node :x_match3)
+                      :ref (ref-node :x_match-vc)
                     })
             
                     :name
@@ -1208,7 +1455,7 @@
           ;   (make-node :clojure/kernel/unquote {
           ;     :body
           ;     (make-node :clojure/kernel/var {
-          ;       :ref (ref-node :match3_coeff)
+          ;       :ref (ref-node :match-vc_coeff)
           ;     })
           ;   })
           ;   
@@ -1218,7 +1465,7 @@
           ;     (make-node :clojure/core/attr {
           ;       :node 
           ;       (make-node :clojure/kernel/var {
-          ;         :ref (ref-node :x_match3)
+          ;         :ref (ref-node :x_match-vc)
           ;       })
           ;   
           ;       :name
@@ -1232,7 +1479,7 @@
               (make-node :clojure/kernel/unquote {
                 :body
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :match3_cont)
+                  :ref (ref-node :match-vc_cont)
                 })
               })
             
@@ -1240,7 +1487,7 @@
               (make-node :clojure/core/attr {
                 :node 
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :x_match3)
+                  :ref (ref-node :x_match-vc)
                 })
           
                 :name
@@ -1251,7 +1498,7 @@
               (make-node :clojure/kernel/unquote {
                 :body
                 (make-node :clojure/kernel/var {
-                  :ref (ref-node :match3_then)
+                  :ref (ref-node :match-vc_then)
                 })
               })
             })
@@ -1261,7 +1508,7 @@
           (make-node :clojure/kernel/unquote {
             :body
             (make-node :clojure/kernel/var {
-              :ref (ref-node :match3_else)
+              :ref (ref-node :match-vc_else)
             })
           })
         })
@@ -1473,7 +1720,7 @@
               ])
               
               :body
-              (make-node :cf/match2 {
+              (make-node :cf/match-xc {
                 :expr
                 (make-node :clojure/kernel/var {            
                   :ref (ref-node :c_ratio)
@@ -1556,7 +1803,7 @@
     ;       ])
     ;       
     ;       :body
-    ;       ; TODO: use match1/2
+    ;       ; TODO: use match-v/2
     ;       (make-node :clojure/kernel/if {
     ;         :test
     ;         (make-node :clojure/core/has? {
@@ -1654,5 +1901,501 @@
     ; })
   })
   
+  ; match-xv
+  (make-node :grammar/mapNode {
+    :doc 
+    (make-node :grammar/doc { :str "Pattern-match for a fraction with a continuation and a specific coefficient" })
+    
+    :type
+    (make-node :grammar/type :cf/match-xv)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :match-xv_expr {
+        :name
+        (make-node :grammar/name :cf/match-xv/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xv_x {
+        :name
+        (make-node :grammar/name :cf/match-xv/x)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/bind })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xv_v {
+        :name
+        (make-node :grammar/name :cf/match-xv/v)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xv_then {
+        :name
+        (make-node :grammar/name :cf/match-xv/then)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xv_else {
+        :name
+        (make-node :grammar/name :cf/match-xv/else)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/section [
+        (make-node :view/expr/flow [
+          (make-node :view/expr/keyword { :str "match" })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-xv_expr)
+            })
+          })
+        ])
+        (make-node :view/expr/flow [
+          (make-node :view/sequence []) ; empty, so there's just one quad of indent
+          ; (make-node :view/expr/symbol { :str "|" })
+          (make-node :view/expr/binary [
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :match-xv_x)
+              })
+            })
+            (make-node :view/expr/symbol { :str "+" })
+            (make-node :view/over {
+              :top
+              (make-node :clojure/kernel/int { :value 1 })
+              
+              :weight 1
+              
+              :bottom
+              (make-node :view/expr/binary [
+                (make-node :clojure/kernel/unquote {
+                  :body
+                  (make-node :clojure/kernel/var {
+                    :ref (ref-node :match-xv_v)
+                  })
+                })
+                (make-node :view/expr/symbol { :str "+" })
+                (make-node :view/expr/symbol { :str :circ })
+              ])
+            })
+          ])
+          (make-node :view/expr/symbol { :str :to })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-xv_then)
+            })
+          })
+        ])
+        (make-node :view/expr/flow [
+          (make-node :view/sequence []) ; empty, so there's just one quad of indent
+          (make-node :view/expr/keyword { :str "else" })
+          (make-node :view/expr/symbol { :str :to })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-xv_else)
+            })
+          })
+        ])
+      ])
+    })
+    
+    ; TODO:
+    ; :expand
+  })  
+  
+  ; match-xvxc
+  (make-node :grammar/mapNode {
+    :type
+    (make-node :grammar/type :cf/match-xvxc)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :match-xvxc_expr {
+        :name
+        (make-node :grammar/name :cf/match-xvxc/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xvxc_x {
+        :name
+        (make-node :grammar/name :cf/match-xvxc/x)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/bind })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xvxc_v {
+        :name
+        (make-node :grammar/name :cf/match-xvxc/v)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xvxc_y {
+        :name
+        (make-node :grammar/name :cf/match-xvxc/y)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/bind })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xvxc_c {
+        :name
+        (make-node :grammar/name :cf/match-xvxc/c)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xvxc_then {
+        :name
+        (make-node :grammar/name :cf/match-xvxc/then)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xvxc_else {
+        :name
+        (make-node :grammar/name :cf/match-xvxc/else)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/section [
+        (make-node :view/expr/flow [
+          (make-node :view/expr/keyword { :str "match" })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-xvxc_expr)
+            })
+          })
+        ])
+        (make-node :view/expr/flow [
+          (make-node :view/sequence []) ; empty, so there's just one quad of indent
+          ; (make-node :view/expr/symbol { :str "|" })
+          (make-node :view/expr/binary [
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :match-xvxc_x)
+              })
+            })
+            (make-node :view/expr/symbol { :str "+" })
+            (make-node :view/over {
+              :top
+              (make-node :clojure/kernel/int { :value 1 })
+              
+              :weight 1
+              
+              :bottom
+              (make-node :view/expr/binary [
+                (make-node :clojure/kernel/unquote {
+                  :body
+                  (make-node :clojure/kernel/var {
+                    :ref (ref-node :match-xvxc_v)
+                  })
+                })
+                (make-node :view/expr/symbol { :str "+" })
+                (make-node :view/over {
+                  :top
+                  (make-node :clojure/kernel/int { :value 1 })
+            
+                  :weight 1
+            
+                  :bottom
+                  (make-node :view/expr/binary [
+                    (make-node :clojure/kernel/unquote {
+                      :body
+                      (make-node :clojure/kernel/var {
+                        :ref (ref-node :match-xvxc_y)
+                      })
+                    })
+                    (make-node :view/expr/symbol { :str "+" })
+                    (make-node :view/over {
+                      :top
+                      (make-node :clojure/kernel/int { :value 1 })
+              
+                      :weight 1
+              
+                      :bottom
+                      (make-node :view/expr/binary [
+                        (make-node :clojure/kernel/unquote {
+                          :body
+                          (make-node :clojure/kernel/var {
+                            :ref (ref-node :match-xvxc_c)
+                          })
+                        })
+                      ])
+                    })
+                  ])
+                })
+              ])
+            })
+          ])
+          (make-node :view/expr/symbol { :str :to })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-xvxc_then)
+            })
+          })
+        ])
+        (make-node :view/expr/flow [
+          (make-node :view/sequence []) ; empty, so there's just one quad of indent
+          (make-node :view/expr/keyword { :str "else" })
+          (make-node :view/expr/symbol { :str :to })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-xvxc_else)
+            })
+          })
+        ])
+      ])
+    })
+    
+    ; TODO:
+    ; :expand
+  })  
+  
+  ; match-xxc
+  (make-node :grammar/mapNode {
+    :type
+    (make-node :grammar/type :cf/match-xxc)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :match-xxc_expr {
+        :name
+        (make-node :grammar/name :cf/match-xxc/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xxc_x {
+        :name
+        (make-node :grammar/name :cf/match-xxc/x)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/bind })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xxc_y {
+        :name
+        (make-node :grammar/name :cf/match-xxc/y)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/bind })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xxc_c {
+        :name
+        (make-node :grammar/name :cf/match-xxc/c)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xxc_then {
+        :name
+        (make-node :grammar/name :cf/match-xxc/then)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+      (make-node :grammar/attr :match-xxc_else {
+        :name
+        (make-node :grammar/name :cf/match-xxc/else)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :clojure/kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/section [
+        (make-node :view/expr/flow [
+          (make-node :view/expr/keyword { :str "match" })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-xxc_expr)
+            })
+          })
+        ])
+        (make-node :view/expr/flow [
+          (make-node :view/sequence []) ; empty, so there's just one quad of indent
+          ; (make-node :view/expr/symbol { :str "|" })
+          (make-node :view/expr/binary [
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :match-xxc_x)
+              })
+            })
+            (make-node :view/expr/symbol { :str "+" })
+            (make-node :view/over {
+              :top
+              (make-node :clojure/kernel/int { :value 1 })
+              
+              :weight 1
+              
+              :bottom
+              (make-node :view/expr/binary [
+                (make-node :clojure/kernel/unquote {
+                  :body
+                  (make-node :clojure/kernel/var {
+                    :ref (ref-node :match-xxc_y)
+                  })
+                })
+                (make-node :view/expr/symbol { :str "+" })
+                (make-node :view/over {
+                  :top
+                  (make-node :clojure/kernel/int { :value 1 })
+            
+                  :weight 1
+            
+                  :bottom
+                  (make-node :view/expr/binary [
+                    (make-node :clojure/kernel/unquote {
+                      :body
+                      (make-node :clojure/kernel/var {
+                        :ref (ref-node :match-xxc_c)
+                      })
+                    })
+                  ])
+                })
+              ])
+            })
+          ])
+          (make-node :view/expr/symbol { :str :to })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-xxc_then)
+            })
+          })
+        ])
+        (make-node :view/expr/flow [
+          (make-node :view/sequence []) ; empty, so there's just one quad of indent
+          (make-node :view/expr/keyword { :str "else" })
+          (make-node :view/expr/symbol { :str :to })
+          (make-node :clojure/kernel/unquote {
+            :body
+            (make-node :clojure/kernel/var {
+              :ref (ref-node :match-xxc_else)
+            })
+          })
+        ])
+      ])
+    })
+    
+    ; TODO:
+    ; :expand
+  })  
   
 ])

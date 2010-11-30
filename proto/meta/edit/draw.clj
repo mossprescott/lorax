@@ -24,6 +24,7 @@
       JCheckBoxMenuItem
       JSeparator
       JMenuBar
+      JOptionPane
       KeyStroke)
     (java.awt.event 
       ActionListener
@@ -413,10 +414,10 @@
   [sourceId root sourceIdsInViewOrder]
   (if-let [p (idToPath sourceId root)]
     (let [paths (sibling-paths root p)
-          _ (println "paths:" paths)  ; HACK
+          ; _ (println "paths:" paths)  ; HACK
           ids (for [p paths] (node-id (node-at-path root p)))
-          _ (println "ids (unsorted):" ids)  ; HACK
-          _ (println "siivo:" sourceIdsInViewOrder)  ; HACK
+          ; _ (println "ids (unsorted):" ids)  ; HACK
+          ; _ (println "siivo:" sourceIdsInViewOrder)  ; HACK
           ]
       (sortAs ids sourceIdsInViewOrder))))
   
@@ -566,6 +567,12 @@
         add (doto (JMenuItem. "Add") 
                 (.setEnabled editable)
                 (.setAccelerator (KeyStroke/getKeyStroke "meta alt A")))
+        insert (doto (JMenuItem. "Insert/Replace") 
+                (.setEnabled editable)
+                (.setAccelerator (KeyStroke/getKeyStroke "meta alt I")))
+        addChild (doto (JMenuItem. "Add Child") 
+                (.setEnabled editable)
+                (.setAccelerator (KeyStroke/getKeyStroke "meta alt C")))
         swapPrevious (doto (JMenuItem. "Swap with Previous Sibling")
                     (.setEnabled editable)
                     (.setAccelerator (KeyStroke/getKeyStroke "meta alt LEFT")))
@@ -586,6 +593,8 @@
                           (.add (JSeparator.))
                           (.add delete)
                           (.add add)
+                          (.add insert)
+                          (.add addChild)
                           (.add swapPrevious)
                           (.add swapNext)))
         
@@ -639,7 +648,13 @@
     (.addActionListener delete
       (proxy [ActionListener] []
         (actionPerformed [evt]
-          (swap! rootA delete-node (first @sref)))))
+          (let [n (make-node :view/expr/missing)
+                p (idToPath (first @sref) @rootA)
+                pp (parent-path p)
+                pn (node-at-path @rootA pp)]
+          (if (seq-node? pn)
+            (swap! rootA delete-node (first @sref))
+            (swap! rootA replace-node (first @sref) (make-node :view/expr/missing)))))))
 
     ; Add a new node after the selected node:
     (.addActionListener add
@@ -647,8 +662,8 @@
         (actionPerformed [evt]
           (let [n (make-node :view/expr/missing)
                 p (idToPath (first @sref) @rootA)
-                _ (println (path-to-str p))
-                _ (doseq [cp (sibling-paths @rootA p)] (println "cp:" (path-to-str cp)))
+                ; _ (println (path-to-str p))
+                ; _ (doseq [cp (sibling-paths @rootA p)] (println "cp:" (path-to-str cp)))
                 pp (parent-path p)
                 pn (node-at-path @rootA pp)
                 ^Collection s (sibling-paths @rootA p)
@@ -659,9 +674,30 @@
             (dosync
               (ref-set sref #{ (node-id n) })
               (ref-set snref n))))))
+              
+    (.addActionListener insert
+      (proxy [ActionListener] []
+        (actionPerformed [evt]
+          (let [ tstr (JOptionPane/showInputDialog panel "Enter node type:") ]
+            (if tstr
+              (let [n (make-node (keyword tstr) (first @sref) {})]
+                (swap! rootA replace-node (first @sref) n)
+                ))))))
     
-    ; TODO: action to add a child to selected node (in case there aren't any yet)
+    (.addActionListener addChild
+      (proxy [ActionListener] []
+        (actionPerformed [evt]
+          (let [pn @snref
+                n (make-node :view/expr/missing)]
+            (swap! rootA insert-node (node-id pn)
+                                    (count (node-children pn))
+                                    n)
+            (dosync
+              (ref-set sref #{ (node-id n) })
+              (ref-set snref n))))))
+            
 
+    
     (.addActionListener swapPrevious
       (proxy [ActionListener] []
         (actionPerformed [evt]

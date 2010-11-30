@@ -1146,7 +1146,7 @@
             :ref (ref-node :and_left)
           })
         })
-        (make-node :view/expr/keyword { :str "or" })
+        (make-node :view/expr/keyword { :str "and" })
         (make-node :clojure/kernel/unquote {
           :body
           (make-node :clojure/kernel/var {

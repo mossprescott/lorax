@@ -1,4 +1,4 @@
-; Program taking a seq of :core/program files on the command line and 
+; Program taking a seq of core/program files on the command line and 
 ; evaluating each expr, displaying the result as a session.
 
 (ns meta.util.showsession

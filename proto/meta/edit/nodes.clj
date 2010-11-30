@@ -159,7 +159,7 @@
 
 ; Global multiplier for the font size. 1.0 gets you something nice for 
 ; reading up close. 2.0 is probably better for across a room.
-(def font-multiplier 2.0)
+(def font-multiplier 1.5)
 
 (def TEXT_SIZE_BASE 14)
 (def FONT_SCALES {

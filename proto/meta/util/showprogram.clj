@@ -1,4 +1,4 @@
-; Program taking a seq of :core/program files on the command line and simply 
+; Program taking a seq of core/program files on the command line and simply 
 ; showing the contents.
 
 (ns meta.util.showprogram
