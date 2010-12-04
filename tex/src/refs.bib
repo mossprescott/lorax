@@ -51,6 +51,13 @@
   year = 1994
 }
 
+@techreport{simonyi,
+  author = "Charles Simonyi",
+  title = "The Death of Computer Languages, The Birth of Intentional Programming",
+  institution = "Microsoft Research",
+  year = 1995
+}
+
 @inproceedings{intentional,
  author = {Simonyi, Charles and Christerson, Magnus and Clifford, Shane},
  title = {Intentional software},
@@ -62,8 +69,14 @@
  doi = {http://doi.acm.org/10.1145/1167473.1167511},
  publisher = {ACM},
  address = {New York, NY, USA},
- }
+}
 
+@techreport{mps,
+  author = "Sergey Dmitriev",
+  title = "Language Oriented Programming: The Next Programming Paradigm",
+  institution = "JetBrains",
+  year = 2004
+}
 
 @article{gibbons,
 author = {Gibbons, Jeremy and Lester, David and Bird, Richard},
@@ -129,7 +142,7 @@ eprint = {http://journals.cambridge.org/article_S0956796806005880},
 @misc{clojure-and,
   title = "Clojure v1.2 API documentation",
   author = "Rich Hickey",
-  howpublished = "Available at http://clojure.github.com/clojure/clojure.core-api.html\#clojure.core/and"
+  howpublished = "Available at http://clojure.github.com/clojure/clojure.core-api.html\#clojure.core/and",
   year = 2010,
 }
 
@@ -172,10 +185,11 @@ http://diveintopython.org/power_of_introspection/and_or.html
 P. Bagwell. Ideal Hash Trees. Technical report, Computer Science Department, Ecole Polytechnique Federale de Lausanne, 2000. 681 
 
 @book{javascript,
-  title = "JavaScript, the definitive guide",
+  author = "David Flanagan",
+  title = "JavaScript: the definitive guide, Fifth Edition",
   publisher = "O'Reilly and Associates",
   address = "Sebastopol, CA",
-  year = 2002
+  year = 2006
 }
 
 @book{mozart,
@@ -191,17 +205,19 @@ P. Bagwell. Ideal Hash Trees. Technical report, Computer Science Department, Eco
   journal = "Multimedia, IEEE",
   volume = 10,
   issue = 3,
-  pages = 99--102,
+  pages = "99--102",
   year = 2003
 }
 
-@techreport{openoffice,
+@techreport{openoffice, 
+  key = "openoffice",
   title = "OpenOffice.org XML File Format 1.0 December 2002",
   institution = "Sun Microsystems"
 }
 Sun Microsystems. OpenOffice.org XML File Format 1.0 December 2002. http://xml.openoffice.org/xml_specification.pdf
 
 @techreport{mathml,
+  key = "w3c",
   title = "Mathematical Markup Language (MathML) version 2.0",
   institution = "W3C",
   year = 2003
@@ -240,6 +256,15 @@ http://www.cs.uu.nl/~andres/lhs2tex/.
 publisher = "Prentice Hall PTR",
 address = "Upper Saddle River, NJ, USA",
 
+@inbook{knuth,
+  author = "Donald E. Knuth",
+  chapter = 16,
+  title = {The {\TeX}book},
+  publisher = "Addison-Wesley",
+  address = "Reading, MA",
+  year = 1984
+}
+
 @inbook{tex-math,
   author = "Donald E. Knuth",
   chapter = "Appendix G",
@@ -273,6 +298,266 @@ address = "Upper Saddle River, NJ, USA",
  publisher = {IEEE Computer Society},
  address = {Washington, DC, USA},
  }
+
+@inproceedings{sikuli,
+ author = {Yeh, Tom and Chang, Tsung-Hsiang and Miller, Robert C.},
+ title = {Sikuli: using GUI screenshots for search and automation},
+ booktitle = {UIST '09: Proceedings of the 22nd annual ACM symposium on User interface software and technology},
+ year = {2009},
+ isbn = {978-1-60558-745-5},
+ pages = {183--192},
+ location = {Victoria, BC, Canada},
+ doi = {http://doi.acm.org/10.1145/1622176.1622213},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+
+@inproceedings{frost,
+ author = {Frost, Richard A. and Hafiz, Rahmatullah and Callaghan, Paul},
+ title = {Parser combinators for ambiguous left-recursive grammars},
+ booktitle = {PADL'08: Proceedings of the 10th international conference on Practical aspects of declarative languages},
+ year = {2008},
+ isbn = {3-540-77441-6, 978-3-540-77441-9},
+ pages = {167--181},
+ location = {San Francisco, CA, USA},
+ publisher = {Springer-Verlag},
+ address = {Berlin, Heidelberg},
+ }
+
+@inproceedings{spoofax,
+ author = {Kats, Lennart C.L. and Visser, Eelco},
+ title = {The spoofax language workbench: rules for declarative specification of languages and IDEs},
+ booktitle = {Proceedings of the ACM international conference on Object oriented programming systems languages and applications},
+ series = {OOPSLA '10},
+ year = {2010},
+ isbn = {978-1-4503-0203-6},
+ location = {Reno/Tahoe, Nevada, USA},
+ pages = {444--463},
+ numpages = {20},
+ url = {http://doi.acm.org/10.1145/1869459.1869497},
+ doi = {http://doi.acm.org/10.1145/1869459.1869497},
+ acmid = {1869497},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {IDE, domain-specific language, dsl, eclipse, language workbench, meta-tooling, sdf, sglr, spoofax, stratego},
+}
+
+@inproceedings{xtext,
+  author = "S. Efftinge and M. Voelter. oAW xText: A framework for textual DSLs",
+  booktitle = "Workshop on Modeling Symposium at Eclipse Summit",
+  year = 2006
+}
+
+@inproceedings{citrus,
+ author = {Ko, Andrew J. and Myers, Brad A.},
+ title = {Citrus: a language and toolkit for simplifying the creation of structured editors for code and data},
+ booktitle = {Proceedings of the 18th annual ACM symposium on User interface software and technology},
+ series = {UIST '05},
+ year = {2005},
+ isbn = {1-59593-271-2},
+ location = {Seattle, WA, USA},
+ pages = {3--12},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1095034.1095037},
+ doi = {http://doi.acm.org/10.1145/1095034.1095037},
+ acmid = {1095037},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {interface builder, structured editing, toolkit},
+}
+
+@inproceedings{barista,
+ author = {Ko, Andrew J. and Myers, Brad A.},
+ title = {Barista: An implementation framework for enabling new tools, interaction techniques and views in code editors},
+ booktitle = {Proceedings of the SIGCHI conference on Human Factors in computing systems},
+ series = {CHI '06},
+ year = {2006},
+ isbn = {1-59593-372-7},
+ location = {Montr\&\#233;al, Qu\&\#233;bec, Canada},
+ pages = {387--396},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1124772.1124831},
+ doi = {http://doi.acm.org/10.1145/1124772.1124831},
+ acmid = {1124831},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {end-user software engineering, programming environments, structured editors},
+}
+
+@inproceedings{lang,
+ author = {Lang, Bernard},
+ title = {On the usefulness of syntax directed editors},
+ booktitle = {An International Workshop on Advanced Programming Environments},
+ year = {1986},
+ isbn = {0-387-17189-4},
+ location = {Trondheim, Norway},
+ pages = {47--51},
+ numpages = {5},
+ url = {http://portal.acm.org/citation.cfm?id=28265.28270},
+ acmid = {28270},
+ publisher = {Springer-Verlag},
+ address = {London, UK},
+}
+
+
+@article{cps,
+ author = {Teitelbaum, Tim and Reps, Thomas},
+ title = {The Cornell program synthesizer: a syntax-directed programming environment},
+ journal = {Commun. ACM},
+ volume = {24},
+ issue = {9},
+ month = {September},
+ year = {1981},
+ issn = {0001-0782},
+ pages = {563--573},
+ numpages = {11},
+ url = {http://doi.acm.org/10.1145/358746.358755},
+ doi = {http://doi.acm.org/10.1145/358746.358755},
+ acmid = {358755},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {diagnostic interpreter, program development system, programming environment, source language debugger, syntax-directed editor, template},
+}
+
+
+@incollection {stratego,
+   author = {Visser, Eelco},
+   affiliation = {Institute of Information and Computing Sciences, Utrecht University, P.O. Box 80089 3508 TB, Utrecht The Netherlands},
+   title = {Program Transformation with Stratego/XT},
+   booktitle = {Domain-Specific Program Generation},
+   series = {Lecture Notes in Computer Science},
+   editor = {Lengauer, Christian and Batory, Don and Consel, Charles and Odersky, Martin},
+   publisher = {Springer Berlin / Heidelberg},
+   isbn = {},
+   pages = {315-349},
+   volume = {3016},
+   url = {http://dx.doi.org/10.1007/978-3-540-25935-0_13},
+   year = {2004}
+}
+
+
+@misc{fortress,
+  title = "The Fortress language specification",
+  author = "E. Allen and D. Chase and J. Hallett and V. Luchangco and J. W. Maessen and S. Ryu and G. Steele and S. Tobin-Hochstadt",
+  howpublished = "Available from http://research.sun.com/projects/plrg/"
+}
+
+
+@misc{fortress-parallel,
+  title="Fortress Programming Language Tutorial (PLDI)",
+  author = "Guy Steele and Jan-Willem Maessen",
+  howpublished = "Available from http://labs.oracle.com/projects/plrg/PLDITutorialSlides9Jun2006.pdf",
+  year = 2006
+}
+
+@article{unicode,
+  title = "The Unicode standard, version 4.0",
+  author = "Aliprand, Joan and Allen, Julie and Becker, Joe and Davis, Mark and Everson, Michael and Freytag, Asmus and Jenkins, John and Ksar, Mike and McGowan, Rick and Muller, Eric and Moore, Lisa and Suignard, Michel and Whisler, Ken",
+  journal = "Computing Reviews",
+  volume = 45,
+  number = 8,
+  pages = 480,
+  month = "August",
+  year = 2004 
+}
+
+@inproceedings{metaedit,
+ author = {Tolvanen, Juha-Pekka and Rossi, Matti},
+ title = {MetaEdit+: defining and using domain-specific modeling languages and code generators},
+ booktitle = {Companion of the 18th annual ACM SIGPLAN conference on Object-oriented programming, systems, languages, and applications},
+ series = {OOPSLA '03},
+ year = {2003},
+ isbn = {1-58113-751-6},
+ location = {Anaheim, CA, USA},
+ pages = {92--93},
+ numpages = {2},
+ url = {http://doi.acm.org/10.1145/949344.949365},
+ doi = {http://doi.acm.org/10.1145/949344.949365},
+ acmid = {949365},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {code generators, domain-specific modeling, metamodel},
+}
+
+@misc{lisp-hated,
+  author = "siddhadev",
+  title = "Fixing Lisp Syntax",
+  howpublished = "Available from http://stackoverflow.com/questions/643892/fixing-lisp-syntax",
+  year = 2009
+}
+
+
+@book{scheme,
+ author = {Dybvig, R. Kent},
+ title = {The SCHEME programming language},
+ year = {1987},
+ isbn = {0-13-791864-X},
+ publisher = {Prentice-Hall, Inc.},
+ address = {Upper Saddle River, NJ, USA},
+}
+
+
+@inproceedings{attribute-grammar,
+ author = {Demers, Alan and Reps, Thomas and Teitelbaum, Tim},
+ title = {Incremental evaluation for attribute grammars with application to syntax-directed editors},
+ booktitle = {Proceedings of the 8th ACM SIGPLAN-SIGACT symposium on Principles of programming languages},
+ series = {POPL '81},
+ year = {1981},
+ isbn = {0-89791-029-X},
+ location = {Williamsburg, Virginia},
+ pages = {105--116},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/567532.567544},
+ doi = {http://doi.acm.org/10.1145/567532.567544},
+ acmid = {567544},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+@misc{workbench,
+  author = "Martin Fowler",
+  title = "Language Workbenches: The Killer-App for Domain Specific Languages?",
+  howpublished = "Available from http://www.martinfowler.com/articles/languageWorkbench.html",
+  year = 2005
+}
+
+
+@article{alice,
+ author = {Cooper, Stephen and Dann, Wanda and Pausch, Randy},
+ title = {Alice: a 3-D tool for introductory programming concepts},
+ journal = {J. Comput. Small Coll.},
+ volume = {15},
+ issue = {5},
+ month = {April},
+ year = {2000},
+ issn = {1937-4771},
+ pages = {107--116},
+ numpages = {10},
+ url = {http://portal.acm.org/citation.cfm?id=364133.364161},
+ acmid = {364161},
+ publisher = {Consortium for Computing Sciences in Colleges},
+ address = {, USA},
+}
+
+
+@inproceedings{hygiene,
+ author = {Herman, David and Wand, Mitchell},
+ title = {A theory of hygienic macros},
+ booktitle = {Proceedings of the Theory and practice of software, 17th European conference on Programming languages and systems},
+ series = {ESOP'08/ETAPS'08},
+ year = {2008},
+ isbn = {3-540-78738-0, 978-3-540-78738-9},
+ location = {Budapest, Hungary},
+ pages = {48--62},
+ numpages = {15},
+ url = {http://portal.acm.org/citation.cfm?id=1792878.1792884},
+ acmid = {1792884},
+ publisher = {Springer-Verlag},
+ address = {Berlin, Heidelberg},
+}
+
+
 
 %
 % Examples...

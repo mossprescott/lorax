@@ -6,307 +6,303 @@
   /><g
   ><defs id="defs1"
     ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath1"
-      ><path d="M0 0 L466 0 L466 85 L0 85 L0 0 Z"
+      ><path d="M0 0 L496 0 L496 708 L0 708 L0 0 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath2"
-      ><path d="M-10 -10 L456 -10 L456 75 L-10 75 L-10 -10 Z"
+      ><path d="M-10 -10 L486 -10 L486 698 L-10 698 L-10 -10 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath3"
-      ><path d="M-10 -11 L456 -11 L456 74 L-10 74 L-10 -11 Z"
+      ><path d="M-10 -15 L486 -15 L486 693 L-10 693 L-10 -15 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath4"
-      ><path d="M-95 -10 L371 -10 L371 75 L-95 75 L-95 -10 Z"
+      ><path d="M-10 -16 L486 -16 L486 692 L-10 692 L-10 -16 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath5"
-      ><path d="M-102 -11 L364 -11 L364 74 L-102 74 L-102 -11 Z"
+      ><path d="M-96 -15 L400 -15 L400 693 L-96 693 L-96 -15 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath6"
-      ><path d="M-131 -11 L335 -11 L335 74 L-131 74 L-131 -11 Z"
+      ><path d="M-105 -16 L391 -16 L391 692 L-105 692 L-105 -16 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath7"
-      ><path d="M-163 -12 L303 -12 L303 73 L-163 73 L-163 -12 Z"
+      ><path d="M-132 -16 L364 -16 L364 692 L-132 692 L-132 -16 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath8"
-      ><path d="M-172 -11 L294 -11 L294 74 L-172 74 L-172 -11 Z"
+      ><path d="M-166 -17 L330 -17 L330 691 L-166 691 L-166 -17 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath9"
-      ><path d="M-210 -11 L256 -11 L256 74 L-210 74 L-210 -11 Z"
+      ><path d="M-178 -16 L318 -16 L318 692 L-178 692 L-178 -16 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath10"
-      ><path d="M-10 -33 L456 -33 L456 52 L-10 52 L-10 -33 Z"
+      ><path d="M-214 -16 L282 -16 L282 692 L-214 692 L-214 -16 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath11"
-      ><path d="M-28 -33 L438 -33 L438 52 L-28 52 L-28 -33 Z"
+      ><path d="M-10 -38 L486 -38 L486 670 L-10 670 L-10 -38 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath12"
-      ><path d="M-32 -37 L434 -37 L434 48 L-32 48 L-32 -37 Z"
+      ><path d="M-24 -38 L472 -38 L472 670 L-24 670 L-24 -38 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath13"
-      ><path d="M-32 -40 L434 -40 L434 45 L-32 45 L-32 -40 Z"
+      ><path d="M-28 -42 L468 -42 L468 666 L-28 666 L-28 -42 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath14"
-      ><path d="M-34 -42 L432 -42 L432 43 L-34 43 L-34 -42 Z"
+      ><path d="M-28 -45 L468 -45 L468 663 L-28 663 L-28 -45 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath15"
-      ><path d="M-34 -43 L432 -43 L432 42 L-34 42 L-34 -43 Z"
+      ><path d="M-30 -47 L466 -47 L466 661 L-30 661 L-30 -47 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath16"
-      ><path d="M-65 -42 L401 -42 L401 43 L-65 43 L-65 -42 Z"
+      ><path d="M-30 -48 L466 -48 L466 660 L-30 660 L-30 -48 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath17"
-      ><path d="M-65 -45 L401 -45 L401 40 L-65 40 L-65 -45 Z"
+      ><path d="M-62 -47 L434 -47 L434 661 L-62 661 L-62 -47 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath18"
-      ><path d="M-112 -43 L354 -43 L354 42 L-112 42 L-112 -43 Z"
+      ><path d="M-62 -50 L434 -50 L434 658 L-62 658 L-62 -50 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath19"
-      ><path d="M-167 -37 L299 -37 L299 48 L-167 48 L-167 -37 Z"
+      ><path d="M-82 -47 L414 -47 L414 661 L-82 661 L-82 -47 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath20"
-      ><path d="M-191 -37 L275 -37 L275 48 L-191 48 L-191 -37 Z"
+      ><path d="M-99 -48 L397 -48 L397 660 L-99 660 L-99 -48 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath21"
-      ><path d="M-195 -41 L271 -41 L271 44 L-195 44 L-195 -41 Z"
+      ><path d="M-138 -42 L358 -42 L358 666 L-138 666 L-138 -42 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath22"
-      ><path d="M-242 -42 L224 -42 L224 43 L-242 43 L-242 -42 Z"
+      ><path d="M-154 -42 L342 -42 L342 666 L-154 666 L-154 -42 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath23"
-      ><path d="M-292 -41 L174 -41 L174 44 L-292 44 L-292 -41 Z"
+      ><path d="M-184 -42 L312 -42 L312 666 L-184 666 L-184 -42 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath24"
-      ><path d="M-299 -42 L167 -42 L167 43 L-299 43 L-299 -42 Z"
+      ><path d="M-188 -46 L308 -46 L308 662 L-188 662 L-188 -46 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath25"
-      ><path d="M-313 -46 L153 -46 L153 39 L-313 39 L-313 -46 Z"
+      ><path d="M-244 -47 L252 -47 L252 661 L-244 661 L-244 -47 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath26"
-      ><path d="M-405 -42 L61 -42 L61 43 L-405 43 L-405 -42 Z"
+      ><path d="M-300 -46 L196 -46 L196 662 L-300 662 L-300 -46 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath27"
-      ><path d="M-47 -11 L419 -11 L419 74 L-47 74 L-47 -11 Z"
+      ><path d="M-309 -47 L187 -47 L187 661 L-309 661 L-309 -47 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath28"
-      ><path d="M-66 -11 L400 -11 L400 74 L-66 74 L-66 -11 Z"
+      ><path d="M-421 -47 L75 -47 L75 661 L-421 661 L-421 -47 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath29"
-      ><path d="M-102 -12 L364 -12 L364 73 L-102 73 L-102 -12 Z"
+      ><path d="M-50 -16 L446 -16 L446 692 L-50 692 L-50 -16 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath30"
-      ><path d="M-124 -12 L342 -12 L342 73 L-124 73 L-124 -12 Z"
+      ><path d="M-72 -16 L424 -16 L424 692 L-72 692 L-72 -16 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath31"
-      ><path d="M-172 -12 L294 -12 L294 73 L-172 73 L-172 -12 Z"
+      ><path d="M-105 -17 L391 -17 L391 691 L-105 691 L-105 -17 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath32"
-      ><path d="M-203 -12 L263 -12 L263 73 L-203 73 L-203 -12 Z"
+      ><path d="M-126 -17 L370 -17 L370 691 L-126 691 L-126 -17 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath33"
-      ><path d="M-38 -47 L428 -47 L428 38 L-38 38 L-38 -47 Z"
+      ><path d="M-178 -17 L318 -17 L318 691 L-178 691 L-178 -17 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath34"
-      ><path d="M-67 -47 L399 -47 L399 38 L-67 38 L-67 -47 Z"
+      ><path d="M-208 -17 L288 -17 L288 691 L-208 691 L-208 -17 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath35"
-      ><path d="M-96 -42 L370 -42 L370 43 L-96 43 L-96 -42 Z"
+      ><path d="M-34 -52 L462 -52 L462 656 L-34 656 L-34 -52 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath36"
-      ><path d="M-116 -47 L350 -47 L350 38 L-116 38 L-116 -47 Z"
+      ><path d="M-64 -52 L432 -52 L432 656 L-64 656 L-64 -52 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath37"
-      ><path d="M-151 -37 L315 -37 L315 48 L-151 48 L-151 -37 Z"
+      ><path d="M-103 -52 L393 -52 L393 656 L-103 656 L-103 -52 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath38"
-      ><path d="M-172 -46 L294 -46 L294 39 L-172 39 L-172 -46 Z"
+      ><path d="M-162 -51 L334 -51 L334 657 L-162 657 L-162 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath39"
-      ><path d="M-195 -46 L271 -46 L271 39 L-195 39 L-195 -46 Z"
+      ><path d="M-188 -51 L308 -51 L308 657 L-188 657 L-188 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath40"
-      ><path d="M-217 -46 L249 -46 L249 39 L-217 39 L-217 -46 Z"
+      ><path d="M-213 -51 L283 -51 L283 657 L-213 657 L-213 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath41"
-      ><path d="M-226 -46 L240 -46 L240 39 L-226 39 L-226 -46 Z"
+      ><path d="M-225 -51 L271 -51 L271 657 L-225 657 L-225 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath42"
-      ><path d="M-246 -46 L220 -46 L220 39 L-246 39 L-246 -46 Z"
+      ><path d="M-248 -51 L248 -51 L248 657 L-248 657 L-248 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath43"
-      ><path d="M-274 -46 L192 -46 L192 39 L-274 39 L-274 -46 Z"
+      ><path d="M-279 -51 L217 -51 L217 657 L-279 657 L-279 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath44"
-      ><path d="M-299 -46 L167 -46 L167 39 L-299 39 L-299 -46 Z"
+      ><path d="M-309 -51 L187 -51 L187 657 L-309 657 L-309 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath45"
-      ><path d="M-322 -46 L144 -46 L144 39 L-322 39 L-322 -46 Z"
+      ><path d="M-326 -51 L170 -51 L170 657 L-326 657 L-326 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath46"
-      ><path d="M-331 -46 L135 -46 L135 39 L-331 39 L-331 -46 Z"
+      ><path d="M-338 -51 L158 -51 L158 657 L-338 657 L-338 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath47"
-      ><path d="M-367 -46 L99 -46 L99 39 L-367 39 L-367 -46 Z"
+      ><path d="M-377 -51 L119 -51 L119 657 L-377 657 L-377 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath48"
-      ><path d="M-376 -46 L90 -46 L90 39 L-376 39 L-376 -46 Z"
+      ><path d="M-389 -51 L107 -51 L107 657 L-389 657 L-389 -51 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath49"
-      ><path d="M-409 -46 L57 -46 L57 39 L-409 39 L-409 -46 Z"
+      ><path d="M-425 -51 L71 -51 L71 657 L-425 657 L-425 -51 Z"
       /></clipPath
     ></defs
-    ><g style="fill:white; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:white;"
-    ><rect x="0" y="0" width="466" style="clip-path:url(#clipPath1); stroke:none;" height="85"
+    ><g style="fill:white; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:white;" transform="translate(-8,-8)"
+    ><rect x="0" y="0" width="496" style="clip-path:url(#clipPath1); stroke:none;" height="708"
     /></g
-    ><g transform="translate(28,33)" style="fill:rgb(230,230,255); text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:rgb(230,230,255);"
-    ><rect x="0.5" y="0.5" width="139" style="clip-path:url(#clipPath11); stroke:none;" height="39"
-      /><rect x="0.5" y="0.5" width="139" style="clip-path:url(#clipPath11); fill:none; stroke:rgb(128,128,204);" height="39"
+    ><g transform="translate(16,30)" style="fill:rgb(230,230,255); text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:rgb(230,230,255);"
+    ><rect x="0.5" y="0.5" width="130" style="clip-path:url(#clipPath12); stroke:none;" height="39"
+      /><rect x="0.5" y="0.5" width="130" style="clip-path:url(#clipPath12); fill:none; stroke:rgb(128,128,204);" height="39"
     /></g
-    ><g transform="translate(32,40)" style="fill:rgb(179,179,179); text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:rgb(179,179,179);"
-    ><rect x="0.5" y="0.5" width="118" style="fill:none; clip-path:url(#clipPath13);" height="28"
+    ><g transform="translate(20,37)" style="fill:rgb(179,179,179); text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:rgb(179,179,179);"
+    ><rect x="0.5" y="0.5" width="109" style="fill:none; clip-path:url(#clipPath14);" height="28"
     /></g
-    ><g transform="translate(34,43)" style="fill:white; text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:white;"
-    ><rect x="0.5" y="0.5" width="27" style="clip-path:url(#clipPath15); stroke:none;" height="23"
-      /><rect x="0.5" y="0.5" width="27" style="clip-path:url(#clipPath15); fill:none; stroke:rgb(128,128,204);" height="23"
+    ><g transform="translate(22,40)" style="fill:white; text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:white;"
+    ><rect x="0.5" y="0.5" width="27" style="clip-path:url(#clipPath16); stroke:none;" height="23"
+      /><rect x="0.5" y="0.5" width="27" style="clip-path:url(#clipPath16); fill:none; stroke:rgb(128,128,204);" height="23"
     /></g
-    ><g transform="translate(65,45)" style="fill:rgb(179,179,179); text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:rgb(179,179,179);"
-    ><rect x="0.5" y="0.5" width="30" style="fill:none; clip-path:url(#clipPath17);" height="19"
+    ><g transform="translate(54,42)" style="fill:rgb(179,179,179); text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:rgb(179,179,179);"
+    ><rect x="0.5" y="0.5" width="19" style="fill:none; clip-path:url(#clipPath18);" height="19"
     /></g
-    ><g transform="translate(112,43)" style="fill:white; text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:white;"
-    ><rect x="0.5" y="0.5" width="36" style="clip-path:url(#clipPath18); stroke:none;" height="23"
-      /><rect x="0.5" y="0.5" width="36" style="clip-path:url(#clipPath18); fill:none; stroke:rgb(128,128,204);" height="23"
+    ><g transform="translate(91,40)" style="fill:white; text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:white;"
+    ><rect x="0.5" y="0.5" width="36" style="clip-path:url(#clipPath20); stroke:none;" height="23"
+      /><rect x="0.5" y="0.5" width="36" style="clip-path:url(#clipPath20); fill:none; stroke:rgb(128,128,204);" height="23"
     /></g
-    ><g transform="translate(191,37)" style="fill:rgb(230,230,255); text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:rgb(230,230,255);"
-    ><rect x="0.5" y="0.5" width="261" style="clip-path:url(#clipPath20); stroke:none;" height="34"
-      /><rect x="0.5" y="0.5" width="261" style="clip-path:url(#clipPath20); fill:none; stroke:rgb(128,128,204);" height="34"
+    ><g transform="translate(176,34)" style="fill:rgb(230,230,255); text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:rgb(230,230,255);"
+    ><rect x="0.5" y="0.5" width="284" style="clip-path:url(#clipPath23); stroke:none;" height="34"
+      /><rect x="0.5" y="0.5" width="284" style="clip-path:url(#clipPath23); fill:none; stroke:rgb(128,128,204);" height="34"
     /></g
-    ><g transform="translate(242,42)" style="fill:white; text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:white;"
-    ><rect x="0.5" y="0.5" width="27" style="clip-path:url(#clipPath22); stroke:none;" height="23"
-      /><rect x="0.5" y="0.5" width="27" style="clip-path:url(#clipPath22); fill:none; stroke:rgb(128,128,204);" height="23"
+    ><g transform="translate(236,39)" style="fill:white; text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:white;"
+    ><rect x="0.5" y="0.5" width="27" style="clip-path:url(#clipPath25); stroke:none;" height="23"
+      /><rect x="0.5" y="0.5" width="27" style="clip-path:url(#clipPath25); fill:none; stroke:rgb(128,128,204);" height="23"
     /></g
-    ><g transform="translate(405,42)" style="fill:white; text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:white;"
-    ><rect x="0.5" y="0.5" width="36" style="clip-path:url(#clipPath26); stroke:none;" height="23"
-      /><rect x="0.5" y="0.5" width="36" style="clip-path:url(#clipPath26); fill:none; stroke:rgb(128,128,204);" height="23"
+    ><g transform="translate(413,39)" style="fill:white; text-rendering:optimizeLegibility; font-size:13; font-family:&apos;Lucida Grande&apos;; stroke:white;"
+    ><rect x="0.5" y="0.5" width="36" style="clip-path:url(#clipPath28); stroke:none;" height="23"
+      /><rect x="0.5" y="0.5" width="36" style="clip-path:url(#clipPath28); fill:none; stroke:rgb(128,128,204);" height="23"
     /></g
-    ><g style="font-style:italic; text-rendering:optimizeLegibility; font-size:14; font-family:&apos;Courier New&apos;;" transform="translate(10,11)"
-    ><text x="0" xml:space="preserve" y="11.6553" style="clip-path:url(#clipPath3); stroke:none;"
+    ><g style="font-style:italic; text-rendering:optimizeLegibility; font-size:14; font-family:&apos;Courier New&apos;;" transform="translate(2,8)"
+    ><text x="0" xml:space="preserve" y="11.6553" style="clip-path:url(#clipPath4); stroke:none;"
       >expr</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmsy10&apos;;" transform="translate(47,11)"
-    ><text x="0" xml:space="preserve" y="10.99" style="clip-path:url(#clipPath27); stroke:none;"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmsy10&apos;;" transform="translate(42,8)"
+    ><text x="0" xml:space="preserve" y="10.99" style="clip-path:url(#clipPath29); stroke:none;"
       >ï</text
     ></g
-    ><g style="font-style:italic; text-rendering:optimizeLegibility; font-size:14; font-family:&apos;Courier New&apos;;" transform="translate(66,11)"
-    ><text x="0" xml:space="preserve" y="11.6553" style="clip-path:url(#clipPath28); stroke:none;"
-      >and</text
+    ><g style="font-style:italic; text-rendering:optimizeLegibility; font-size:14; font-family:&apos;Courier New&apos;;" transform="translate(64,8)"
+    ><text x="0" xml:space="preserve" y="11.6553" style="clip-path:url(#clipPath30); stroke:none;"
+      >or</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmex10&apos;;" transform="translate(95,10)"
-    ><text x="0" xml:space="preserve" y="0.0075" style="clip-path:url(#clipPath4); stroke:none;"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmex10&apos;;" transform="translate(88,7)"
+    ><text x="0" xml:space="preserve" y="1" style="clip-path:url(#clipPath5); stroke:none;"
       >È</text
-      ><text x="148" xml:space="preserve" y="0.0075" style="clip-path:url(#clipPath4); stroke:none;"
+      ><text x="153" xml:space="preserve" y="1" style="clip-path:url(#clipPath5); stroke:none;"
       >É</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(102,12)"
-    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath29); stroke:none;"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(97,9)"
+    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath31); stroke:none;"
       >left</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(124,12)"
-    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath30); stroke:none;"
-      >:</text
-    ></g
-    ><g style="font-style:italic; text-rendering:optimizeLegibility; font-size:14; font-family:&apos;Courier New&apos;;" transform="translate(131,11)"
-    ><text x="0" xml:space="preserve" y="11.6553" style="clip-path:url(#clipPath6); stroke:none;"
-      >expr</text
-    ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(163,12)"
-    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath7); stroke:none;"
-      >,</text
-    ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(172,12)"
-    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath31); stroke:none;"
-      >right</text
-    ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(203,12)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(118,9)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath32); stroke:none;"
       >:</text
     ></g
-    ><g style="font-style:italic; text-rendering:optimizeLegibility; font-size:14; font-family:&apos;Courier New&apos;;" transform="translate(210,11)"
-    ><text x="0" xml:space="preserve" y="11.6553" style="clip-path:url(#clipPath9); stroke:none;"
+    ><g style="font-style:italic; text-rendering:optimizeLegibility; font-size:14; font-family:&apos;Courier New&apos;;" transform="translate(124,8)"
+    ><text x="0" xml:space="preserve" y="11.6553" style="clip-path:url(#clipPath7); stroke:none;"
       >expr</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(38,47)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(158,9)"
+    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath8); stroke:none;"
+      >,</text
+    ></g
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(170,9)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath33); stroke:none;"
-      >left</text
-    ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(67,47)"
-    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath34); stroke:none;"
-      >and</text
-    ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:9; font-family:&apos;Lucida Grande&apos;;" transform="translate(96,42)"
-    ><text x="0" xml:space="preserve" y="8.7012" style="clip-path:url(#clipPath35); stroke:none;"
-      >kw</text
-    ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(116,47)"
-    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath36); stroke:none;"
       >right</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:9; font-family:&apos;Lucida Grande&apos;;" transform="translate(151,37)"
-    ><text x="0" xml:space="preserve" y="8.7012" style="clip-path:url(#clipPath37); stroke:none;"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(200,9)"
+    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath34); stroke:none;"
+      >:</text
+    ></g
+    ><g style="font-style:italic; text-rendering:optimizeLegibility; font-size:14; font-family:&apos;Courier New&apos;;" transform="translate(206,8)"
+    ><text x="0" xml:space="preserve" y="11.6553" style="clip-path:url(#clipPath10); stroke:none;"
+      >expr</text
+    ></g
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(26,44)"
+    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath35); stroke:none;"
+      >left</text
+    ></g
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(56,44)"
+    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath36); stroke:none;"
+      >or</text
+    ></g
+    ><g style="text-rendering:optimizeLegibility; font-size:9; font-family:&apos;Lucida Grande&apos;;" transform="translate(74,39)"
+    ><text x="0" xml:space="preserve" y="8.7012" style="clip-path:url(#clipPath19); stroke:none;"
+      >kw</text
+    ></g
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(95,44)"
+    ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath37); stroke:none;"
+      >right</text
+    ></g
+    ><g style="text-rendering:optimizeLegibility; font-size:9; font-family:&apos;Lucida Grande&apos;;" transform="translate(130,34)"
+    ><text x="0" xml:space="preserve" y="8.7012" style="clip-path:url(#clipPath21); stroke:none;"
       >rel</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmsy10&apos;;" transform="translate(172,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmsy10&apos;;" transform="translate(154,43)"
     ><text x="0" xml:space="preserve" y="10.99" style="clip-path:url(#clipPath38); stroke:none;"
       >!</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(195,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(180,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath39); stroke:none;"
       >let</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(217,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(205,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath40); stroke:none;"
       >l</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmr10&apos;;" transform="translate(226,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmr10&apos;;" transform="translate(217,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath41); stroke:none;"
       >=</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(246,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(240,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath42); stroke:none;"
       >left</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(274,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(271,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath43); stroke:none;"
       >in</text
     ></g
-    ><g transform="translate(292,41)" style="fill:rgb(128,128,255); text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmex10&apos;; stroke:rgb(128,128,255);"
-    ><text x="0" xml:space="preserve" y="0.0078" style="clip-path:url(#clipPath23); stroke:none;"
+    ><g transform="translate(292,38)" style="fill:rgb(128,128,255); text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmex10&apos;; stroke:rgb(128,128,255);"
+    ><text x="0" xml:space="preserve" y="1" style="clip-path:url(#clipPath26); stroke:none;"
       >°</text
-      ><text x="150" xml:space="preserve" y="0.0078" style="clip-path:url(#clipPath23); stroke:none;"
+      ><text x="158" xml:space="preserve" y="1" style="clip-path:url(#clipPath26); stroke:none;"
       >Ñ</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(299,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(301,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath44); stroke:none;"
       >if</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmsy10&apos;;" transform="translate(313,46)"
-    ><text x="0" xml:space="preserve" y="10.99" style="clip-path:url(#clipPath25); stroke:none;"
-      >:</text
-    ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(322,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(318,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath45); stroke:none;"
       >l</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(331,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(330,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath46); stroke:none;"
       >then</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(367,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(369,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath47); stroke:none;"
       >l</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(376,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmbx10&apos;;" transform="translate(381,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath48); stroke:none;"
       >else</text
     ></g
-    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(409,46)"
+    ><g style="text-rendering:optimizeLegibility; font-size:14; font-family:&apos;jsMath-cmti10&apos;;" transform="translate(417,43)"
     ><text x="0" xml:space="preserve" y="10.514" style="clip-path:url(#clipPath49); stroke:none;"
       >right</text
     ></g
