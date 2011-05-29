@@ -1,0 +1,69 @@
+\section{Transformations}
+
+Although \Meta\ supports arbitrary transformation/reduction of programs for any use, there are two kinds of transformations which are essential to the basic functioning of the system.
+
+\subsection{Execution}
+
+As a self-hosting system, \Meta\ needs a ``native'' language in which its own transformations can be implemented. This language is constructed in the style of Scheme, with a only very small \emph{kernel} language directly implemented. A larger, more expressive \emph{core} language is implemented via reduction to the kernel language.
+
+\begin{figure}[th]
+	\begin{tabular}{ll}
+	construct & concrete syntax
+	\\
+	\hline
+	binding & $\kw{let}~x = e_1~\kw{in}~e_2$
+	\\
+	variable reference & $x$
+	\\
+	lambda abstraction & $\kw{fn}~x \rightarrow e$
+	\\
+	application (call-by-value) & $e_1(e_2)$
+	\\
+	conditional & $\kw{if}~e_1~\kw{then}~e_2~\kw{else}~e_3$
+	\\
+	special values & \kw{nil}, \kw{true}, \kw{false}
+	\\
+	literals (integers, strings, names) & 1, \textsf{abc}, \textit{foo}
+	\\
+	external reference & \texttt{cons}
+	\\
+	quotation & \todo{?}
+	\\
+	un-quotation & \todo{?}
+	\\
+	pattern-matching & $\kw{match}~e_1~\kw{with}~p \rightarrow e_2~\kw{else}~e_3$
+	\end{tabular}
+
+	\caption{A kernel meta-language}
+	\label{fig-kernel}
+\end{figure}
+
+The kernel language is a (purely) functional, call-by-value, meta-language. It consists of the [...] node types seen in Figure~\ref{fig-kernel}. These forms are easily implemented on any platform providing basic services such as garbage-collection and run-time compilation, but map especially well to the language Clojure\footnote{Clojure is a recent LISP which runs on the Java Virtual Machine.}, on which the prototype system was based.
+
+The first [...] nodes are familiar. \kw{extern} allows a kernel program to refer to a value which is defined by the platform (e.g. the function which implements the primitive \cl{+} operation for integers). \kw{quote} and \kw{unquote} are handled by the meta-compiler [...]
+
+
+\subsection{Presentation}
+
+Most program nodes are defined by the programmer and therefore \Meta\ needs a general mechanism to transform these nodes into a representation that can be presented on screen and with which the user can interact. The essential idea derives from the observation that mathematical notation has a hierarchical structure in 2D space. That is, the spatial arrangement of elements in a formula mirrors the formula's own nested structure. In \Meta, a source program is reduced to something that can be rendered on screen in two steps. 
+
+First, the source syntax is reduced to a common \emph{presentation language}. The presentation language contains a node type for each kind of syntactic element in familiar languages and the most commonly-used mathematical notation. See Figure~\ref{fig-expr}. Because the nodes of the presentation language are quite abstract, it is simple to define reductions from source syntax to them. The nodes of the presentation language, like source language nodes, are context-independent. Therefore, the reduction from a source language node to a presentation language node can usually be defined with a simple quoted expression which resembles a graphical template when rendered. This simplicity is crucial to the usability of the system, because this reduction must be supplied anew for \emph{every} new language element that is introduced.
+
+\subsubsection{Nice stuff}
+Handling of variable names. Disambiguation.
+
+Spaces and parens.
+
+\subsubsection{Presentation (high-level) -> View (low-level)}
+In a second step, presentation language nodes are reduced to a more concrete {view language}, which identifies specific fonts, sizes, and colors for each program fragment, as well as specific spatial of nodes. This reduction is significantly more involved than the reduction to the presentation language, because it must account for the context of each node. For example, an integer literal is drawn in a different size if it appears at the root of an expression, compared to when it appears inside a fraction, or as an exponent. This context-awareness also allows nested expressions to be rendered in a particularly helpful way, with a distinct color representing each level of nesting.
+
+The reduction implements a subset of the layout algorithms of \TeX. It consist of about 4 attributes defined for each presentation language node, and a \kw{reduce} function which inspect those attributes and constructs the simplified node. 
+
+\todo{example definitions:}
+
+$\mathit{size}[n: \cl{int}] = \kw{font\_sizes}[\mathit{level}[n]]$, \textit{font}: \kw{serif}, \dots
+
+$\mathit{level}[n: \cl{quote}] = \mathit{level}[\kw{parent}] + 1$
+
+The complexity of this reduction is no impediment to the usability of the system, because it needs to be implemented \emph{only once}. Because the presentation language is flexible enough to represent all commonly-used syntactic forms, it should rarely be necessary to extend it. Any number of new syntactic structures can be added at the level of the presentation language, by combining existing symbols in new arrangements. \todo{figure with a couple of illustrative examples?}
+
