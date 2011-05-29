@@ -1153,6 +1153,13 @@
 		\th@Titlepage
 		\typeout{Making Approval Page}
 		\th@Approvalpage
+		
+		  % HACK
+		\clearpage
+		\begin{center}
+		Copyright 2010, Moss Prescott
+		\end{center}
+		
 		\typeout{Making Abstract Page}
 		\th@Abstractpage
 		\typeout{Making Dedication Page}

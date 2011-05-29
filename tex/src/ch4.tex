@@ -3,14 +3,16 @@
 
 The \Meta\ prototype implements nodes, reductions, and grammars as described in the previous chapters, and a compiler for the kernel language. I built a core language via syntax extension of the kernel language. The \Meta\ editor is capable of editing and executing both grammars and core language programs.
 
+The prototype demonstrates the feasibility of implementation all of the previously-discussed concepts, and provided a test bed for experiments with defining languages and syntax, described in the next chapter.
+
+
 \section{The Host Platform}
 The prototype system is implemented in Clojure \cite{clojure}, a language in the Lisp family which runs on the Java Virtual Machine \cite{jvm}. Clojure also fills the role of the host kernel language. Some characteristics of Clojure that make it a good choice include:
 \begin{enumerate}
 \item Similar notion of a kernel language. The prototype simply adopts (a subset of) the special forms of Clojure as its kernel language.
-\item Functional orientation. Clojure is a non-pure functional language; it allows side-effects but (in contrast to most Lisps) all of its bindings and data structures are immutable. %Destructive assignment is supported only for special \emp{reference} objects which enforce certain semantics (and which do not play any real role in this system). This approach fits quite well with the idea of transformation of immutable trees, and in fact inspired many ideas such as the approach to tree reduction.
+\item Functional orientation. Clojure is a non-pure functional language; it allows side-effects but (in contrast to most Lisps) all of its bindings and data structures are immutable.
 \item Compilation service available at runtime. The Clojure compiler is part of the runtime stack, so once a program is reduced to the kernel language, it can be evaluated (compiled) and executed immediately.
 \item Access to the Java platform. The prototype takes advantage of Java's GUI toolkit for rendering and editing.
-%\item Compiles to Java bytecode, and allows direct access to the platform's objects when needed. For example, nodes are represented as instances of a class at the JVM level, which gives excellent performance with no representational overhead. It's some kind of triumph of compiler technology that a program in this system can achieve performance on par with raw C code. \todo{need to prove that?}
 \end{enumerate}
 
 Nodes are represented as a Lisp-style abstract data type comprising a series of functions \clojure{make-node}, \clojure{node?}, \clojure{node-type}, etc., which allow Clojure programs to construct and manipulate nodes independent of the concrete representation. The prototype uses only these functions to work with nodes.
@@ -22,7 +24,7 @@ The \clojure{make-node} function provides a convenient serialized form for nodes
 
 \section{The Host Language}
 \label{host}
-The host language is composed of a kernel based on the primitive constructs and values of Clojure together with a core language built via syntax extension on top of the kernel language.
+The host language is composed of a kernel based on the primitive constructs and values of Clojure together with a core language built via syntax extension on top of the kernel language. \Meta\ core language programs are reduced to the kernel language (via reductions defined in a \keyword{grammar} program), to Clojure's s-expressions (via the \Meta\ meta-compiler), to Java bytecode (via the Clojure compiler), and finally to a native executable (via the JVM's compiler/optimizer). Therefore a program written using newly-introduced syntax runs without any fixed overhead. This allows the editor to perform reductions during editing with good responsiveness, and allows for non-trivial programs to be executed (see the next chapter). At the same time, taking advantage of the Clojure compiler and platform allowed me to build a working system in a short time and with only a modest amount of code. This efficiency allowed me to bring two previous approaches to a mostly-working stage before I arrived at the node representation, reduction scheme, and grammar language described in this thesis.
 
 \subsection{The Kernel Language}
 The kernel language, shown in Figure \ref{fig-kernel}, consists of six kinds of primitive values, six node types corresponding to Clojure's special forms, two nodes for quotation, and a node for making external references to the platform. Virtually every node is an instance of the abstract \keyword{expr} type, yielding some kind of value as a function of its arguments; there are no statements and no mutating assignments.
@@ -85,9 +87,9 @@ A \keyword{bind} node is reduced to a symbol, and a \keyword{var} node to the sy
 
 When the meta-compiler encounters a \keyword{quote} node, it enters a separate mode where instead of translating kernel language nodes to s-expressions, it instead translates nodes (potentially in any language) to s-expressions that construct a new copy of the quoted nodes. When an \keyword{unquote} node is encountered, the meta-compiler reduces the contents in the normal way, and then inserts the resulting value into the expression building the quoted node. Quotations may be nested more than one level deep, so the reduction keeps track of the current level and only resumes ordinary translation when the level reaches zero.
 
-When quoted nodes are compiled, they are relabeled (that is, each node is assigned a fresh, globally-unique label) and each non-free reference is updated to point to the new node. This is important because it means that no code outside of the newly-generated fragment can possibly contain a reference to anything defined in it. For example, reductions for syntax extensions commonly bind values to names (in order to control evaluation order, for example), and each name is defined by some \keyword{bind} node. So in a reduced program, each instance of the reduced fragment will contain a binding which originated in the same node, but each binding is completely distinct and independent in the reduced program due to the relabeling that is performed when the reduction is executed. Because all names are unique at all times, the problem of ``hygienic macros''\cite{hygiene} does not arise.
+When quoted nodes are compiled, they are relabeled (that is, each node is assigned a fresh, globally-unique label) and each non-free reference is updated to point to the new node. This is important because it means that no code outside of the newly-generated fragment can possibly contain a reference to anything defined in it. For example, reductions for syntax extensions commonly bind values to names (in order to control evaluation order, for example), and each name is defined by some \keyword{bind} node. So in a reduced program, each instance of the reduced fragment will contain a binding which originated in the same node, but each binding is completely distinct and independent in the reduced program due to the relabeling that is performed when the reduction is executed. Because all names are unique at all times, the problem of unintended variable capture does not arise, and some of the complexities of providing ``hygienic macros''\cite{hygiene} may be avoided.
 
-Once a kernel language program has been meta-compiled, the standard Clojure function \clojure{eval} is invoked, which compiles the expression to Java bytecode, loads it into the running JVM, invokes it, and returns the result as a Clojure/Java value. %When necessary a function is available to ``wrap'' that value in (kernel language) nodes which represent the same value. This \emp{unread} mechanism will be discussed later. \todo{Will it? Come back to these implementation details later or not?}
+Once a kernel language program has been meta-compiled, the standard Clojure function \clojure{eval} is invoked, which compiles the expression to Java bytecode, loads it into the running JVM, invokes it, and returns the result as a Clojure/Java value.
 
 
 \subsection{Core Language}
@@ -131,7 +133,7 @@ After a program is reduced to the \keyword{expr} presentation language (via the 
 
 The \keyword{view} language is a lower-level presentation language. Some of the algorithms of \TeX\ \cite{tex-math} are used to lay out nodes and construct glyphs, as in e.g.\ \cite{mathml}. In contrast to the \keyword{expr} language, all the elements of the \keyword{view} language specify fonts, colors, and sizes in concrete terms, so they can be rendered directly. The main tasks of the reduction from \keyword{expr} to \keyword{view} are to identify the correct font size for each atom based on the nesting of expressions, and to transform \keyword{embed}/\keyword{disembed} nodes into border/background colors. Both of these computations involve propagating some information about the structure of the tree down as the nodes are recursively processed.
 
-The mode, a concept from \TeX, identifies the depth of nesting of expressions, and controls the selection of font sizes for atoms. There are four modes, \textit{Display} ($D$), \textit{Text} ($T$), \textit{Script} ($S$), and \textit{Scriptscript} ($SS$). $D$ and $T$ call for normal-sized text, $S$ is about 30\% smaller, and $SS$ is about 50\% smaller.The handling of modes follows \TeX's algorithm in most cases, but deviates from it when necessary for consistency. For example, typographical convention dictates that addition expressions in the smaller modes should be set without spaces, but that would clash with \Meta's handling of parentheses, so \Meta\ sets these expressions with proportionately smaller spaces.
+The mode, a concept from \TeX, identifies the depth of nesting of expressions, and controls the selection of font sizes for atoms. There are four modes, \textit{Display} ($D$), \textit{Text} ($T$), \textit{Script} ($S$), and \textit{Scriptscript} ($SS$). $D$ and $T$ call for normal-sized text, $S$ is about 30\% smaller, and $SS$ is about 50\% smaller. The handling of modes follows \TeX's algorithm in most cases, but deviates from it when necessary for consistency. For example, typographical convention dictates that addition expressions in the smaller modes should be set without spaces, but that would clash with \Meta's handling of parentheses, so \Meta\ sets these expressions with proportionately smaller spaces.
 
 Each of the atom types of the \keyword{expr} language is reduced to a \keyword{chars} node. For example, when a node $n$ having the type \keyword{keyword} and \emp{str} attribute $s$ is reduced:
 $$
@@ -147,7 +149,7 @@ Atoms representing string literals get special treatment. They're surrounded by 
 $$
 n:~\mapnode{string}{\attr{str}{s}} 
  	\reduces
-	\mapnode{chars}{\attr{str}{\textrm{``} + \mathbf{escapewhitespace}[s] + \textrm{''}},
+	\mapnode{chars}{\attr{str}{\textrm{``} + \mathbf{escapews}[s] + \textrm{''}},
 		~\attr{font}{\mathbf{stringfont}_{\mathbf{mode}[n]}} }
 $$
 
@@ -165,7 +167,7 @@ Each of \keyword{expr}'s four sequence types are reduced to a single type, and s
 \\
 & \seqnode{relation}{ c_0, c_1, \dots, c_m }
  	\reduces
-	 \seqnode{sequence}{ c_0, \keyword{mediumspace}, c_1, \keyword{mediumspace}, \dots,\keyword{mediumspace}, c_m }
+	 \seqnode{sequence}{ c_0, \keyword{medspace}, c_1, \keyword{medspace}, \dots,\keyword{medspace}, c_m }
 \\
 & \seqnode{flow}{ c_0, c_1, \dots, c_m }
  	\reduces
@@ -531,3 +533,110 @@ When any editing action changes the source AST, the editor re-reduces the entire
 
 %\subsection{Errors \todo{}}
 
+
+%
+% Example
+%
+\section{Example: Entering Expressions}
+
+Here's how the \Meta\ editor can be used to enter some simple expressions.
+
+Suppose you want to evaluate the expression $(1+2) \times 3$. Begin with an empty core-language program, which is a single \keyword{program} node, with no children. The core grammar requires at least one \keyword{doc} or \keyword{expr} node in the program, so the editor supplies an empty node to start you off:
+\begin{center}
+\includegraphics{src/image/expr1.pdf}
+\end{center}
+%$$?$$
+
+Select the node and type the character `\clojure{1}'. The editor infers you want to replace the missing node with a new \keyword{int} node in the core language, and does so, leaving the new node selected:
+\begin{center}
+\includegraphics{src/image/expr2.pdf}
+\end{center}
+%$$[1]$$
+
+Now we want to add 2 to that, so first type `\clojure{+}'. The editor assumes you want to replace the selected node with a new \keyword{plus} node, and it adds the selected node as the first child of the new node (this is the \emp{insert parent} action with the type \keyword{plus} for the new node). Now the missing right argument is selected:
+\begin{center}
+\includegraphics{src/image/expr3.pdf}
+\end{center}
+%$$1+[?]$$
+
+Simply typing `\clojure{2}' completes the first sub-expression:
+\begin{center}
+\includegraphics{src/image/expr4.pdf}
+\end{center}
+%$$1+[2]$$
+
+Now we want to multiply this expression by 3, but you can't simply add the \keyword{times} node yet, because that would make a new node with only 2 as the left argument. Instead, use the ``select parent node'' action (from now on, $\uparrow$) to move the selection to the \keyword{plus} node (or just click on the $+$ sign):
+\begin{center}
+\includegraphics{src/image/expr5.pdf}
+\end{center}
+%$$[1+2]$$
+
+Now type `\clojure{*}' to create a new node. The previous selection becomes the left child, and \Meta\ inserts parentheses to indicate that the actual grouping of sub-expressions is contrary to what would be suggested by the normal spacing of the operators alone:
+\begin{center}
+\includegraphics{src/image/expr6.pdf}
+\end{center}
+%$$\lsyn 1+2 \rsyn \times [?]$$
+
+Finally, type `\clojure{3}' to complete the expression:
+\begin{center}
+\includegraphics{src/image/expr7.pdf}
+\end{center}
+%$$\lsyn 1+2 \rsyn \times [3]$$
+
+For this kind of simple expression, the \Meta\ editor's efficiency is quite similar to that of entering text. In fact the sequence of characters is not much different: `\clojure{1+2}$\uparrow$\clojure{*3}' as opposed to, say, `\clojure{(1+2)*3}'. Assuming you use only the keyboard, the actual number of keystrokes is fewer by one with \Meta.
+
+Alternatively, you could have entered the same expression in ``top-down'' fashion using the sequence `\clojure{*+1}$\rightarrow${2}$\uparrow\rightarrow$\clojure{3}'. Interestingly, this seems to mimic the process of typing a prefix expression, with `$\rightarrow$' taking the place of spaces between sibling nodes, and `$\uparrow$' acting as a '\clojure{)}' to close one node and return to the parent. I suspect in practice this is more intuitive than it sounds when described in that way, but only experience will tell (just ask anyone who has learned to use an RPN calculator). The editor attempts to support both styles equally well.
+
+Furthermore, \Meta's rendering of the expression includes appropriate spacing, which you might feel the need to add if you were entering text, maybe like this: `\clojure{(1+2) * 3}' or `\clojure{(1 + 2)*3}', depending on your preference. This kind of manual type-setting is extra work for the programmer (imagine how many hours each year world-wide are spent entering and adjusting white-space!), and it's not very effective anyway. None of the three alternatives is particularly readable.
+
+\vspace{12pt}
+
+The host language provides syntax for more specialized purposes also, and these nodes aren't quite so easily accessed. For example, to generate a list of the first 10 perfect squares, you can use a sequence comprehension. Again, starting with a blank program:
+\begin{center}
+\includegraphics{src/image/for1.pdf}
+\end{center}
+%$$[?]$$
+
+Use the \emp{insert node} action to create new node, entering the type \keyword{for}. The new node includes a variable binding. The editor supplies the default name, $x$ (which we won't change):
+\begin{center}
+\includegraphics{src/image/for2.pdf}
+\end{center}
+%$$\keyword{for} [x] \leftarrow ? | ?$$
+
+%So just move the selection to the next sibling ($\rightarrow$), and :
+For the expression, first enter a variable reference by typing `\clojure{x}'. This inserts a reference to a nearby variable, which happens to be $x$. Alternatively, hold down the \emp{insert reference} modifier keys and click on $x$.
+\begin{center}
+\includegraphics{src/image/for3.pdf}
+\end{center}
+%$$\keyword{for} \  x \leftarrow [?] \: .. \: ? \ | \ ?$$
+
+Use the \emp{insert parent} action, entering \keyword{square} for the type:
+\begin{center}
+\includegraphics{src/image/for4.pdf}
+\end{center}
+%$$\keyword{for} \  x \leftarrow 1 \: .. \: [10] \ | \ ?$$
+
+Now move the selection to the next sibling twice ($\rightarrow$, $\rightarrow$, or just click on the last `?'). 
+\begin{center}
+\includegraphics{src/image/for5.pdf}
+\end{center}
+%$$\keyword{for} \  x \leftarrow 1 \: .. \: 10 \ | \ [x]$$
+
+Insert another node, this time a \keyword{range}.
+\begin{center}
+\includegraphics{src/image/for6.pdf}
+\end{center}
+
+Enter 1 and 10 for the range's min and max:
+\begin{center}
+\includegraphics{src/image/for7.pdf}
+\end{center}
+
+And that's it. Switching to \Meta's evaluation view:
+\begin{center}
+\includegraphics{src/image/for.pdf}
+\end{center}
+
+In this case, there is some extra effort to enter the \keyword{for}, \keyword{square}, and \keyword{range} nodes. That's the price of being able to add arbitrary nodes to your language. Furthermore, the editor UI could and should be extended to make this penalty as small as possible, for example, since the keystroke `\clojure{f}' has no particular behavior, it could offer a choice of all known node types beginning with `f'.
+
+These examples hopefully give a sense of how an editor can offer both generality and reasonable usability, but the current \Meta\ editor is certainly only a starting point. Different UI interactions would be appropriate for different kinds of devices (say, emphasizing gestures over keyboard input for a device with a touch-sensitive screen), or for different users (say, something more like a mouse-driven structure editor for end-user programming applications).

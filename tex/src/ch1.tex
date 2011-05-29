@@ -4,7 +4,7 @@
 
 Many kinds of programmers are interested in building new languages. General-purpose languages evolve slowly, but even so a dominant language like Java undergoes change over the years, adding new concepts and syntax \cite{java-generics}. New computer architectures spawn new languages \cite{ctm}\cite{cuda}\cite{opencl}, software engineers talk about how and when to build and use Domain Specific Languages \cite{fowler}, and of course programming language researchers are continually designing new languages to use or to analyze. Yet the technology that is currently used to construct programming languages does not support these kinds of creative activities very well, and often the lack of good tool support is a major factor discouraging the creation and use of a new language.
 
-The design and implementation of languages is often seen as a separate task from the creation of programs \cite{intentional}\cite{ward}, however another approach combines the tasks of writing a program and building its language into one activity \cite{on-lisp}. These two perspectives go along with different tool sets, and the large disparity in goals and approaches suggests an opportunity exists to combine some of the strengths of both approaches in a single environment.
+The design and implementation of languages, undertaken by a relatively small group of ``language vendors,'' is often seen as a separate task from the creation of programs by the much larger population of language users \cite{intentional}\cite{ward}. However, another approach, often identified with the Lisp community, views the task of writing a program as combined with the building of a language into one activity \cite{on-lisp}. These two perspectives go along with different tool sets, and the large disparity in goals suggests an opportunity exists to combine some of the strengths of both approaches in a single environment.
 
 Furthermore, computer language technology could potentially be used in many more contexts. For instance, any class of structured documents (say recipes, essays, math problems) could be represented with a language defining the required elements and their relationships to each other. The tools used to create these documents are often far more user-friendly and visually rich than programming tools, but they fail to identify the underlying structure of the documents, trapping the data in a panoply of closed formats which obscure the valuable content. If the tools programmers use to create and work with languages offered better expressivity and were simpler to employ, software for creating many kind of documents could be built on similar foundations. 
 
@@ -43,7 +43,7 @@ Yet this power comes at a high cost. To construct a structure editor for a compl
 %
 \section{A New Way}
 
-Each of the three approaches just described makes a fundamental trade-off between the conflicting goals of readability, expressive power, and extensibility. This thesis strikes a new balance, showing that by giving up textual source code, a new way of building languages can combine the expressive power of Lisp with the best syntax you can devise. I present a unified framework for constructing languages, editors, and compilers based on two simple ideas: all source code and derived objects are represented from the start as ASTs, and reductions from the former to the latter written in a simple, extensible, functional, meta-language.
+Each of the three approaches just described makes a fundamental trade-off between the conflicting goals of readability, expressive power, and extensibility. This thesis strikes a new balance, showing that by giving up textual source code, a new way of building languages can combine the expressive power of Lisp with the best syntax you can devise. I present a unified framework for constructing languages, editors, and compilers based on two simple ideas: all source code and derived objects are represented from the start as ASTs, and source is transformed into derived trees via reductions written in a simple, extensible, functional, meta-language.
 
 \begin{figure}[th]
   \centering
@@ -54,15 +54,15 @@ Each of the three approaches just described makes a fundamental trade-off betwee
   \label{fig-2}
 \end{figure}
 
-Figure \ref{fig-2} shows the high-level structure of \Meta's editing and execution model. Both the executable form of a program and its visual representation are defined in terms of ASTs (labeled \emp{kernel} and \emp{view}). The translation from the source form to these derived forms is specified in a modular way, with the same tools used to construct core languages and extensions.
+Figure \ref{fig-2} shows the high-level structure of \Meta's editing and execution model. Both the executable form of a program and its visual representation are defined in terms of ASTs (labeled \emp{kernel} and \emp{view}). The translation from the source form to these derived forms is specified in a modular way, with the same tools used to construct core languages and extensions. The programmer operates on the source AST in a relatively direct way, but this interaction is mediated by the ``view'' transformation, which presents the program in a familiar and understandable form.
 
 The benefits of this approach are:
 
 \begin{enumerate}
 
-\item When constructed this way, a structure editor can be flexible enough to work with whatever language you're using now or want to invent in the future.
+\item When constructed this way, a structure editor can be flexible enough to work with programs in multiple languages constructed in a dynamic process and freely embedded within one another.
 
-\item Defining new language constructs or even entirely new languages is radically simpler, and the resulting language are fully supported by the editing environment. Thus the barrier to entry for creating new languages is reduced to essentially zero.
+\item Defining new language constructs or even entirely new languages is as simple as writing a program in an existing language, and the resulting languages are fully supported by the editing environment. Thus the barrier to entry for creating new languages is significantly reduced, and this approach may become a more routine part of the process of writing programs.
 
 \item Freed from the constraints of parsing, more sophisticated presentation becomes easy to achieve. The tools prototyped so far can achieve excellent readability for typical programming constructs, but also support rich, familiar, mathematical notation.
 
@@ -82,7 +82,7 @@ Both these systems seek to provide a complete environment for producing software
 
 MetaEdit \cite{metaedit} is a commercial system aimed at (non-textual) modeling languages. Tools addressing the difficulty of implementing good tool support for textual DLS are many, often targeting the free Eclipse IDE platform: \cite{xtext}\cite{spoofax}\cite{stratego}. 
 
-Structure editors, or syntax-directed editors, had their greatest flowering in the 1980s, but usually had very different goals, including improved compiler performance (via incremental compilation) \cite{cps}\cite{zavodnik}. An interesting retrospective is Lang \cite{lang}.
+Structure editors, or syntax-directed editors, had their greatest flowering in the 1980s, but usually had very different goals, including improved compiler performance (via incremental compilation) \cite{cps}\cite{zavodnik}. Lang provides an interesting retrospective \cite{lang}.
 
 Barista \cite{barista}, built on Citrus \cite{citrus}, is a more recent structure editor for Java exploring new user interface paradigms for editing code.
 
@@ -94,6 +94,6 @@ The Fortress language~\cite{fortress} has similar aspirations with regard to the
 
 % summary
 
-I present a representation for ASTs and fundamental tools for manipulating them in Chapter~\ref{ASTs}. Chapter~\ref{languages} shows how languages are defined and extended. Chapter~\ref{prototype} describes the prototyped system which implements these ideas, and Chapter~\ref{examples} presents examples of the system in use. 
+I present a representation for ASTs and fundamental tools for manipulating them in Chapter~\ref{ASTs}. Chapter~\ref{languages} shows how languages are defined and extended. Chapter~\ref{prototype} describes the prototyped system which implements these ideas, and Chapter~\ref{studies} presents two case studies of the effectiveness of the system for defining new syntax and programming constructs. 
 
 
