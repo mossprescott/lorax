@@ -1,0 +1,135 @@
+\documentclass[defaultstyle,11pt]{thesis}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%  see documentation for information about  %%%%%%%%%%
+%%%%%%%%%%%  the options (11pt, defaultstyle, etc.)   %%%%%%%%%%
+%%%%%%%  http://www.colorado.edu/its/docs/latex/thesis/  %%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%		\documentclass[typewriterstyle]{thesis}
+% 		\documentclass[modernstyle]{thesis}
+% 		\documentclass[modernstyle,11pt]{thesis}
+%	 	\documentclass[modernstyle,12pt]{thesis}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%    load any packages which are needed    %%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{latexsym}		% to get LASY symbols
+\usepackage{graphicx}		% to insert PostScript figures
+\usepackage{rotating}		% for sideways tables/figures
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%       all the preamble material:       %%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Five-Dimensional Flow in Solid Fuel Rocket Engines}
+
+\author{I.~B.}{Scriptor}
+
+\otherdegrees{B.A., North Dakota State University, 1994 \\
+	      M.S., University of Reno, 1997}
+
+\degree{Doctor of Philosophy}		%  #1 {long descr.}
+	{Ph.D., Rocket Science}		%  #2 {short descr.}
+
+\dept{Department of}			%  #1 {designation}
+	{Rocket Science}		%  #2 {name}
+
+\advisor{Prof.}				%  #1 {title}
+	{Ed Visor}			%  #2 {name}
+
+\reader{Prof.~Rachel Goddard}		%  2nd person to sign thesis
+\readerThree{Ms.~Thora Nea}		%  3rd person to sign thesis
+% \readerFour{Mr.~Alfred Remington}	%  4rd person to sign thesis
+
+\abstract{  \OnePageChapter	% one page only ??
+
+	Solid fuel rocket engines are one of the most
+	reliable and efficient propulsion systems used
+	to lift payloads into orbit, in terms of
+	$\lambda=(\Box+\Diamond)\psi$.  Used throughout
+	the astrodynamics community, the theory of the
+	flow within the motor chamber is in fact
+	a black art which defies all attempts at
+	analysis.
+	
+	The present work (no exception to
+	the statement above) contains a theoretical
+	and numerical approach to the flow of the
+	gases within the motor chamber.  The shape of
+	the chamber and original fuel configuration,
+	and the patterns of combustion and
+	flow/expulsion of gases, are modelled by a
+	system of thirty fourth-degree differential
+	equations.
+	
+	$$
+		f_i^{(34)}(x,y,z,t) =
+		\sum_{j=0}^{33}
+		a_{ij}f_i^{({\rm j})}(x,y,z,t)
+	$$
+	
+	Acceptable numerical solutions
+	would require one thousand pentium processors
+	working day and night for $10^{11.2}$ years.
+	}
+
+
+\dedication[Dedication]{	% NEVER use \OnePageChapter here.
+	To all of the fluffy kitties.
+	}
+
+\acknowledgements{	\OnePageChapter	% *MUST* BE ONLY ONE PAGE!
+	Here's where you acknowledge folks who helped.
+	}
+
+\ToCisShort	% a 1-page Table of Contents ??
+
+\LoFisShort	% a 1-page List of Figures ??
+%	\emptyLoF	% no List of Figures at all ??
+
+\LoTisShort	% a 1-page List of Tables ??
+%	\emptyLoT	% no List of Tables at all ??
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%       BEGIN DOCUMENT...         %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%  footnote style; default=\arabic  (numbered 1,2,3...)
+%%%%  others:  \roman, \Roman, \alph, \Alph, \fnsymbol
+%	"\fnsymbol" uses asterisk, dagger, double-dagger, etc.
+%	\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+%	\setcounter{footnote}{0}
+
+\begin{document}
+
+\input macros.tex		% file containing author's macro definitions
+\input ch1.tex			% file with Chapter 1 contents
+\input ch2.tex			% file with Chapter 2 contents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%  Bibliography %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{plain}	% or "siam", or "alpha", or "abbrv"
+				% see other styles (.bst files) in
+				% $TEXHOME/texmf/bibtex/bst
+
+\nocite{*}		% list all refs in database, cited or not.
+
+\bibliography{refs}		% bib database file refs.bib
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%  Appendices %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix	% don't forget this line if you have appendices!
+
+\input appA.tex			% file with Appendix A contents
+\input appB.tex			% file with Appendix B contents
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%   THE END   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}

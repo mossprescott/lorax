@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99c (Web2C 7.2)
+The top-level auxiliary file: Mythesis.aux
+The style file: plain.bst
+Reallocated wiz_functions (elt_size=4) to 3000 items from 0.
+Database file #1: refs.bib
+You've used 14 entries,
+            2118 wiz_defined-function locations,
+            582 strings with 5524 characters,
+and the built_in function-call counts, 4215 in all, are:
+= -- 440
+> -- 154
+< -- 2
++ -- 62
+- -- 48
+* -- 283
+:= -- 725
+add.period$ -- 44
+call.type$ -- 14
+change.case$ -- 64
+chr.to.int$ -- 0
+cite$ -- 14
+duplicate$ -- 159
+empty$ -- 352
+format.name$ -- 48
+if$ -- 866
+int.to.chr$ -- 0
+int.to.str$ -- 14
+missing$ -- 14
+newline$ -- 73
+num.names$ -- 28
+pop$ -- 52
+preamble$ -- 1
+purify$ -- 52
+quote$ -- 0
+skip$ -- 93
+stack$ -- 0
+substring$ -- 317
+swap$ -- 18
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 54
+warning$ -- 0
+while$ -- 48
+width$ -- 16
+write$ -- 158
