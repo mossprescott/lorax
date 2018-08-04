@@ -159,7 +159,7 @@
 
 ; Global multiplier for the font size. 1.0 gets you something nice for 
 ; reading up close. 2.0 is probably better for across a room.
-(def font-multiplier 1.5)
+(def font-multiplier 1.0)
 
 (def TEXT_SIZE_BASE 14)
 (def FONT_SCALES {
@@ -830,10 +830,10 @@
   "Reduce a single child of a node which was reduced by the generic reduction."
   [v]
   (condp = (node-type v) 
-    :core/name
-    (make-node :view/expr/keyword { :str (make-node :core/string (subs (str (node-value v)) 1)) })
+    :lorax/name
+    (make-node :view/expr/keyword { :str (make-node :lorax/string (subs (str (node-value v)) 1)) })
 
-    :core/string
+    :lorax/string
     (do (print "v(string):" (node-value v) (value-node? v) " ") (print-node v)  ; HACK
     (make-node :view/chars { 
       :str (str \" (node-value v) \") 
@@ -843,7 +843,7 @@
     ; (make-node :view/expr/string { :str (str \" (node-value v) \") })
     )  ; HACK
     
-    :core/int
+    :lorax/int
     (make-node :view/expr/int { :str (str (node-value v)) })
     
     v))
@@ -865,7 +865,7 @@
 ; (prn "typ:" typ)  ; HACK
     (cond
       ; TODO: use the reduction for any node with an error given only the :view grammar
-      (not (or (re-matches #"view/.*" typ) (re-matches #"core/.*" typ)))
+      (not (or (re-matches #"view/.*" typ) (re-matches #"lorax/.*" typ)))
       ; (do (println "  reducing...")  ; HACK
       (node :view/border
         :weight 1

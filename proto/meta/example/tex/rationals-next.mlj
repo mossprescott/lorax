@@ -1,48 +1,41 @@
 (use 'meta.core)
 
-(make-node :clojure/core/program [
-  (make-node :clojure/core/whereVar {
-    :bind 
-    (make-node :clojure/kernel/bind :next { :name "next" })
+(make-node :core/program [
+  (make-node :kernel/lambda {
+    :params
+    (make-node :kernel/params [
+      (make-node :kernel/bind :x { :name "x" })
+    ])
     
-    :expr
-    (make-node :clojure/kernel/lambda {
-      :params
-      (make-node :clojure/kernel/params [
-        (make-node :clojure/kernel/bind :x { :name "c" })
-      ])
-      
-      :body
-      (make-node :cf/recip {
-        :expr
-        (make-node :cf/plus {
-          :int
-          (make-node :clojure/core/plus {
-            :left
-            (make-node :cf/ip {
-              :expr
-              (make-node :clojure/kernel/var {
-                :ref (ref-node :x)
-              })
+    :body
+    (make-node :cf/recip {
+      :expr
+      (make-node :cf/plus {
+        :int
+        (make-node :core/plus {
+          :left
+          (make-node :cf/ip {
+            :expr
+            (make-node :kernel/var {
+              :ref (ref-node :x)
             })
-            
-            :right
-            (make-node :clojure/kernel/int { :value 1 })
           })
           
-          :cf
-          (make-node :cf/negate {
+          :right
+          (make-node :kernel/int { :value 1 })
+        })
+        
+        :cf
+        (make-node :cf/negate {
+          :expr
+          (make-node :cf/fp {
             :expr
-            (make-node :cf/fp {
-              :expr
-              (make-node :clojure/kernel/var {
-                :ref (ref-node :x)
-              })
+            (make-node :kernel/var {
+              :ref (ref-node :x)
             })
           })
         })
       })
     })
-  })
-  
+  })  
 ])

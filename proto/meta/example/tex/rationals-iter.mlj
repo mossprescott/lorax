@@ -1,14 +1,14 @@
 (use 'meta.core)
 
-(make-node :clojure/core/program [
-  (make-node :clojure/core/whereVar {
+(make-node :core/program [
+  (make-node :core/whereVar {
     :bind 
-    (make-node :clojure/kernel/bind :rationals { :name "rationals" })
+    (make-node :kernel/bind :rationals { :name "rationals" })
     
     :expr
-    (make-node :clojure/core/iterate {
+    (make-node :core/iterate {
       :fn
-      ; (make-node :clojure/kernel/var {
+      ; (make-node :kernel/var {
       ;   :ref (ref-node :next)
       ; })
       (make-node :view/expr/var { :str "next" })
@@ -16,7 +16,7 @@
       :expr
       (make-node :cf/fraction {
         :coeff
-        (make-node :clojure/kernel/int { :value 1 })
+        (make-node :kernel/int { :value 1 })
         
         :cont
         (make-node :cf/inf)

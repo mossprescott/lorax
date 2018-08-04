@@ -31,10 +31,10 @@
     (fn [n] 
       (node-attr n :name))
       
-    :clojure/kernel/bind
+    :kernel/bind
     (fn [n] n)
       
-    :clojure/kernel/lambda
+    :kernel/lambda
     (fn [n] n)
   })
 
@@ -45,13 +45,13 @@
     (fn [n]
       (baseName (node-value n)))
 
-    :clojure/kernel/bind
+    :kernel/bind
     (fn [n]
       (if (has-attr? n :name)
         (node-attr-value n :name)
         (baseName (node-id n))))  ; HACK: assign a random name? (x, x', ...?)
 
-    :clojure/kernel/lambda
+    :kernel/lambda
     (fn [n]
       (baseName (node-id n)))  ; HACK: what would be right?
   })
@@ -99,7 +99,7 @@
               (if (ref-node? n)
                 (if-let [ [name num] (node-id-to-name-and-num (ref-node-id n))]
                   (primed name num))
-                (if (not= (node-type n) :clojure/kernel/lambda)
+                (if (not= (node-type n) :kernel/lambda)
                   (if-let [ [name num] (name-id-to-name-and-num (node-id n))]
                     (primed name num)))))
         ]

@@ -46,7 +46,7 @@
 ;  - the trickier reduction for :view/expr
 ;  - the name reduction
 ;  - the simple reductions for :structure and :grammar languages
-;  - the display reductions for :clojure/kernel and (maybe) /core
+;  - the display reductions for :kernel and (maybe) /core
 ; This is a gigantic hack now. For one thing, the "meta-expr" reduction
 ; has to provided with the set of source ids, which has to be captured _before_
 ; the name reduction runs...

@@ -24,7 +24,7 @@
     :min 1
     
     :display 
-    (make-node :clojure/kernel/quote {
+    (make-node :kernel/quote {
       :body
       (make-node :view/section [
         ; TODO
@@ -98,7 +98,7 @@
       
         :options
         (make-node :grammar/options [
-          (make-node :grammar/node { :type :clojure/kernel/expr })
+          (make-node :grammar/node { :type :kernel/expr })
         ])
         
         :optional 
@@ -110,7 +110,7 @@
       
         :options
         (make-node :grammar/options [
-          (make-node :grammar/node { :type :clojure/kernel/expr })
+          (make-node :grammar/node { :type :kernel/expr })
         ])
         
         :optional 
@@ -119,32 +119,32 @@
     ])
             
     :display
-    (make-node :clojure/kernel/quote {
+    (make-node :kernel/quote {
       :body
       (make-node :view/section [
-          (make-node :clojure/kernel/unquote {
+          (make-node :kernel/unquote {
             :body
-            (make-node :clojure/kernel/var {
+            (make-node :kernel/var {
               :ref (ref-node :mapNode_doc)
             })
           })
         (make-node :view/expr/flow [
-          (make-node :clojure/kernel/unquote {
+          (make-node :kernel/unquote {
             :body
-            (make-node :clojure/kernel/var {
+            (make-node :kernel/var {
               :ref (ref-node :mapNode_supers)
             })
           })
           (make-node :view/expr/symbol { :str :from })
-          (make-node :clojure/kernel/unquote {
+          (make-node :kernel/unquote {
             :body
-            (make-node :clojure/kernel/var {
+            (make-node :kernel/var {
               :ref (ref-node :mapNode_type)
             })
           })
-          (make-node :clojure/kernel/unquote {
+          (make-node :kernel/unquote {
             :body
-            (make-node :clojure/kernel/var {
+            (make-node :kernel/var {
               :ref (ref-node :mapNode_attrs)
             })
           })
@@ -152,9 +152,9 @@
         (make-node :view/sequence [
           (make-node :view/quad)
           ; TODO: this part optional
-          (make-node :clojure/kernel/unquote {
+          (make-node :kernel/unquote {
             :body
-            (make-node :clojure/kernel/var {
+            (make-node :kernel/var {
               :ref (ref-node :mapNode_display)
             })
           })
@@ -162,9 +162,9 @@
           (make-node :view/quad)
           (make-node :view/expr/symbol { :str :to })
           (make-node :view/quad)
-          (make-node :clojure/kernel/unquote {
+          (make-node :kernel/unquote {
             :body
-            (make-node :clojure/kernel/var {
+            (make-node :kernel/var {
               :ref (ref-node :mapNode_expand)
             })
           })
@@ -237,7 +237,7 @@
     ;             :options [
     ;               ; ??? this will be a drawable, but maybe it should be quoted?
     ;               (node :structure/node
-    ;                 :type :clojure/kernel/expr)
+    ;                 :type :kernel/expr)
     ;             ]
     ;             
     ;             :optional false)

@@ -1,18 +1,18 @@
 (use 'meta.core)
 
-(make-node :clojure/core/program [
+(make-node :core/program [
   ; a simple expr
-  (make-node :clojure/core/times {
+  (make-node :core/times {
     :left
-    (make-node :clojure/core/plus {
+    (make-node :core/plus {
       :left
-      (make-node :clojure/kernel/int { :value 1 })
+      (make-node :kernel/int { :value 1 })
 
       :right
-      (make-node :clojure/kernel/int { :value 2 })
+      (make-node :kernel/int { :value 2 })
     })
 
     :right
-    (make-node :clojure/kernel/int { :value 3 })
+    (make-node :kernel/int { :value 3 })
   })
 ])

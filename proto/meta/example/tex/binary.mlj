@@ -9,13 +9,13 @@
     (make-node :grammar/doc { :str "Addition" })
     
     :type
-    (make-node :grammar/type :clojure/core/plus)
+    (make-node :grammar/type :core/plus)
     
     :op
     (make-node :view/expr/symbol { :str "+" })
     
     :fn
-    (make-node :clojure/kernel/extern { :name "add"})
+    (make-node :kernel/extern { :name "add"})
   })
 
   ; format
@@ -24,13 +24,13 @@
     (make-node :grammar/doc { :str "String formatting" })
     
     :type
-    (make-node :grammar/type :clojure/core/format)
+    (make-node :grammar/type :core/format)
     
     :op
     (make-node :view/expr/int { :str "%" })
     
     :fn
-    (make-node :clojure/kernel/extern { :name "format"})
+    (make-node :kernel/extern { :name "format"})
   })
   
   ; contains
@@ -39,12 +39,12 @@
     (make-node :grammar/doc { :str "Set membership" })
     
     :type
-    (make-node :grammar/type :clojure/core/contains)
+    (make-node :grammar/type :core/contains)
     
     :op
     (make-node :view/expr/symbol { :str :ni })
     
     :fn
-    (make-node :clojure/kernel/extern { :name "contains?"})
+    (make-node :kernel/extern { :name "contains?"})
   })
 ])

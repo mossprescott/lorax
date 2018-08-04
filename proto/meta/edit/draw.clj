@@ -69,6 +69,7 @@
 ; (celsius)
 
 (def PRINT_ALL false)
+(def PRINT_TIMING false)
 
 (def MARGIN 10)
 ; (def SELECTED_COLOR 
@@ -237,7 +238,8 @@
                   (time2 "draw-all: "
                          (draw-all @rootA 
                                   (doto (.create g) (.translate MARGIN MARGIN)) 
-                                  @debugA @selectedIdsA @errorIdsA @originsA))))
+                                  @debugA @selectedIdsA @errorIdsA @originsA)
+                          PRINT_TIMING)))
               (getPreferredSize []
                 (let [this #^JComponent this
                       g (.getGraphics this)
@@ -247,7 +249,7 @@
           watch (fn [r msg]
                   (add-watch r c
                             (fn [key r old new]
-                              (println "Repainting for changed" msg)
+                              (if PRINT_TIMING (println "Repainting for changed" msg))
                               (.repaint c))))]
     (watch rootA "root")
     (watch debugA "debug flag")
@@ -632,7 +634,8 @@
                   (add-watch a panel
                     (fn [k r old new]
                       (let [ [n o] (time2 (str "Reducing for " reason ": ")
-                                          (display @rootA (.isSelected parens))) ]
+                                          (display @rootA (.isSelected parens))
+                                          PRINT_TIMING) ]
                         (dosync 
                           (ref-set nref n)
                           (ref-set oref o)
@@ -785,18 +788,20 @@
                                             (make-node (node-type val-node)
                                                        (node-id val-node)
                                                        new-val)))))
-
-            (println "not handled; code: " (.getKeyCode evt))))
+                  
+            ; (println "not handled; code: " (.getKeyCode evt))
+            nil
+            ))
         (keyTyped [#^KeyEvent evt]
           (let [ch (.getKeyChar evt)]
-            (print "char: ") (prn ch)
-            (println "code:" (.getKeyCode evt))
+            ; (print "char: ") (prn ch)
+            ; (println "code:" (.getKeyCode evt))
             (cond
               ; Big hack for introducing "+" nodes
               (and @snref (= ch \+))
               (let [rt (make-node :view/expr/missing)]
                 (swap! rootA replace-node (node-id @snref) 
-                                          (make-node :clojure/core/plus {
+                                          (make-node :core/plus {
                                             :left
                                             @snref  ; the formerly selected node
                                           
@@ -812,7 +817,7 @@
               (and @snref (= ch \*))
               (let [rt (make-node :view/expr/missing)]
                 (swap! rootA replace-node (node-id @snref) 
-                                          (make-node :clojure/core/times {
+                                          (make-node :core/times {
                                             :left
                                             @snref  ; the formerly selected node
                                           
@@ -828,7 +833,7 @@
               (and @snref (= ch \-))
               (let [rt (make-node :view/expr/missing)]
                 (swap! rootA replace-node (node-id @snref) 
-                                          (make-node :clojure/core/minus {
+                                          (make-node :core/minus {
                                             :left
                                             @snref  ; the formerly selected node
                                           
@@ -845,7 +850,7 @@
               (and @snref (= ch \/))
               (let [rt (make-node :view/expr/missing)]
                 (swap! rootA replace-node (node-id @snref) 
-                                          (make-node :clojure/core/fraction {
+                                          (make-node :core/fraction {
                                             :num
                                             @snref  ; the formerly selected node
                                           
@@ -860,14 +865,15 @@
               ; Big hack for entering new integer nodes
               (and @snref (= :view/expr/missing (node-type @snref)))
               (if (contains? (set "0123456789") ch)
-                (let [n (make-node :clojure/kernel/int (node-id @snref) { :value (Integer/parseInt (str ch)) })]
+                (let [n (make-node :kernel/int (node-id @snref) { :value (Integer/parseInt (str ch)) })]
                   (swap! rootA replace-node (node-id @snref) n))
-                (println "not handled (on missing child)"))
+                ; (println "not handled (on missing child)")
+                )
                             
               (and @snref (has-attr? @snref :value) (value-node? (node-attr @snref :value)))
               (let [val-node (node-attr @snref :value)
                     val (node-value val-node)]
-                (println "val:" val)
+                ; (println "val:" val)
                 (cond
                   (and (integer? val) (contains? (set "0123456789") ch))
                   (let [new-val (Integer/parseInt (str val ch))]
@@ -876,8 +882,9 @@
                                                          (node-id val-node)
                                                          new-val)))
                                                                            
-                  true
-                  (println "not handled")))
+                  ; true
+                  ; (println "not handled")
+                  ))
 
               )))
       ))

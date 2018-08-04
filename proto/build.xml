@@ -1,0 +1,9 @@
+<project name="meta" default="run">
+
+  <target name="run">
+    <exec executable="./clj">
+      <arg line="meta/util/showgrammar.clj meta/clojure/kernel2.mlj" />
+    </exec>
+  </target>
+  
+</project>

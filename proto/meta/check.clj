@@ -92,7 +92,7 @@
 ;   (let [nodeType (node-type n)
 ;         rule (getRule struc nodeType)]
 ;     (cond
-;       (= nodeType :core/ref) []  ; don't check refs at all for now
+;       (= nodeType :lorax/ref) []  ; don't check refs at all for now
 ;       (nil? rule) [ [(node-id n) (str "unrecognized node type: " nodeType)] ]
 ;       ; TODO: also look for missing required attributes
 ;       true (apply concat
@@ -219,29 +219,29 @@
     ; because the tree will contain other nodes that are part of the source 
     ; tree and we don't want to lose track of those.
     ; d
-    (make-node :clojure/kernel/app {
+    (make-node :kernel/app {
               :expr
-              (make-node :clojure/kernel/extern { :name "meta.core/rename-node" })  ; Note: needs qualification only on _second_ use!
+              (make-node :kernel/extern { :name "meta.core/rename-node" })  ; Note: needs qualification only on _second_ use!
               
               :args
-              (make-node :clojure/kernel/args [
+              (make-node :kernel/args [
                 d
               ])
             })
     (let [a (first attrs)]
-      (make-node :clojure/kernel/let {
+      (make-node :kernel/let {
         :bind
-        (make-node :clojure/kernel/bind (node-id a) {})
+        (make-node :kernel/bind (node-id a) {})
     
         :expr
-        (make-node :clojure/kernel/app {
+        (make-node :kernel/app {
           :expr
-          (make-node :clojure/kernel/extern { :name "meta.reduce/with-attr-node" })  ; Note: needs qualification only on _second_ use!
+          (make-node :kernel/extern { :name "meta.reduce/with-attr-node" })  ; Note: needs qualification only on _second_ use!
         
           :args 
-          (make-node :clojure/kernel/args [
-            (make-node :clojure/kernel/var { :ref (ref-node :node) })
-            (make-node :clojure/kernel/name { :value (node-attr-value a :name) })
+          (make-node :kernel/args [
+            (make-node :kernel/var { :ref (ref-node :node) })
+            (make-node :kernel/name { :value (node-attr-value a :name) })
           ])
         })
     
@@ -252,10 +252,10 @@
 (defn- display-fn
   [mn attr]
   (let [red (node-attr mn attr)]  ; TODO: reduce the reduction using what exactly?
-    (make-node :clojure/kernel/lambda {
+    (make-node :kernel/lambda {
       :params 
-      (make-node :clojure/kernel/params [
-        (make-node :clojure/kernel/bind :node {})
+      (make-node :kernel/params [
+        (make-node :kernel/bind :node {})
       ])
       
       :body
@@ -294,7 +294,7 @@
               ; _ (println "mdf:")  ; HACK
               ; _ (print-node mdf true)  ; HACK
               cl (meta-compile mdf)
-              ; _ (when (= :clojure/core/where (node-attr-value rule :type)) ; HACK
+              ; _ (when (= :core/where (node-attr-value rule :type)) ; HACK
               ;     (print-node mdf true) ; HACK
               ;     (println "cl:" cl))  ; HACK
               ; _ (println "cl:" cl)  ; HACK
@@ -346,7 +346,7 @@
                     (if-let [rule (first rules)]
                       (let [rrule (meta-reduce rule (reduceByType expfns))
                             typ (node-attr-value rrule :type)
-                            ; _ (if (= typ :clojure/core/in) (print-node rrule)) ; HACK
+                            ; _ (if (= typ :core/in) (print-node rrule)) ; HACK
                             f (reduce-with-rule rrule attr)
                             e (reduce-with-rule rrule :expand)]
                         (recur (next rules) 

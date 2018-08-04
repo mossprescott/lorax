@@ -8,7 +8,7 @@
       :type
       :clojure/regex/pattern
     
-      :supers [ :clojure/kernel/expr ]
+      :supers [ :kernel/expr ]
     
       :display
       (node :view/sequence  ; TODO: any kind of wrapping?
@@ -40,7 +40,7 @@
           
             :options [
               (node :structure/node
-                :type :clojure/kernel/expr) ; the idea is to accept any expr yielding a string
+                :type :kernel/expr) ; the idea is to accept any expr yielding a string
               (node :structure/node
                 :type :clojure/regex/literal) ; or an embedded string literal, without quotes
             ]
@@ -130,7 +130,7 @@
           
               :options [
                 (node :structure/node
-                  :type :clojure/kernel/expr)
+                  :type :kernel/expr)
               ]
               
               :optional false)
@@ -141,7 +141,7 @@
           
               :options [
                 (node :structure/node
-                  :type :clojure/kernel/expr)
+                  :type :kernel/expr)
               ]
               
               :optional false)

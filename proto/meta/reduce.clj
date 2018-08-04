@@ -373,7 +373,7 @@
     `(with-attr-seq ~n ~attrName c# c#))
   ([n attrName c body]
     `(with-attr ~n ~attrName ~c ~body 
-      (make-node :core/sequence [ (make-node :view/expr/missing {}) ]))))
+      (make-node :lorax/sequence [ (make-node :view/expr/missing {}) ]))))
   
 
 (defn apply-until
@@ -478,11 +478,11 @@
       "A node is reduced to a vector, and then an element of the vector is reduced.")))
       
 (deftest introduced
-  (let [n1 (node :foo :core/id :1)
+  (let [n1 (node :foo :lorax/id :1)
         n3 (node :bleep)
-        n2 (node :bar :core/id :2 :other n3)
-        n4 (node :baz :core/id :3 :child n1)
-        n5 (node :baz :core/id :3 :child n2)
+        n2 (node :bar :lorax/id :2 :other n3)
+        n4 (node :baz :lorax/id :3 :child n1)
+        n5 (node :baz :lorax/id :3 :child n2)
         r (fn [n] (if (= (node-type n) :foo) n2 nil)) 
         [np o] (meta-reduce2 n4 r)]
     (is (= np n5))
@@ -492,8 +492,8 @@
 
 (deftest ids-via-reduction
   (let [f (fn [n v] [nil (conj v (node-id n))])]
-    (is (= (reduce-plus (node :foo :core/id :1) f #{})
-            [(node :foo :core/id :1) {:1 :1} #{:1}]))))
+    (is (= (reduce-plus (node :foo :lorax/id :1) f #{})
+            [(node :foo :lorax/id :1) {:1 :1} #{:1}]))))
 
 (deftest apply-until1
   (let [n (fn [n] nil)
@@ -524,6 +524,6 @@
   (is (= (with-attr (node :foo) :foo/bar bar (node :baz :quux bar) 1)
           1)
           "missing")
-  (is (= (with-attr (node :foo :bar (make-node :bar :2 2)) :foo/bar bar (node :baz :core/id :1 :quux bar) 1)
-          (node :baz :core/id :1 :quux (make-node :bar :2 2)))
+  (is (= (with-attr (node :foo :bar (make-node :bar :2 2)) :foo/bar bar (node :baz :lorax/id :1 :quux bar) 1)
+          (node :baz :lorax/id :1 :quux (make-node :bar :2 2)))
           "present"))

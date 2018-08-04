@@ -310,7 +310,7 @@
   [n]
   (if (and (value-node? n) (string? (node-value n)))
       (node-value n)
-      (make-node :core/string (str (node-type n)))))
+      (make-node :lorax/string (str (node-type n)))))
 
 (defn exprToView 
   [n]
@@ -381,8 +381,8 @@
                           f)
                     ]
                 [ (make-node :view/chars {
-                    :str (make-node :core/string c)
-                    :font (make-node :core/name fp)
+                    :str (make-node :lorax/string c)
+                    :font (make-node :lorax/name fp)
                   })
                   [mode level] ])))
 

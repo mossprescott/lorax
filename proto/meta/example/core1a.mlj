@@ -1,0 +1,136 @@
+(use 'meta.core)
+
+(make-node :core/program [
+    ; (make-node :core/doc { :string "Simple examples using only the kernel syntax..."})
+    ;   
+    ; (make-node :kernel/nil)
+    ; (make-node :kernel/true)
+    ; (make-node :kernel/false)
+    ; (make-node :kernel/int { :value 42 })
+    ; (make-node :kernel/string { :value "abc"})
+    ; (make-node :kernel/name { :value :thing })
+    ; (make-node :kernel/if {
+    ;   ; :test
+    ;   ; (make-node :kernel/true)
+    ;   
+    ;   :then
+    ;   (make-node :kernel/int { :value 1 })
+    ;   
+    ;   :else
+    ;   (make-node :kernel/int { :value 2 })
+    ; })
+    
+    (make-node :kernel/app {
+      :expr
+      (make-node :kernel/extern { :name "+" })
+     
+      :args
+      (make-node :kernel/args [
+        (make-node :kernel/int { :value 1 })
+        (make-node :kernel/int { :value 2 })
+      ]) 
+    })
+    
+    (make-node :kernel/let {
+      :bind 
+      (make-node :kernel/bind :y {})
+      
+      :expr
+      (make-node :kernel/int { :value 11 })
+      
+      :body
+      (make-node :kernel/app {
+        :expr
+        (make-node :kernel/extern { :name "-" })
+     
+        :args
+        (make-node :kernel/args [
+          (make-node :kernel/var {
+            :ref (ref-node :y)
+          })
+          (make-node :kernel/int { :value 1 })
+        ]) 
+      })
+    })
+    
+    ; (make-node :kernel/let {
+    ;   :bind 
+    ;   (make-node :kernel/bind :dec {})
+    ;   
+    ;   :expr
+    ;   (make-node :kernel/lambda { 
+    ;     :params
+    ;     (make-node :kernel/params [
+    ;       (make-node :kernel/bind :n {})
+    ;     ])
+    ;     
+    ;     :body
+    ;     (make-node :kernel/app {
+    ;       :expr
+    ;       (make-node :kernel/extern { :name "-" })
+    ;  
+    ;       :args
+    ;       (make-node :kernel/args [
+    ;         (make-node :kernel/var {
+    ;           :ref (ref-node :n)
+    ;         })
+    ;         (make-node :kernel/int { :value 1 })
+    ;       ])
+    ;     })
+    ;   })
+    ;   
+    ;   :body
+    ;   (make-node :kernel/app {
+    ;     :expr
+    ;     (make-node :kernel/var {
+    ;       :ref (ref-node :dec)
+    ;     })
+    ;  
+    ;     :args
+    ;     (make-node :kernel/args [
+    ;       (make-node :kernel/int { :value 3 })
+    ;     ]) 
+    ;   })
+    ; })
+    ; 
+    ; (make-node :kernel/let {
+    ;   :bind 
+    ;   (make-node :kernel/bind :inc {})
+    ;   
+    ;   :expr
+    ;   (make-node :kernel/lambda { 
+    ;     :params
+    ;     (make-node :kernel/params [
+    ;       (make-node :kernel/bind :n_ {})
+    ;     ])
+    ;     
+    ;     :body
+    ;     (make-node :kernel/app {
+    ;       :expr
+    ;       (make-node :kernel/extern { :name "+" })
+    ;  
+    ;       :args
+    ;       (make-node :kernel/args [
+    ;         (make-node :kernel/var {
+    ;           :ref (ref-node :n_)
+    ;         })
+    ;         (make-node :kernel/int { :value 1 })
+    ;       ])
+    ;     })
+    ;   })
+    ;   
+    ;   :body
+    ;   (make-node :kernel/app {
+    ;     :expr
+    ;     (make-node :kernel/var {
+    ;       :ref (ref-node :inc)
+    ;     })
+    ;  
+    ;     :args
+    ;     (make-node :kernel/args [
+    ;       (make-node :kernel/int { :value 4 })
+    ;     ]) 
+    ;   })
+    ; })
+
+  ])

@@ -1,0 +1,1 @@
+wc -l meta/*.clj meta/clojure/*.clj meta/edit/*.clj

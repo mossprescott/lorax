@@ -6,7 +6,7 @@
   
 
 (def n1 
-  (node :clojure/core/and2 
+  (node :core/and2 
     :left 
     "a"
 
@@ -42,86 +42,86 @@
 ; (defn run nil) ;; HACK
 
 (run
-  (node :clojure/kernel/bind)
+  (node :kernel/bind)
   false)
   
 (run 
-  (node :clojure/kernel/int 
+  (node :kernel/int 
     :value 1)
   false)
 
 (run 
-  (node :clojure/kernel/var
-    :ref (node :core/ref :id :1))
+  (node :kernel/var
+    :ref (node :lorax/ref :id :1))
   false)
                                   
 (run 
-  (node :clojure/kernel/app 
-    :expr (node :clojure/kernel/extern :name '+)
-    :args [ (node :clojure/kernel/int :value 1)
-            (node :clojure/kernel/int :value 2)])
+  (node :kernel/app 
+    :expr (node :kernel/extern :name '+)
+    :args [ (node :kernel/int :value 1)
+            (node :kernel/int :value 2)])
   true)
 
 (run
-  (node :clojure/kernel/let
-    :bind (node :clojure/kernel/bind :core/id :1)
-    :expr (node :clojure/kernel/int :value 2)
+  (node :kernel/let
+    :bind (node :kernel/bind :lorax/id :1)
+    :expr (node :kernel/int :value 2)
     :body 
-      (node :clojure/kernel/var
-        :ref (node :core/ref :id :1)))
+      (node :kernel/var
+        :ref (node :lorax/ref :id :1)))
   true)
 
 (run
-  (node :clojure/kernel/if
-    :test (node :clojure/kernel/false)
-    :then (node :clojure/kernel/int :value 1)
-    :else (node :clojure/kernel/int :value 2))
+  (node :kernel/if
+    :test (node :kernel/false)
+    :then (node :kernel/int :value 1)
+    :else (node :kernel/int :value 2))
   true)
 
 (run
-  (node :clojure/kernel/lambda
-    :params [ (node :clojure/kernel/bind :core/id :1) ]
+  (node :kernel/lambda
+    :params [ (node :kernel/bind :lorax/id :1) ]
     :body 
-    (node :clojure/kernel/var 
+    (node :kernel/var 
       :ref 
-      (node :core/ref 
+      (node :lorax/ref 
         :id :1)))
   false)
 
 (run
-  (node :clojure/kernel/app
+  (node :kernel/app
     :expr
-    (node :clojure/kernel/lambda
-      :params [ (node :clojure/kernel/bind :core/id :1) ]
+    (node :kernel/lambda
+      :params [ (node :kernel/bind :lorax/id :1) ]
       :body 
-      (node :clojure/kernel/var 
+      (node :kernel/var 
         :ref 
-        (node :core/ref 
+        (node :lorax/ref 
           :id :1)))
     :args [
-      (node :clojure/kernel/int 
+      (node :kernel/int 
         :value 42) ])
   true)
   
 (run 
-  (node :core/later
-    :node (node :clojure/kernel/int :value 1))
+  (node :lorax/later
+    :node (node :kernel/int :value 1))
   true)
 
 (def quoted
-  (node :core/later
+  (node :lorax/later
     :node
-    (node :clojure/kernel/app 
-      :expr (node :clojure/kernel/extern :name '+)
+    (node :kernel/app 
+      :expr (node :kernel/extern :name '+)
       :args [ 
-        (node :clojure/kernel/int :value 1)
-        (node :core/sooner 
+        (node :kernel/int :value 1)
+        (node :lorax/sooner 
           :node 
-          (node :clojure/kernel/app 
-            :expr (node :clojure/kernel/extern :name '+)
+          (node :kernel/app 
+            :expr (node :kernel/extern :name '+)
             :args [ 
-              (node :clojure/kernel/int :value 2)
-              (node :clojure/kernel/int :value 3)
+              (node :kernel/int :value 2)
+              (node :kernel/int :value 3)
             ]))
         ])))
     
@@ -139,44 +139,44 @@
     (run (meta-reduce ~n (reduceByType ccrules)) ~e)))
     
 (rrun
-  (node :clojure/core/and2 
+  (node :core/and2 
     :left 
-    (node :clojure/kernel/true)
+    (node :kernel/true)
   
     :right 
-    (node :clojure/kernel/false))
+    (node :kernel/false))
   true)
   
 (rrun
-  (node :clojure/core/and2-wrong 
+  (node :core/and2-wrong 
     :left 
-    (node :clojure/kernel/int
+    (node :kernel/int
       :value 1)
   
     :right 
-    (node :clojure/core/and2-wrong
+    (node :core/and2-wrong
       :left 
-      (node :clojure/kernel/int
+      (node :kernel/int
         :value 2)
   
       :right 
-      (node :clojure/kernel/int
+      (node :kernel/int
         :value 3)))
   true)
   
 (rrun
-  (node :clojure/core/and2 
+  (node :core/and2 
     :left 
-    (node :clojure/kernel/int
+    (node :kernel/int
       :value 1)
   
     :right 
-    (node :clojure/core/and2 
+    (node :core/and2 
       :left 
-      (node :clojure/kernel/int
+      (node :kernel/int
         :value 2)
   
       :right 
-      (node :clojure/kernel/int
+      (node :kernel/int
         :value 3)))
   true)

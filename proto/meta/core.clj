@@ -37,11 +37,11 @@
 
 (defmacro time2
   "Slightly enhanced time macro"
-  [msg expr]
+  [msg expr print?]
   `(let [start# (. System (nanoTime))
          ret# ~expr
          elapsed# (/ (double (- (. System (nanoTime)) start#)) 1000000.0)]
-     (println (str ~msg elapsed# " ms"))
+     (if ~print? (println (str ~msg elapsed# " ms")))
      ret#))
 
 
@@ -85,19 +85,19 @@
     v
     
     (string? v)
-    (make-node :core/string v)
+    (make-node :lorax/string v)
     
     (integer? v)
-    (make-node :core/int v)
+    (make-node :lorax/int v)
     
     (float? v)
-    (make-node :core/float v)
+    (make-node :lorax/float v)
     
     (keyword? v)
-    (make-node :core/name v)
+    (make-node :lorax/name v)
 
     (or (= true v) (= false v))
-    (make-node :core/boolean v)
+    (make-node :lorax/boolean v)
     
     true
     (throw (AssertionError. (str "Invalid node value: " v)))))
@@ -126,7 +126,7 @@
 (defn make-node
   "Constructor for nodes. For convenience, any 'collection' value is converted to 
   a vector (i.e. a seq-node), any primitive value is wrapped in a node
-  with the standard type (e.g. :core/string), and any un-qualified attribute 
+  with the standard type (e.g. :lorax/string), and any un-qualified attribute 
   name is prefixed with the node type name."
   ([typ]
     (make-node typ (genid) {}))
@@ -162,7 +162,7 @@
 (defn node
   "Deprecated: use make-node.
   Build a new node with the given type and children, and a freshly generated 
-  id. If a :core/id child is provided, it overrides the generated id."
+  id. If a :lorax/id child is provided, it overrides the generated id."
   [t & children]
   (do
     (assert-pred even? (count children))
@@ -172,7 +172,7 @@
                     (node? v)
                     v
                     
-                    ; (and (keyword? v) (= :core/id k))
+                    ; (and (keyword? v) (= :lorax/id k))
                     ; v
                     
                     ; Simple values will get wrapped in make-node:
@@ -181,13 +181,13 @@
                     
                     ; Vector needs wrapping; so do its elements, if not nodes
                     (vector? v)
-                    (make-node :core/sequence 
+                    (make-node :lorax/sequence 
                       (vec (map wrap-value v)))
                     
                     true
                     (assert-pred (fn [n] false) v)))
-          id (if-let [i (m :core/id)] i (genid))]
-      (make-node t id (dissoc m :core/id)))))
+          id (if-let [i (m :lorax/id)] i (genid))]
+      (make-node t id (dissoc m :lorax/id)))))
       
 (defn node-type 
   "The 'type' of the node (a keyword)."
@@ -225,13 +225,13 @@
 (defn ref-node
   "Make a new ref node which points to the node with the given id."
   [id]
-  (make-node :core/ref id))
+  (make-node :lorax/ref id))
     
 (defn ref-node?
   "true if x is a reference-node (that is, a node that represents a pointer to another node)"
   [#^nodetype x]
   (and (node? x) 
-        (= (node-type x) :core/ref)))
+        (= (node-type x) :lorax/ref)))
 
 (defn ref-node-id
   "Id of the node pointed to by the given reference-node."
@@ -548,14 +548,14 @@
 (deftest deep-ids-1
   (is (= '(:1) 
       (deep-node-ids 
-        (node :foo :core/id :1)))))
+        (node :foo :lorax/id :1)))))
   
 (deftest deep-ids-2
   (is (= #{:1 :2}
         (set (deep-node-ids 
-              (node :foo :core/id :1 
+              (node :foo :lorax/id :1 
                 :child 
-                (node :bar :core/id :2)))))))
+                (node :bar :lorax/id :2)))))))
   
 (deftest deep-ids-3
   (is (= #{:1 :2 :3 :4}

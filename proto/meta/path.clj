@@ -116,8 +116,8 @@
                    :c [2 (node :d :e 3)])))))))
   
 (deftest node-at-path1
-  (is (= (node :foo :core/id :1)
-        (node-at-path (node :foo :core/id :1) '())))
+  (is (= (node :foo :lorax/id :1)
+        (node-at-path (node :foo :lorax/id :1) '())))
   (is (= "a"
         (node-at-path 
           (node :foo :bar "a")

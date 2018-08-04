@@ -30,7 +30,7 @@ additional views:
 next demo language?
 - python? (not typed, but rich(er) syntax)
 
-:clojure/core
+:core
 - map
 - essential operators
 - list comprehensions

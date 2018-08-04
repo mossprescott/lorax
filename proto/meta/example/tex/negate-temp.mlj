@@ -1,0 +1,248 @@
+(use 'meta.core)  ; ignored by load-nodes, but should make this file legal Clojure
+
+(make-node :grammar/language [
+  ; negate
+  (make-node :grammar/mapNode {
+    :type
+    (make-node :grammar/type :cf/negate)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :kernel/expr)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :negate-2_expr {
+        :name
+        (make-node :grammar/name :cf/negate-2/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node { :type :kernel/expr })
+        ])
+        
+        :optional false
+      }) 
+    ])
+    
+    :display
+    (make-node :kernel/quote {
+      :body
+      (make-node :view/expr/juxt [
+        (make-node :view/expr/symbol { :str "-" })
+        (make-node :kernel/unquote {
+          :body
+          (make-node :kernel/var {
+            :ref (ref-node :negate-2_expr)
+          })
+        })
+      ])
+    })
+    
+    :expand
+    (make-node :kernel/quote {
+      :body
+      (make-node :core/where {
+        :body
+        (make-node :cf/match-x {
+          :expr
+          (make-node :kernel/var {
+            :ref (ref-node :negate-2_c)
+          })
+          
+          :x
+          (make-node :kernel/bind :negate-2_n0 { :name "n" })
+          
+          :then
+          (make-node :cf/fraction {
+            :coeff
+            (make-node :core/unaryminus {
+              :expr
+              (make-node :kernel/var {
+                :ref (ref-node :negate-2_n0)
+              })
+            })
+            
+            :cont
+            (make-node :cf/inf)
+          })
+          
+          :else
+          (make-node :cf/match-xv {
+            :expr
+            (make-node :kernel/var {
+              :ref (ref-node :negate-2_c)
+            })
+          
+            :x
+            (make-node :kernel/bind :negate-2_n1 { :name "n" })
+          
+            :v
+            (make-node :kernel/int { :value 2 })
+            
+            :then
+            (make-node :cf/fraction {
+              :coeff
+              (make-node :core/minus {
+                :left
+                (make-node :core/unaryminus {
+                  :expr
+                  (make-node :kernel/var {
+                    :ref (ref-node :negate-2_n1)
+                  })
+                })
+                
+                :right
+                (make-node :kernel/int { :value 1 })
+              })
+            
+              :cont
+              (make-node :cf/fraction {
+                :coeff
+                (make-node :kernel/int { :value 2 })
+                
+                :cont
+                (make-node :cf/inf)
+              })
+            })
+            
+            :else
+            (make-node :cf/match-xvxc {
+              :expr
+              (make-node :kernel/var {
+                :ref (ref-node :negate-2_c)
+              })
+          
+              :x
+              (make-node :kernel/bind :negate-2_n2 { :name "n" })
+          
+              :v
+              (make-node :kernel/int { :value 1 })
+            
+              :y
+              (make-node :kernel/bind :negate-2_n3 { :name "l" })
+          
+              :c
+              (make-node :kernel/bind :negate-2_c0 { :name "d" })
+          
+              :then
+              (make-node :cf/fraction {
+                :coeff
+                (make-node :core/minus {
+                  :left
+                  (make-node :core/unaryminus {
+                    :expr
+                    (make-node :kernel/var {
+                      :ref (ref-node :negate-2_n2)
+                    })
+                  })
+                
+                  :right
+                  (make-node :kernel/int { :value 1 })
+                })
+            
+                :cont
+                (make-node :cf/fraction {
+                  :coeff
+                  (make-node :core/plus {
+                    :left
+                    (make-node :kernel/var {
+                      :ref (ref-node :negate-2_n3)
+                    })
+                    
+                    :right
+                    (make-node :kernel/int { :value 1 })
+                  })
+                  
+                  :cont
+                  (make-node :kernel/var {
+                    :ref (ref-node :negate-2_c0)
+                  })
+                })
+              })
+              
+              :else
+              (make-node :cf/match-xxc {
+                :expr
+                (make-node :kernel/var {
+                  :ref (ref-node :negate-2_c)
+                })
+          
+                :x
+                (make-node :kernel/bind :negate-2_n4 { :name "n" })
+          
+                :y
+                (make-node :kernel/bind :negate-2_n5 { :name "m" })
+          
+                :c
+                (make-node :kernel/bind :negate-2_c1 { :name "d" })
+          
+                :then
+                (make-node :cf/fraction {
+                  :coeff
+                  (make-node :core/minus {
+                    :left
+                    (make-node :core/unaryminus {
+                      :expr
+                      (make-node :kernel/var {
+                        :ref (ref-node :negate-2_n4)
+                      })
+                    })
+                
+                    :right
+                    (make-node :kernel/int { :value 1 })
+                  })
+            
+                  :cont
+                  (make-node :cf/fraction {
+                    :coeff
+                    (make-node :kernel/int { :value 1 })
+
+                    :cont
+                    (make-node :cf/fraction {
+                      :coeff
+                      (make-node :core/minus {
+                        :left
+                        (make-node :kernel/var {
+                          :ref (ref-node :negate-2_n5)
+                        })
+                    
+                        :right
+                        (make-node :kernel/int { :value 1 })
+                      })
+                  
+                      :cont
+                      (make-node :kernel/var {
+                        :ref (ref-node :negate-2_c1)
+                      })
+                    })
+                  })
+                })
+              
+                :else
+                (make-node :core/fail)
+              })
+            })
+          })
+        })
+        
+        :vars
+        (make-node :core/whereVars [
+          (make-node :core/whereVar {
+            :bind
+            (make-node :kernel/bind :negate-2_c { :name "c" })
+            
+            :expr
+            (make-node :kernel/unquote {
+              :body
+              (make-node :kernel/var {
+                :ref (ref-node :negate-2_expr)
+              })
+            })
+          })
+        ])
+      })
+    })
+  })
+])

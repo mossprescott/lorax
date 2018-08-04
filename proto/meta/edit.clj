@@ -164,7 +164,7 @@
   (is (= (make-node :foo { :bar (make-node :baz) })
         (insert-node (make-node :foo :123 {}) :123 :bar (make-node :baz))))
   (is (= (make-node :foo { :bar 1 :baz 2 })
-        (insert-node (make-node :foo :123 { :bar 1 }) :123 :baz (make-node :core/int 2)))))
+        (insert-node (make-node :foo :123 { :bar 1 }) :123 :baz (make-node :lorax/int 2)))))
 
 (deftest insert-seq1
   (is (= (make-node :foo [ (make-node :bar) ])

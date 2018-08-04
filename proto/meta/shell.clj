@@ -160,7 +160,7 @@
 
 ; "Standard" lifted grammar display function, including:
 ;  - the simple reductions for :structure and :grammar languages
-;  - the display reductions for :clojure/kernel and /core
+;  - the display reductions for :kernel and /core
 (def grammar-display
   (lift make-grammar-display 
         (ref grammar-display-simple) 
@@ -234,3 +234,7 @@
 (def ex2 "meta/example/core2.mlj")
 (def ex3 "meta/example/core3.mlj")
 (def excf "meta/example/tex/continued.mlj")
+
+(defn demo []
+  (show-program "meta/example/empty.mlj")
+  (show-session "meta/example/empty.mlj" true))

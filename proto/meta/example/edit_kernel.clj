@@ -23,186 +23,186 @@
 ;       ])))
 
 (def x1 
-  (node :clojure/kernel/let 
+  (node :kernel/let 
     :bind 
-    (node :clojure/kernel/bind :core/id :x)
+    (node :kernel/bind :lorax/id :x)
 
     :expr 
-    (node :clojure/kernel/int :value 1)
+    (node :kernel/int :value 1)
 
     :body
-    (node :clojure/kernel/var 
+    (node :kernel/var 
       :ref
-      (node :core/ref
+      (node :lorax/ref
         :id :x))))
 
 (def x5
-  (node :clojure/kernel/app
+  (node :kernel/app
     :expr
-    (node :clojure/kernel/extern
+    (node :kernel/extern
       :name "inc")
     
     :args [
-      (node :clojure/kernel/int :value 1)
+      (node :kernel/int :value 1)
     ]))
     
 ; (def x2  ; identity fxn
-;   (node :clojure/kernel/lambda
+;   (node :kernel/lambda
 ;     :params [
-;       (node :clojure/kernel/bind :core/id :y)
+;       (node :kernel/bind :lorax/id :y)
 ;     ]
 ;     
 ;     :body
-;     (node :clojure/kernel/var :ref (node :core/ref :id :y))))
+;     (node :kernel/var :ref (node :lorax/ref :id :y))))
 ; 
 ; (def x3
-;   (node :clojure/kernel/app
+;   (node :kernel/app
 ;     :expr
 ;     x2
 ;     
 ;     :args [
-;       (node :clojure/kernel/int :value 1)
+;       (node :kernel/int :value 1)
 ;     ]))
     
 (def x3
-  (node :clojure/kernel/let
+  (node :kernel/let
     :bind
-    (node :clojure/kernel/bind :core/id :id)
+    (node :kernel/bind :lorax/id :id)
     
     :expr
-    (node :clojure/kernel/lambda
+    (node :kernel/lambda
       :params [
-        (node :clojure/kernel/bind :core/id :y)
+        (node :kernel/bind :lorax/id :y)
       ]
       
       :body
-      (node :clojure/kernel/var :ref (node :core/ref :id :y)))
+      (node :kernel/var :ref (node :lorax/ref :id :y)))
     
     :body
-    (node :clojure/kernel/app
+    (node :kernel/app
       :expr
-      (node :clojure/kernel/var :ref (node :core/ref :id :id))
+      (node :kernel/var :ref (node :lorax/ref :id :id))
 
       :args [
-        (node :clojure/kernel/int :value 1)
+        (node :kernel/int :value 1)
       ])))
 
 (def x4
-  (node :clojure/kernel/let
+  (node :kernel/let
     :bind
-    (node :clojure/kernel/bind :core/id :z)
+    (node :kernel/bind :lorax/id :z)
     
     :expr
-    (node :clojure/kernel/lambda
+    (node :kernel/lambda
       :params [
-        (node :clojure/kernel/bind :core/id :t)
-        (node :clojure/kernel/bind :core/id :u)
+        (node :kernel/bind :lorax/id :t)
+        (node :kernel/bind :lorax/id :u)
       ]
     
       :body
-      (node :clojure/kernel/app
+      (node :kernel/app
         :expr
-        (node :clojure/kernel/extern :name "+")
+        (node :kernel/extern :name "+")
         
         :args [
-          (node :clojure/kernel/var :ref (node :core/ref :id :t))
-          (node :clojure/kernel/var :ref (node :core/ref :id :u))
+          (node :kernel/var :ref (node :lorax/ref :id :t))
+          (node :kernel/var :ref (node :lorax/ref :id :u))
         ]))
       
     :body
-    (node :clojure/kernel/app
+    (node :kernel/app
       :expr
-      (node :clojure/kernel/var :ref (node :core/ref :id :z))
+      (node :kernel/var :ref (node :lorax/ref :id :z))
       
       :args [
-        (node :clojure/kernel/int :value 1)
-        (node :clojure/kernel/int :value 2)
+        (node :kernel/int :value 1)
+        (node :kernel/int :value 2)
       ])))
       
 (def x6
-  (node :clojure/kernel/if
+  (node :kernel/if
     :test
-    (node :clojure/kernel/true)
+    (node :kernel/true)
     
     :then
-    (node :clojure/kernel/int :value 1)
+    (node :kernel/int :value 1)
     
     :else
-    (node :clojure/kernel/string :value "abc")))
+    (node :kernel/string :value "abc")))
 
 (def x7
-  (node :clojure/kernel/bind :core/id :w))
+  (node :kernel/bind :lorax/id :w))
 
 (def x8
-  (node :clojure/kernel/let
+  (node :kernel/let
     :bind
-    (node :clojure/kernel/int :value 1)
+    (node :kernel/int :value 1)
     
     :expr
-    (node :clojure/kernel/bind :core/id :q)
+    (node :kernel/bind :lorax/id :q)
     
     :body
-    (node :clojure/kernel/nil)))
+    (node :kernel/nil)))
 
 (def x9
-  (node :clojure/kernel/if
+  (node :kernel/if
     :test
-    (node :clojure/core/and
+    (node :core/and
       :left
-      (node :clojure/kernel/true)
+      (node :kernel/true)
     
       :right
-      (node :clojure/kernel/app
+      (node :kernel/app
         :expr
-        (node :clojure/kernel/extern
+        (node :kernel/extern
           :name "=")
       
         :args [
-          (node :clojure/kernel/int :value 1)
-          (node :clojure/kernel/int :value 2)
+          (node :kernel/int :value 1)
+          (node :kernel/int :value 2)
         ]))
     
     :then
-    (node :clojure/kernel/nil)
+    (node :kernel/nil)
     
     :else
-    (node :clojure/kernel/int :value 10000)))
+    (node :kernel/int :value 10000)))
 
 (def x10
-  (node :clojure/kernel/let
+  (node :kernel/let
     :bind
-    (node :clojure/kernel/bind :core/id :a)
+    (node :kernel/bind :lorax/id :a)
     
     :expr
-    (node :clojure/kernel/int :value 42)
+    (node :kernel/int :value 42)
     
     :body
-    (node :clojure/kernel/quote
+    (node :kernel/quote
       :body
-      (node :clojure/kernel/app
+      (node :kernel/app
         :expr
-        (node :clojure/kernel/extern
+        (node :kernel/extern
           :name "+")
         
         :args [
-          (node :clojure/kernel/int :value 24)
-          (node  :clojure/kernel/unquote
+          (node :kernel/int :value 24)
+          (node  :kernel/unquote
             :body
-            (node :clojure/kernel/var
-              :ref (node :core/ref :id :a)))
+            (node :kernel/var
+              :ref (node :lorax/ref :id :a)))
         ]))))
         
 (def x11
-  (node :clojure/kernel/if))
+  (node :kernel/if))
 
 (def x12
-  (node :clojure/kernel/app))
+  (node :kernel/app))
 
 (def x13
-  (node :clojure/kernel/lambda))
+  (node :kernel/lambda))
 
 (def p3 
-  (node :clojure/kernel/program
+  (node :kernel/program
     ; :items [ x1 x2 x3 ]))
     :exprs [ x1 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 ]))
 

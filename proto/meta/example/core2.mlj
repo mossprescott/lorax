@@ -1,148 +1,148 @@
 (use 'meta.core)
 
-(make-node :clojure/core/program [
-  (make-node :clojure/core/doc { :string "Examples using the core syntax..."})
+(make-node :core/program [
+  (make-node :core/doc { :string "Examples using the core syntax..."})
    
-  (make-node :clojure/core/comment {
+  (make-node :core/comment {
     :expr
-    (make-node :clojure/core/fraction {
+    (make-node :core/fraction {
       :num
-      (make-node :clojure/kernel/int { :value 1 })
+      (make-node :kernel/int { :value 1 })
 
       :denom
-      (make-node :clojure/kernel/int { :value 0 })
+      (make-node :kernel/int { :value 0 })
     })
   })
   
-  (make-node :clojure/core/not {
+  (make-node :core/not {
     :expr
-    (make-node :clojure/kernel/true)
+    (make-node :kernel/true)
   })
   
-  (make-node :clojure/core/unaryminus {
+  (make-node :core/unaryminus {
     :expr
-    (make-node :clojure/kernel/int { :value 137 })
+    (make-node :kernel/int { :value 137 })
   })
 
-  (make-node :clojure/core/sqrt {
+  (make-node :core/sqrt {
     :expr
-    (make-node :clojure/kernel/int { :value 4 })
+    (make-node :kernel/int { :value 4 })
   })
   
-  (make-node :clojure/core/sqrt {
+  (make-node :core/sqrt {
     :expr
-    (make-node :clojure/core/times {
+    (make-node :core/times {
       :left
-      (make-node :clojure/kernel/int { :value 4 })
+      (make-node :kernel/int { :value 4 })
       :right
-      (make-node :clojure/kernel/int { :value 9 })
+      (make-node :kernel/int { :value 9 })
     })
   })
   
-  (make-node :clojure/core/times {
+  (make-node :core/times {
     :left
-    (make-node :clojure/core/fraction {
+    (make-node :core/fraction {
       :num
-      (make-node :clojure/core/plus {
+      (make-node :core/plus {
         :left
-        (make-node :clojure/kernel/int { :value 1 })
+        (make-node :kernel/int { :value 1 })
         :right
-        (make-node :clojure/kernel/int { :value 2 })
+        (make-node :kernel/int { :value 2 })
       })
       :denom
-      (make-node :clojure/kernel/int { :value 4 })
+      (make-node :kernel/int { :value 4 })
     })
     
     :right
-    (make-node :clojure/kernel/int { :value 100 })
+    (make-node :kernel/int { :value 100 })
   })
   
-  ; (make-node :clojure/core/square {
+  ; (make-node :core/square {
     ; :expr
-    (make-node :clojure/core/times {
+    (make-node :core/times {
       :left
-      (make-node :clojure/core/fraction {
+      (make-node :core/fraction {
         :num
-        (make-node :clojure/kernel/int { :value 1 })
+        (make-node :kernel/int { :value 1 })
 
         :denom
-        (make-node :clojure/kernel/int { :value 3 })
+        (make-node :kernel/int { :value 3 })
       })
       
       :right
-      (make-node :clojure/core/sqrt {
+      (make-node :core/sqrt {
         :expr
-        (make-node :clojure/core/square {
+        (make-node :core/square {
           :expr
-          (make-node :clojure/kernel/int { :value 3 })
+          (make-node :kernel/int { :value 3 })
         })
       })
     })
   ; })
   
-  (make-node :clojure/core/where {
+  (make-node :core/where {
     :body 
-    (make-node :clojure/core/plus {
+    (make-node :core/plus {
       :left
-      (make-node :clojure/kernel/var {
+      (make-node :kernel/var {
         :ref (ref-node :a_where)
       })
       
       :right
-      (make-node :clojure/kernel/var {
+      (make-node :kernel/var {
         :ref (ref-node :b_where)
       })
     })
     
     :vars
-    (make-node :clojure/core/whereVars [
-      (make-node :clojure/core/whereVar {
+    (make-node :core/whereVars [
+      (make-node :core/whereVar {
         :bind
-        (make-node :clojure/kernel/bind :a_where { :name "a" })
+        (make-node :kernel/bind :a_where { :name "a" })
         
         :expr
-        (make-node :clojure/kernel/int { :value 1 })
+        (make-node :kernel/int { :value 1 })
       })
-      (make-node :clojure/core/whereVar {
+      (make-node :core/whereVar {
         :bind
-        (make-node :clojure/kernel/bind :b_where { :name "b" })
+        (make-node :kernel/bind :b_where { :name "b" })
         
         :expr
-        (make-node :clojure/kernel/int { :value 2 })
+        (make-node :kernel/int { :value 2 })
       })
     ])
   })
 
-  ; (make-node :clojure/core/and {
+  ; (make-node :core/and {
   ;   :left
-  ;   (make-node :clojure/kernel/true)
+  ;   (make-node :kernel/true)
   ;   
   ;   :right
-  ;   (make-node :clojure/kernel/false)
+  ;   (make-node :kernel/false)
   ; })
   ; 
-  ; (node :clojure/core/greater
+  ; (node :core/greater
   ;   :left
-  ;   (node :clojure/core/times
+  ;   (node :core/times
   ;     :left 
-  ;     (node :clojure/kernel/int :value 11)
+  ;     (node :kernel/int :value 11)
   ;     
   ;     :right
-  ;     (node :clojure/kernel/int :value 4))
+  ;     (node :kernel/int :value 4))
   ;   
   ;   :right
-  ;   (node :clojure/kernel/int :value 42))
+  ;   (node :kernel/int :value 42))
   ; 
-  ; (node :clojure/core/factorial
+  ; (node :core/factorial
   ;   :expr
-  ;   (node :clojure/kernel/int :value 4))
+  ;   (node :kernel/int :value 4))
   ; 
-  ; (node :clojure/core/factorial
+  ; (node :core/factorial
   ;   :expr
-  ;   (node :clojure/core/times
+  ;   (node :core/times
   ;     :left
-  ;     (node :clojure/kernel/int :value 2)
+  ;     (node :kernel/int :value 2)
   ;     
   ;     :right
-  ;     (node :clojure/kernel/int :value 10)))
+  ;     (node :kernel/int :value 10)))
   ])

@@ -56,11 +56,11 @@
 
 ; (def k (make-structure-checker (first (load-nodes "meta/kernel.mlj"))))
 ; 
-; (println "int:" (k (node :clojure/kernel/int
-;                     :core/id :1 
+; (println "int:" (k (node :kernel/int
+;                     :lorax/id :1 
 ;                     :value 1)))
-; (println "bad int:" (k (node :clojure/kernel/int 
-;                     :core/id :2 
+; (println "bad int:" (k (node :kernel/int 
+;                     :lorax/id :2 
 ;                     :foo 1
 ;                     :bar 2
 ;                     :value [3])))

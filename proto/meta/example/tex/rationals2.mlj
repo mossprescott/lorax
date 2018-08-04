@@ -19,8 +19,7 @@
       (make-node :core/nth {
         :expr
         (make-node :kernel/var {
-          :ref (ref-node :ratios)
-          ; :ref (ref-node :rationals)
+          :ref (ref-node :rationals)
         })
         
         :index
@@ -38,7 +37,7 @@
         (make-node :kernel/int { :value 0 })
     
         :max
-        (make-node :kernel/int { :value 2 })
+        (make-node :kernel/int { :value 14 })
       })
     })
 
@@ -77,29 +76,6 @@
     (make-node :core/whereVars [
       (make-node :core/whereVar {
         :bind 
-        (make-node :kernel/bind :ratios { :name "ratios" })
-        
-        :expr
-        (make-node :core/for {
-          :expr
-          (make-node :cf/ratio {
-            :expr
-            (make-node :kernel/var {
-              :ref (ref-node :r)
-            })
-          })
-          
-          :x
-          (make-node :kernel/bind :r { :name "r" })
-          
-          :seq
-          (make-node :kernel/var {
-            :ref (ref-node :rationals)
-          })
-        })
-      })
-      (make-node :core/whereVar {
-        :bind 
         (make-node :kernel/bind :rationals { :name "rationals" })
         
         :expr
@@ -127,7 +103,7 @@
         (make-node :kernel/lambda {
           :params
           (make-node :kernel/params [
-            (make-node :kernel/bind :x { :name "c" })
+            (make-node :kernel/bind :x { :name "x" })
           ])
           
           :body

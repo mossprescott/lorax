@@ -1,107 +1,107 @@
 (use 'meta.core)
 
-(make-node :clojure/core/program [
-    (make-node :clojure/core/doc { :string "Simple examples using only the kernel syntax..."})
+(make-node :core/program [
+    (make-node :core/doc { :string "Simple examples using only the kernel syntax..."})
   
-    (make-node :clojure/kernel/nil)
-    (make-node :clojure/kernel/true)
-    (make-node :clojure/kernel/false)
-    (make-node :clojure/kernel/int { :value 3 })
-    (make-node :clojure/kernel/int { :value 42 })
-    (make-node :clojure/kernel/string { :value "abc"})
-    (make-node :clojure/kernel/string { :value "Hello, world."})
-    (make-node :clojure/kernel/name { :value :thing })
-    (make-node :clojure/kernel/if {
+    (make-node :kernel/nil)
+    (make-node :kernel/true)
+    (make-node :kernel/false)
+    (make-node :kernel/int { :value 3 })
+    (make-node :kernel/int { :value 42 })
+    (make-node :kernel/string { :value "abc"})
+    (make-node :kernel/string { :value "Hello, world."})
+    (make-node :kernel/name { :value :thing })
+    (make-node :kernel/if {
       :test
-      (make-node :clojure/kernel/true)
+      (make-node :kernel/true)
       
       :then
-      (make-node :clojure/kernel/int { :value 1 })
+      (make-node :kernel/int { :value 1 })
       
       :else
-      (make-node :clojure/kernel/int { :value 2 })
+      (make-node :kernel/int { :value 2 })
     })
     
-    (make-node :clojure/kernel/if {
+    (make-node :kernel/if {
       :test
-      (make-node :clojure/kernel/false)
+      (make-node :kernel/false)
       
       :then
-      (make-node :clojure/kernel/int { :value 3 })
+      (make-node :kernel/int { :value 3 })
       
       :else
-      (make-node :clojure/kernel/nil)
+      (make-node :kernel/nil)
     })
     
-    (make-node :clojure/kernel/app {
+    (make-node :kernel/app {
       :expr
-      (make-node :clojure/kernel/extern { :name "+" })
+      (make-node :kernel/extern { :name "+" })
      
       :args
-      (make-node :clojure/kernel/args [
-        (make-node :clojure/kernel/int { :value 1 })
-        (make-node :clojure/kernel/int { :value 2 })
+      (make-node :kernel/args [
+        (make-node :kernel/int { :value 1 })
+        (make-node :kernel/int { :value 2 })
       ]) 
     })
     
-    (make-node :clojure/kernel/let {
+    (make-node :kernel/let {
       :bind 
-      (make-node :clojure/kernel/bind :y {})
+      (make-node :kernel/bind :y {})
       
       :expr
-      (make-node :clojure/kernel/int { :value 11 })
+      (make-node :kernel/int { :value 11 })
       
       :body
-      (make-node :clojure/kernel/app {
+      (make-node :kernel/app {
         :expr
-        (make-node :clojure/kernel/extern { :name "-" })
+        (make-node :kernel/extern { :name "-" })
      
         :args
-        (make-node :clojure/kernel/args [
-          (make-node :clojure/kernel/var {
+        (make-node :kernel/args [
+          (make-node :kernel/var {
             :ref (ref-node :y)
           })
-          (make-node :clojure/kernel/int { :value 1 })
+          (make-node :kernel/int { :value 1 })
         ]) 
       })
     })
     
-    (make-node :clojure/kernel/let {
+    (make-node :kernel/let {
       :bind 
-      (make-node :clojure/kernel/bind :dec {})
+      (make-node :kernel/bind :dec {})
       
       :expr
-      (make-node :clojure/kernel/lambda { 
+      (make-node :kernel/lambda { 
         :params
-        (make-node :clojure/kernel/params [
-          (make-node :clojure/kernel/bind :n {})
+        (make-node :kernel/params [
+          (make-node :kernel/bind :n {})
         ])
         
         :body
-        (make-node :clojure/kernel/app {
+        (make-node :kernel/app {
           :expr
-          (make-node :clojure/kernel/extern { :name "-" })
+          (make-node :kernel/extern { :name "-" })
      
           :args
-          (make-node :clojure/kernel/args [
-            (make-node :clojure/kernel/var {
+          (make-node :kernel/args [
+            (make-node :kernel/var {
               :ref (ref-node :n)
             })
-            (make-node :clojure/kernel/int { :value 1 })
+            (make-node :kernel/int { :value 1 })
           ])
         })
       })
       
       :body
-      (make-node :clojure/kernel/app {
+      (make-node :kernel/app {
         :expr
-        (make-node :clojure/kernel/var {
+        (make-node :kernel/var {
           :ref (ref-node :dec)
         })
      
         :args
-        (make-node :clojure/kernel/args [
-          (make-node :clojure/kernel/int { :value 3 })
+        (make-node :kernel/args [
+          (make-node :kernel/int { :value 3 })
         ]) 
       })
     })

@@ -1,5 +1,5 @@
-; Consumes a :clojure/core/program, expanding and then evaluating each expr
-; and building a :clojure/core/session.
+; Consumes a :core/program, expanding and then evaluating each expr
+; and building a :core/session.
 
 (ns meta.clojure.run
   (:use (meta core check reduce)
@@ -42,7 +42,7 @@
 ;   "Map from node types to functions which may be applied to a node of the 
 ;   specified type to produce an expanded node, for each rule in the given
 ;   grammar which has an :expand attribute.
-;   The reduction functions are built by constructing a :clojure/kernel/lambda
+;   The reduction functions are built by constructing a :kernel/lambda
 ;   node and then compiling it."
 ;   [gr]
 ;   (reduce merge {} 
@@ -60,27 +60,27 @@
 ;                                 (let [s (seq idAndNamePairs)]
 ;                                   (if s
 ;                                     (let [ [cid cname] (first s) ]
-;                                       (node :clojure/kernel/let
+;                                       (node :kernel/let
 ;                                         :bind
-;                                         (node :clojure/kernel/bind :core/id cid)
+;                                         (node :kernel/bind :lorax/id cid)
 ;                       
 ;                                         :expr
-;                                         (node :clojure/kernel/app
+;                                         (node :kernel/app
 ;                                           :expr
-;                                           (node :clojure/kernel/extern
+;                                           (node :kernel/extern
 ;                                             :name "node-attr")
 ;                           
 ;                                           :args [
-;                                             (node :clojure/kernel/var
+;                                             (node :kernel/var
 ;                                               :ref (ref-node nid))
 ;                             
-;                                             (node :clojure/kernel/app
+;                                             (node :kernel/app
 ;                                               :expr
-;                                               (node :clojure/kernel/extern
+;                                               (node :kernel/extern
 ;                                                 :name "keyword")
 ;                             
 ;                                               :args [
-;                                                 (node :clojure/kernel/string
+;                                                 (node :kernel/string
 ;                                                   :value (subs (str cname) 1))  ;; TODO???
 ;                                               ])
 ;                                           ])
@@ -89,9 +89,9 @@
 ;                                         (bindChildren (rest idAndNamePairs))))
 ;                                       exp)))
 ; 
-;                 qf (node :clojure/kernel/lambda
+;                 qf (node :kernel/lambda
 ;                     :params [
-;                       (node :clojure/kernel/bind :core/id nid)
+;                       (node :kernel/bind :lorax/id nid)
 ;                     ]
 ;                     
 ;                     :body
@@ -156,38 +156,38 @@
 
 (defn run-program
   [n exp show-reduced]
-  (make-node :clojure/core/session
+  (make-node :core/session
     (vec (for [x (node-children n)]
-            (if (#{ :clojure/core/doc :clojure/core/comment } (node-type x))
+            (if (#{ :core/doc :core/comment } (node-type x))
               x
               (let [ ; _ (println "x:") _ (print-node x true) ; HACK
                      [xp o] (try (meta-reduce2 x exp)
                                  (catch Throwable x
                                         (println x)
-                                        (make-node :clojure/kernel/nil))) ; HACK
+                                        (make-node :kernel/nil))) ; HACK
                   
                     ; _ (println "xp:") _ (print-node xp true) ; HACK
                     ; _ (println "cxp:" (meta-compile xp)) ; HACK
                     r (try (unread (meta-eval xp))
                            (catch Throwable x 
                                   (println x)
-                                  (make-node :clojure/kernel/nil))) ; HACK
+                                  (make-node :kernel/nil))) ; HACK
                     ; _ (println "r:" r)
                     ]
                 (if show-reduced
-                  (make-node :clojure/core/exchange {
+                  (make-node :core/exchange {
                     :expr   x
                     :kernel (rename-nodes xp)
                     :value  r
                   })
-                  (make-node :clojure/core/exchange {
+                  (make-node :core/exchange {
                     :expr   x
                     :value  r
                   }))))))))
 
 ; (def x1
-;   (make-node :clojure/core/program [
-;       (make-node :clojure/kernel/nil)
+;   (make-node :core/program [
+;       (make-node :kernel/nil)
 ;     ]))
 ;     
 ; (print-node (run-program x1 expand-core))

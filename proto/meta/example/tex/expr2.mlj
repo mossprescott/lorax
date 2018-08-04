@@ -1,6 +1,6 @@
 (use 'meta.core)
 
-(make-node :clojure/core/program [
+(make-node :core/program [
   ; a simple expr
-  (make-node :clojure/kernel/int { :value 1 })
+  (make-node :kernel/int { :value 1 })
 ])
