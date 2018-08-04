@@ -159,7 +159,7 @@
 
 ; Global multiplier for the font size. 1.0 gets you something nice for 
 ; reading up close. 2.0 is probably better for across a room.
-(def font-multiplier 1.5)
+(def font-multiplier 1.0)
 
 (def TEXT_SIZE_BASE 14)
 (def FONT_SCALES {
@@ -530,7 +530,7 @@
           result
           (let [d (first items)
                 ds (rest items)
-                [dw dh db] (size d g ctx)
+                [#^long dw dh db] (size d g ctx)
                 y (if (and b db) 
                     (- b db)        ; use baseline
                     (/ (- h dh) 2)) ; center
@@ -564,10 +564,10 @@
           result
           (let [d (first items)
                 ds (rest items)
-                [dw dh db] (size d g ctx)
+                [dw #^long dh db] (size d g ctx)
                 resultp (conj result [ d 0 y dw dh ])]
       ;       ; (println "d ds" d ds)
-              (recur ds (+ y dh LINE_SPACING) resultp))))))
+              (recur ds (+ y dh (long LINE_SPACING)) resultp))))))
 
 (defmethod draw-impl :view/section [n #^Graphics2D g ctx debug?] [])
 

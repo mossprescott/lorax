@@ -2,207 +2,288 @@
 
 (use 'meta.core)   ; ignored by load-nodes, but should make this file legal Clojure
 
-(node :grammar/language
-  :rules [
-    (node :grammar/rule
-      :type
-      :clojure/regex/pattern
+(make-node :grammar/language [
+
+  ; dot
+  (make-node :grammar/mapNode {
+    :doc
+    (make-node :grammar/doc { :str "Matches any single character" })
+
+    :type
+    (make-node :grammar/type :clojure/re/dot)
     
-      :supers [ :clojure/kernel/expr ]
+    :supers 
+    (make-node :grammar/types [ 
+      (make-node :grammar/type :clojure/re/pattern)
+    ])
     
-      :display
-      (node :view/sequence  ; TODO: any kind of wrapping?
-        :items [
-          (node :grammar/attr
-            :name
-            :clojure/regex/pattern/term
-            
-            :options [
-              (node :structure/node
-                :type :clojure/regex/term)
-            ]
-            
-            :optional false)
-        ]))
+    :attrs
+    (make-node :grammar/attrs [
+    ])
     
-    (node :grammar/rule
-      :type 
-      :clojure/regex/chars
-      
-      :supers [ :clojure/regex/term ]
-      
-      :display
-      (node :view/sequence
-        :items [
-          (node :grammar/attr
-            :name
-            :clojure/regex/chars/str
-          
-            :options [
-              (node :structure/node
-                :type :clojure/kernel/expr) ; the idea is to accept any expr yielding a string
-              (node :structure/node
-                :type :clojure/regex/literal) ; or an embedded string literal, without quotes
-            ]
-          
-            :optional false)
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/symbol { :str :cdot })
+    })
+  })
+
+  ; star
+  (make-node :grammar/mapNode {
+    :doc
+    (make-node :grammar/doc { :str "Matches zero or more repeats of the contained pattern" })
+
+    :type
+    (make-node :grammar/type :clojure/re/star)
+    
+    :supers 
+    (make-node :grammar/types [ 
+      (make-node :grammar/type :clojure/re/pattern)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :star_expr {
+        :name
+        (make-node :grammar/name :clojure/re/star/expr)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+            :type :clojure/re/pattern
+          })
         ])
-      
-      ; TODO: :reduce
-      )
+      })
+    ])
     
-    (node :grammar/rule
-      :type
-      :clojure/regex/sequence
-      
-      :supers [ :clojure/regex/term ]
-      
-      :display
-      (node :view/expr/juxt
-        :boxes
-        (node :grammar/sequence
-          :name
-          :clojure/regex/sequence/terms
-          
-          :options [
-            (node :structure/node
-              :type :clojure/regex/term)
-          ]
-          
-          :min 2))
-        
-        ; TODO: :reduce
-        )
-
-    (node :grammar/rule
-      :type
-      :clojure/regex/alt
-      
-      :supers [ :clojure/regex/term ]
-      
-      :display
-      (node :view/expr/juxt
-        :boxes
-        (node :grammar/sequence
-          :name
-          :clojure/regex/alt/terms
-          
-          :options [
-            (node :structure/node
-              :type :clojure/regex/term)
-          ]
-          
-          :min 2
-          
-          :separator
-          (node :view/expr/symbol :str "|")))
-        
-        ; TODO: :reduce
-        )
-
-
-    (node :grammar/rule
-      :type
-      :clojure/regex/repeat
-      
-      :supers [ :clojure/regex/term ]
-      
-      :display
-      (node :view/scripted
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/scripted {
         :nucleus
-        (node :grammar/attr
-          :name
-          :clojure/regex/repeat/term
-          
-          :options [
-            (node :structure/node
-              :type :clojure/regex/term)
-          ]
-          
-          :optional false)
-        
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :star_expr)
+          })
+        })
+
         :super
-        (node :view/expr/juxt
-          :boxes [
-            (node :grammar/attr
-              :name
-              :clojure/regex/repeat/min
-          
-              :options [
-                (node :structure/node
-                  :type :clojure/kernel/expr)
-              ]
-              
-              :optional false)
-            (node :view/expr/keyword :str "..")
-            (node :grammar/attr
-              :name
-              :clojure/regex/repeat/max
-          
-              :options [
-                (node :structure/node
-                  :type :clojure/kernel/expr)
-              ]
-              
-              :optional false)
-          ]))
+        (make-node :view/expr/symbol { :str "*" })
+      })
+    })
+  })
 
-      ; TODO: :reduce
-      )
-      
-    ;
-    ; Non-primitive terms (defined in terms of each other and/or the primitive terms):
-    ;
+
+  ; repeat
+  (make-node :grammar/mapNode {
+    :doc
+    (make-node :grammar/doc { :str "Matches repeats of the contained pattern" })
+
+    :type
+    (make-node :grammar/type :clojure/re/repeat)
     
-    ; chars: an alternative form of string literal for regex's only which 
-    ; doesn't use quotes for compactness
-    (node :grammar/rule
-      :type
-      :clojure/regex/literal
-      
-      :supers []
-      
-      :display
-      (node :view/chars
-        :str
-        (node :grammar/attr
-          :name
-          :clojure/regex/literal/str
-          
-          :options [
-            (node :structure/string)
-          ]
-          
-          :optional false)
+    :supers 
+    (make-node :grammar/types [ 
+      (make-node :grammar/type :clojure/re/pattern)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :repeat_expr {
+        :name
+        (make-node :grammar/name :clojure/re/repeat/expr)
         
-        :font :times  ; :cmr10
-      
-        :view/drawable/color
-        (node :view/rgb :red 0.7 :green 0 :blue 0.7)))
-    
-    (node :grammar/rule
-      :type
-      :clojure/regex/option
-      
-      :supers [ :clojure/regex/term ]
-      
-      :display
-      (node :view/expr/juxt
-        :boxes [
-          (node :grammar/attr
-            :name
-            :clojure/regex/option/term
-          
-            :options [
-              (node :structure/node
-                :type :clojure/regex/term)
-            ]
-          
-            :optional false)
-          (node :view/expr/keyword :str "?")
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+            :type :clojure/re/pattern
+          })
         ])
-
-      ; TODO: :reduce
-      )
+      })
+      (make-node :grammar/attr :repeat_min {
+        :name
+        (make-node :grammar/name :clojure/re/repeat/min)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+            :type :clojure/kernel/int
+          })
+        ])
+      })
+      (make-node :grammar/attr :repeat_max {
+        :name
+        (make-node :grammar/name :clojure/re/repeat/max)
+        
+        :options
+        (make-node :grammar/options [
+          (make-node :grammar/node {
+            :type :clojure/kernel/int
+          })
+        ])
+      })
+    ])
     
-  ])
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/scripted {
+        :nucleus
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :repeat_expr)
+          })
+        })
+
+        :super
+        (make-node :view/expr/juxt [
+          (make-node :view/expr/int { 
+            :str
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :repeat_min)
+              })
+            })
+          })
+          (make-node :view/expr/keyword { :str ".." })
+          (make-node :view/expr/int { 
+            :str
+            (make-node :clojure/kernel/unquote {
+              :body
+              (make-node :clojure/kernel/var {
+                :ref (ref-node :repeat_max)
+              })
+            })
+          })
+        ])
+      })
+    })
+  })
+
+
+  ; digit
+  (make-node :grammar/mapNode {
+    :doc
+    (make-node :grammar/doc { :str "Matches a single digit, 0-9" })
+
+    :type
+    (make-node :grammar/type :clojure/re/digit)
+    
+    :supers 
+    (make-node :grammar/types [ 
+      (make-node :grammar/type :clojure/re/pattern)
+    ])
+    
+    :attrs
+    (make-node :grammar/attrs [
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/keyword { :str "#" })
+    })
+  })
+
+  ; sequence
+  (make-node :grammar/seqNode {
+    :type 
+    (make-node :grammar/type :clojure/re/sequence)
+    
+    :supers 
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/re/pattern)
+    ])
+
+    :options 
+    (make-node :grammar/options [
+      (make-node :grammar/node {
+        :type :clojure/re/pattern
+      })
+    ])
+    
+    :min
+    (make-node :grammar/count 2)
+
+    :display
+    (make-node :grammar/seq {
+      :type 
+      (make-node :grammar/type :view/expr/binary)
+    })
+  })
+  
+  ; option
+  (make-node :grammar/seqNode {
+    :type 
+    (make-node :grammar/type :clojure/re/option)
+    
+    :supers
+    (make-node :grammar/types [
+      (make-node :grammar/type :clojure/re/pattern)
+    ])
+
+    :options 
+    (make-node :grammar/options [
+      (make-node :grammar/node {
+        :type :clojure/re/pattern
+      })
+    ])
+    
+    :min
+    (make-node :grammar/count 2)
+
+    :display
+    (make-node :grammar/seq {
+      :type 
+      (make-node :grammar/type :view/expr/binary)
+      
+      :separator
+      (make-node :view/expr/symbol { :str :textpipe })
+    })
+  })
+  
+  ; chars
+  (make-node :grammar/mapNode {
+    :type
+    (make-node :grammar/type :clojure/re/chars)
+  
+    :supers
+    (make-node :grammar/types [ 
+      (make-node :grammar/type :clojure/re/pattern)
+    ])
+  
+    :attrs
+    (make-node :grammar/attrs [
+      (make-node :grammar/attr :chars_str {
+        :name
+        (make-node :grammar/name :clojure/re/chars/str)
+
+        :options
+        (make-node :grammar/options [
+          (node :grammar/string)
+        ])
+    
+        :optional
+        false
+      })
+    ])
+    
+    :display
+    (make-node :clojure/kernel/quote {
+      :body
+      (make-node :view/expr/mono {
+        :str
+        (make-node :clojure/kernel/unquote {
+          :body
+          (make-node :clojure/kernel/var {
+            :ref (ref-node :chars_str) 
+          })
+        })
+      })
+    })
+  })
+  
+])

@@ -1,0 +1,208 @@
+; Regular expression sub-language.
+
+(use 'meta.core)   ; ignored by load-nodes, but should make this file legal Clojure
+
+(node :grammar/language
+  :rules [
+    (node :grammar/rule
+      :type
+      :clojure/regex/pattern
+    
+      :supers [ :clojure/kernel/expr ]
+    
+      :display
+      (node :view/sequence  ; TODO: any kind of wrapping?
+        :items [
+          (node :grammar/attr
+            :name
+            :clojure/regex/pattern/term
+            
+            :options [
+              (node :structure/node
+                :type :clojure/regex/term)
+            ]
+            
+            :optional false)
+        ]))
+    
+    (node :grammar/rule
+      :type 
+      :clojure/regex/chars
+      
+      :supers [ :clojure/regex/term ]
+      
+      :display
+      (node :view/sequence
+        :items [
+          (node :grammar/attr
+            :name
+            :clojure/regex/chars/str
+          
+            :options [
+              (node :structure/node
+                :type :clojure/kernel/expr) ; the idea is to accept any expr yielding a string
+              (node :structure/node
+                :type :clojure/regex/literal) ; or an embedded string literal, without quotes
+            ]
+          
+            :optional false)
+        ])
+      
+      ; TODO: :reduce
+      )
+    
+    (node :grammar/rule
+      :type
+      :clojure/regex/sequence
+      
+      :supers [ :clojure/regex/term ]
+      
+      :display
+      (node :view/expr/juxt
+        :boxes
+        (node :grammar/sequence
+          :name
+          :clojure/regex/sequence/terms
+          
+          :options [
+            (node :structure/node
+              :type :clojure/regex/term)
+          ]
+          
+          :min 2))
+        
+        ; TODO: :reduce
+        )
+
+    (node :grammar/rule
+      :type
+      :clojure/regex/alt
+      
+      :supers [ :clojure/regex/term ]
+      
+      :display
+      (node :view/expr/juxt
+        :boxes
+        (node :grammar/sequence
+          :name
+          :clojure/regex/alt/terms
+          
+          :options [
+            (node :structure/node
+              :type :clojure/regex/term)
+          ]
+          
+          :min 2
+          
+          :separator
+          (node :view/expr/symbol :str "|")))
+        
+        ; TODO: :reduce
+        )
+
+
+    (node :grammar/rule
+      :type
+      :clojure/regex/repeat
+      
+      :supers [ :clojure/regex/term ]
+      
+      :display
+      (node :view/scripted
+        :nucleus
+        (node :grammar/attr
+          :name
+          :clojure/regex/repeat/term
+          
+          :options [
+            (node :structure/node
+              :type :clojure/regex/term)
+          ]
+          
+          :optional false)
+        
+        :super
+        (node :view/expr/juxt
+          :boxes [
+            (node :grammar/attr
+              :name
+              :clojure/regex/repeat/min
+          
+              :options [
+                (node :structure/node
+                  :type :clojure/kernel/expr)
+              ]
+              
+              :optional false)
+            (node :view/expr/keyword :str "..")
+            (node :grammar/attr
+              :name
+              :clojure/regex/repeat/max
+          
+              :options [
+                (node :structure/node
+                  :type :clojure/kernel/expr)
+              ]
+              
+              :optional false)
+          ]))
+
+      ; TODO: :reduce
+      )
+      
+    ;
+    ; Non-primitive terms (defined in terms of each other and/or the primitive terms):
+    ;
+    
+    ; chars: an alternative form of string literal for regex's only which 
+    ; doesn't use quotes for compactness
+    (node :grammar/rule
+      :type
+      :clojure/regex/literal
+      
+      :supers []
+      
+      :display
+      (node :view/chars
+        :str
+        (node :grammar/attr
+          :name
+          :clojure/regex/literal/str
+          
+          :options [
+            (node :structure/string)
+          ]
+          
+          :optional false)
+        
+        :font :times  ; :cmr10
+      
+        :view/drawable/color
+        (node :view/rgb :red 0.7 :green 0 :blue 0.7)))
+    
+    (node :grammar/rule
+      :type
+      :clojure/regex/option
+      
+      :supers [ :clojure/regex/term ]
+      
+      :display
+      (node :view/expr/juxt
+        :boxes [
+          (node :grammar/attr
+            :name
+            :clojure/regex/option/term
+          
+            :options [
+              (node :structure/node
+                :type :clojure/regex/term)
+            ]
+          
+            :optional false)
+          (node :view/expr/keyword :str "?")
+        ])
+
+      ; TODO: :reduce
+      )
+    
+  ])

@@ -192,6 +192,8 @@
   :wedge   [ "\u005f" :cmsy10 ]
   :vdash   [ "\u0060" :cmsy10 ]
   :dashv   [ "\u0061" :cmsy10 ]
+  :textpipe    [ "\u006a" :cmsy10 ]
+  :textdoublepipe    [ "\u006b" :cmsy10 ]
 
   :gg      [ "\u00b5" :cmsy10 ]
   

@@ -1,0 +1,84 @@
+(use 'meta.core)
+
+(make-node :clojure/core/program [
+
+  (make-node :clojure/core/doc {
+    :string "A US phone number"
+  })
+  
+  (make-node :clojure/re/sequence [
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+  
+    (make-node :clojure/re/chars {
+      :str "-"
+    })
+  
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+  ])
+
+  (make-node :clojure/core/doc {
+    :string "A US phone number with area code"
+  })
+  
+  (make-node :clojure/re/sequence [
+    (make-node :clojure/re/chars { :str "(" })
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/chars { :str ")" })
+  
+    (make-node :clojure/re/chars { :str " " })
+  
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+  
+    (make-node :clojure/re/chars { :str "-" })
+  
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+    (make-node :clojure/re/digit)
+  ])
+
+  (make-node :clojure/core/doc {
+    :string "C-style integer literal"
+  })
+  
+  (make-node :clojure/re/sequence [
+    (make-node :clojure/re/option [
+      (make-node :clojure/re/chars { :str "1" })
+      (make-node :clojure/re/chars { :str "2" })
+      (make-node :clojure/re/chars { :str "3" })
+      (make-node :clojure/re/chars { :str "4" })
+      (make-node :clojure/re/chars { :str "5" })
+      (make-node :clojure/re/chars { :str "6" })
+      (make-node :clojure/re/chars { :str "7" })
+      (make-node :clojure/re/chars { :str "8" })
+      (make-node :clojure/re/chars { :str "9" })
+    ])
+    (make-node :clojure/re/repeat {
+      :expr
+      (make-node :clojure/re/option [
+        (make-node :clojure/re/chars { :str "0" })
+        (make-node :clojure/re/chars { :str "1" })
+        (make-node :clojure/re/chars { :str "2" })
+        (make-node :clojure/re/chars { :str "3" })
+        (make-node :clojure/re/chars { :str "4" })
+        (make-node :clojure/re/chars { :str "5" })
+        (make-node :clojure/re/chars { :str "6" })
+        (make-node :clojure/re/chars { :str "7" })
+        (make-node :clojure/re/chars { :str "8" })
+        (make-node :clojure/re/chars { :str "9" })
+      ])
+      
+      :min 0
+    })
+  ])
+
+])

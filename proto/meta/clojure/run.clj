@@ -120,6 +120,7 @@
   "meta/clojure/core.mlj"
   "meta/example/tex/cons.mlj"  ; HACK
   "meta/clojure/core-seq.mlj"
+  "meta/clojure/re.mlj"
   "meta/example/tex/and.mlj"  ; HACK
   "meta/example/tex/continued-grammar.mlj"  ; HACK
   "meta/example/tex/continued-ops.mlj"  ; HACK

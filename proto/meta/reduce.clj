@@ -156,7 +156,7 @@
   by looking up the node and its ancestors in order.
   Currently works by filtering the result of meta-reduce-one2 to include mappings for
   nodes in the original program only. This isn't particulary clever or efficient."
-  [#^nodetype n f]
+  [#^meta.core.nodetype n f]
   (let [fp (fn [n v] [(f n) nil])
         [np o vp] (reduce-plus n fp nil)]
     [np o]))
@@ -174,7 +174,7 @@
   "Reduction fxn built from a map of node types to fxns."
   ; TODO: accept multiple maps (and merge them?)
   [rules]
-  (fn [#^nodetype n] 
+  (fn [#^meta.core.nodetype n] 
     (if-let [ f (rules (node-type n)) ]
       (f n)
       nil)))
@@ -228,7 +228,7 @@
   ; TODO: detect when no reduction has taken place and return the original node?
   ; As it is, each node gets rebuilt, which means allocating an entire new tree
   ; on every reduction. Is that why it's slow?
-  [#^nodetype n f v depth]
+  [#^meta.core.nodetype n f v depth]
   (cond 
     (map-node? n)
     (let [ childrenAndMaps (for [ a (node-attrs n) ]
@@ -281,7 +281,7 @@
   by looking up the node and its ancestors in order.
   The resulting map contains the ids of all resulting nodes, whether or not they appear
   in the 'original' program."
-  [#^nodetype n f v depth]
+  [#^meta.core.nodetype n f v depth]
   (if (node? n)
     (let [_ (if PRINT (do (print "reduce-one: ")(print-node n true)))
           origId (node-id n)
@@ -308,7 +308,7 @@
   and a value which has been threaded through the reduction.
   The reduction function takes a node and value, and returns a vector of
   a reduced node (or nil) and a new value."
-  [#^nodetype n f v]
+  [#^meta.core.nodetype n f v]
   (do
     (if PRINT_REDUCED_TYPES (println "\nreduce-plus:" (node-type n)))
     (let [origIds (set (deep-node-ids n))
