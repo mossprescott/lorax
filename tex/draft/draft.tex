@@ -1,0 +1,278 @@
+\documentclass[110pt]{amsart}
+
+\usepackage{color}
+\usepackage{geometry}                % See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   % ... or a4paper or a5paper or ... 
+%\geometry{landscape}                % Activate for for rotated page geometry
+%\usepackage[parfill]{parskip}    % Activate to begin paragraphs with an empty line rather than an indent
+%\usepackage{graphicx}
+%\usepackage{amssymb}
+%\usepackage{epstopdf}
+%\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\title{Dfining Languages}
+\author{Moss Prescott}
+\date{21 Feb. 2010}
+
+%
+% Syntax macros:
+%
+
+% font for literals in the presentation:
+\newcommand{\keyword}[1]{\ensuremath{\mathtt{#1}}}
+
+% a way of setting off ???
+\newcommand{\syntax}[1]{\ensuremath{\fbox{\ensuremath{#1}}}}
+
+% 
+\definecolor{literal}{rgb}{.8,.8,.6}
+\definecolor{literalbg}{rgb}{1,1,.8}
+
+% deprecated:
+\newcommand{\embed}[1]{\ensuremath{\fcolorbox{literal}{literalbg}{\ensuremath{#1}}}}
+\newcommand{\unbed}[1]{\ensuremath{\fcolorbox{literal}{white}{\ensuremath{#1}}}}
+
+\newcommand{\quoted}[1]{\ensuremath{\fcolorbox{literal}{literalbg}{\ensuremath{#1}}}}
+\newcommand{\unquoted}[1]{\ensuremath{\fcolorbox{literal}{white}{\ensuremath{#1}}}}
+
+\newcommand{\node}[2]{\ensuremath{#1 \: \{ #2 \}}}
+\newcommand{\attr}[2]{\ensuremath{\mathrm{#1} : \: #2}}
+
+\newcommand{\reducep}{\ensuremath{\overset{present}{\longrightarrow}}}
+\newcommand{\reducec}{\ensuremath{\overset{compile}{\longrightarrow}}}
+
+\newcommand{\gray}[1]{ {\color[gray]{.7}#1}}
+\newcommand{\gparens}[1]{ \gray{(} #1 \gray{)} }
+
+% formatting for selections:
+\definecolor{selection}{rgb}{1,.5,.8}
+
+
+\begin{document}
+\maketitle
+
+\section{Concepts}
+A \emph{language} is made up of several \emph{sub-languages}. A \emph{program} is made up of a tree of \emph{nodes}. A node has a \emph{type}, \emph{id}, and a set of tagged fields, each of which contains a sequence zero or more nodes or primitive values. A sub-language is defined by a set of rules (productions?) which define what nodes may occupy which fields of which other nodes. A sub-language may introduce new productions for the nodes first defined in a different sub-language.
+
+Each sub-language has different creators, programmers, and consumers. A series of \emph{reductions} can be applied to a program to reduce it to a particular sub-language, which can be used by a particular consumer. For instance, the \emph{editor} reduces a program to a presentation language program which can be drawn on the screen, while a meta-compiler reduces the same program to a kernel language program which can be compiled to an executable.
+
+However, not every sub-language is required to be reducible to executable (kernel) form. For example, a symbolic algebra program might manipulate algebra expressions. There would be a sub-language for these expressions so that they could be expressed in the program, but they would never be reduced by the compiler.
+
+A sub-language may also define additional rules which can be used to do other kinds of static checks. For example: \emph{scoping rules}, \emph{typing rules}, \emph{access modifiers}, Clojure's explicit tail-recursion, etc.
+
+Meta-programs can embed programs in other languages if a sub-language provides adapting syntax. For example, a \emph{sql.query} node type cannot reside where a \emph{java.expr} node is expected, but a \emph{java.embed.sql.query} node could, and would be reduced at compile time to some ordinary Java code which constructs a Java value encapsulating the query. The embedded code would have all the editor support of a regular SQL program, and could contain unquoted Java expressions referring to variables in the enclosing scope, etc.
+
+
+\section{Core Language}
+Some common elements which may be used by any language.
+
+\vspace{12pt}
+
+$\keyword{language} \: core$
+
+
+%\vspace{12pt}
+
+%$\node{*}{\attr{type}{\keyword{nodeidentifier}}, \: \attr{id}{\keyword{uniqueid}}}$  - every node has a type and unique id
+
+
+\vspace{12pt}
+
+$\node{ref}{\attr{id}{\keyword{uniqueid}}} $ --- refers to another node by its unique id
+
+
+\vspace{12pt}
+
+$\node{quote}{\attr{body}{*}}$ --- delays evaluation of its body, which can be any node
+
+$\node{unquote}{\attr{body}{*}}$ --- causes its body to be evaluated sooner
+
+
+\section{``Clojure'' Kernel Language}
+Nodes defining the base language, which is based on the primitive ``special forms'' of the LISP variant \emph{Clojure} (more or less the lambda calculus). These primitives can be trivially converted to Clojure forms, so once a program is reduced to this language it can be compiled and executed.
+
+This sub-language contains only nodes that are of interest to an (abstract) compiler, so for example there are only bindings, but no names.
+
+
+\vspace{12pt}
+
+$\keyword{language} \: clojure.kernel$
+
+
+\vspace{12pt}
+
+$\node{bind}{}$ --- represents a binding; no required attributes
+
+
+\vspace{12pt}
+
+$expr$ --- `abstract' node type which all nodes will implement; no node ever actually has this type
+
+\vspace{12pt}
+
+$expr ::= \node{lambda}{\attr{params}{[ core.bind ]^{0..n}}, \: \attr{body}{expr}}$
+
+$\node{lambda}{\attr{params}{[x, y]}, \: \attr{body}{b}}
+\reducep 
+\quoted{\lambda \: x, y . \unquoted{b}}$
+
+(TODO: some way to define the scope of the bindings)
+
+
+\vspace{12pt}
+
+$expr ::= \node{app}{\attr{expr}{expr}, \: \attr{args}{[ expr ]^{0..n}}}$
+
+$\reducep \quoted{\unquoted{e} \: \unquoted{e_1} \: \dots }$
+
+
+\vspace{12pt}
+
+$expr ::= \node{let}{\attr{bind}{bind}, \: \attr{expr}{expr}, \: \attr{body}{expr}}$
+
+$\reducep \quoted{\keyword{let} \: \unquoted{x} \: = \: \unquoted{e_1} \: \keyword{in} \:\unquoted{e_2}}$
+
+\vspace{12pt}
+
+$expr ::= if \{ \attr{test}{expr}, \: \attr{then}{expr}, \: \attr{else}{expr} \}$
+
+$\reducep \embed{\keyword{if} \: \unbed{e_1} \: \keyword{then} \: \unbed{e_2} \: \keyword{else} \: \unbed{e_3}}$
+
+
+\vspace{12pt}
+
+$expr ::= \node{var}{\attr{ref}{core.ref}}$  --- a reference to a binding, which must be in scope according to...
+
+
+\vspace{12pt}
+
+$expr ::= \node{true}{}$
+
+$expr ::= \node{false}{}$
+
+$expr ::= \node{int}{\attr{value}{\keyword{int}}}$
+
+
+\vspace{12pt}
+
+$expr ::= \node{extern}{\attr{name}{\keyword{identifier}}}$  --- a way to call into the language runtime
+
+
+
+\section{``Clojure'' Core Language}
+Elements of the full \emph{clojure.core} namespace (that is, the language as it is available to the Clojure programmer), implemented as syntax extensions reducible to the kernel language.
+
+
+\vspace{12pt}
+
+$\keyword{language} \: clojure.core$
+
+$\keyword{requires} \: clojure.kernel$
+
+\vspace{12pt}
+
+$expr ::= and \: \{ \mathrm{left}: expr, \: \mathrm{right}: expr \}$
+
+$and \: \{ \mathrm{left}: l, \: \mathrm{right}: r \} 
+\overset{present}{\longrightarrow} 
+\embed{\unbed{l} \: \keyword{and} \: \unbed{r}}$
+
+$\embed{\unbed{l} \: \keyword{and} \: \unbed{r}}
+\overset{compile}{\longrightarrow}
+\embed{\keyword{let} \: x = \unbed{l} \: \keyword{in} \:
+	\gparens{ \keyword{if} \: x \: \keyword{then} \: \unbed{r} \: \keyword{else} \: x } }$
+
+
+\vspace{12pt}
+$expr ::= \node{cons}{\attr{first}{expr}, \: \attr{rest}{expr}}$
+
+$\reducep \embed{\unbed{f} \: . \: \unbed{r}}$
+
+\vspace{12pt}
+$expr ::= \node{nil}{}$  --- the empty list
+
+$\reducep \embed{[]}$
+
+
+\vspace{12pt}
+
+$expr ::= \node{list}{\attr{elements}{[ expr ]^{0..n}}}$
+
+$\reducep \quoted{ [ \unquoted{e1}, \: \dots ] }$
+
+$\node{list}{\attr{elements}{\emptyset}} \reducec \node{nil}$
+
+$\quoted{ [ \unquoted{e_1} ] } 
+\reducec 
+\quoted{ \unquoted{e_1} \: . \: [] }$
+
+$\quoted{ [ \unquoted{e_1}, \unquoted{e_2} ] } 
+\reducec 
+\quoted{ \unquoted{e1} \: . \: \gray{(} \unquoted{e_2} \: . \: [] \gray{)} }$
+
+
+\vspace{12pt}
+
+$expr ::= \node{for}{\attr{bind}{bind}, \: \attr{expr}{expr}, \: \attr{body}{expr}}$
+
+$
+\reducep 
+\quoted{ [ \: \unquoted{e} \: | \: \unquoted{x} \leftarrow \unquoted{lst} \: ]}
+\reducec 
+\quoted{ \keyword{let} \: f = 
+	\gparens{ \lambda \: l.
+		\gparens{ \keyword{let} \: \unquoted{x} = 
+					first(l) \: \keyword{in} \: \unquoted{e} } 
+		\: . \:
+		\gparens{ f \: rest(l) } } \:
+	\keyword{in} \:
+	\gparens{ f \: \unquoted{lst}} }
+$
+
+
+\vspace{12pt}
+
+...many more...
+
+\vspace{12pt}
+
+
+\section{Documentation Language}
+Names, comments, and other information which aid comprehension but are not used by the compiler.
+
+\vspace{12pt}
+
+$\keyword{language} \: clojure.core$
+
+
+\vspace{12pt}
+
+$\node{name}{\attr{base}{\keyword{chars}}, \: 
+				\attr{primes}{\keyword{int}, \:
+				\attr{subscript}{\keyword{chars}}}, \:
+				\attr{locale}{\keyword{localeid}}}$
+				
+e.g. $x$, $count$, $x'$, $index_{start}$, $\gamma$
+
+\vspace{12pt}
+
+$\node{core.bind}{\attr{names}{[ name ]^{0..n}}}$  --- adds a new field to a node type defined elsewhere
+
+
+\vspace{12pt}
+
+$\node{clojure.kernel.expr}{\attr{comment}{text?}}$  --- adds a new field to a whole class of nodes, and declares it to be optional (same as $[text]^{0..1}$)
+
+
+\vspace{12pt}
+$text ::= \dots$  --- this could be a whole grammar for rich text, to support hyperlinks, embedded code snippets, ``literate programming'', etc.
+
+\section{Presentation Hint Language}
+Extra information which helps the editor/browser display the program in a useful and aesthetic way.
+
+\vspace{12pt}
+
+$\node{clojure.kernel.int}{\attr{base}{\keyword{2, 8, 10, 16}}}$  --- controls how the value of an integer literal is displayed.
+
+
+\end{document}
