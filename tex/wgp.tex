@@ -16,8 +16,8 @@
 \titlebanner{banner above paper title (pre-print only)}        % These are ignored unless
 \preprintfooter{short description of paper (pre-print only)}   % 'preprint' option specified.
 
-\title{[a better title]}
-%\subtitle{Subtitle Text, if any}
+\title{Bootstrapping a Language Workbench}
+\subtitle{A Light-weight Approach to Language Oriented Programming}
 
 \authorinfo{Moss Prescott and Jeremy Siek}
            {University of Colorado, Boulder}
@@ -39,66 +39,24 @@ Languages, Syntax
 \keywords
 Syntax extension, Domain Specific Languages, Abstract syntax
 
-
-\section{new outline}
-
-intro: position rel. to other work. summarize entire paper.; the most important connected ideas
-
-define what the thing is, what the methodology is (lang. oriented meta-prog?)
-
-thesis:
-
-- methodology enables system to be an order of mag. smaller than same thing using previous approaches
-
--- wider range of extensions
-
--- also simpler/smaller
-
--- prototype
-
--- case studies that illustrate
-
-
-- lessons learned
-
-
-
-
-section 2: case studies
-
-section 3: overview of system; what are all the pieces
-
-section 4: ASTs and Txs; kernel language
-
-section 5: presentation language
-
-section 6: related work
-
-section 7: conclusion
-
-
 \input{src/wgp/intro}
-
-\section{Two (or three) approaches}
-\subsection{Text-based}
-Familiar and well-understood. Difficulties inherent in parsing; limitations of text.
-
-\subsection{Structure Editors and Language Workbenches}
-Successful for certain domains. Inflexibility, large footprint, etc.
-
-\subsection{LISP}
-Eschew concrete syntax (but not really completely).
-
-\input{src/wgp/ast}
-
-\input{src/wgp/tx}
 
 \input{src/wgp/studies}
 
+\input{src/wgp/lorax}
+
+\input{src/wgp/ast}
+
+\input{src/wgp/expr}
+
+\input{src/wgp/eval}
+
 \section{Related Work}
+\label{related}
 [Not the language workbenches, but other AST-based work?]
 
 \section{Conclusion}
+\label{conclusion}
 ~
 
 %\appendix
@@ -112,16 +70,18 @@ Eschew concrete syntax (but not really completely).
 
 % We recommend abbrvnat bibliography style.
 
-\bibliographystyle{abbrvnat}
+%\bibliographystyle{abbrvnat}
+\bibliographystyle{plain}
 
 % The bibliography should be embedded for final submission.
+\bibliography{src/refs}
 
-\begin{thebibliography}{}
-\softraggedright
+%\begin{thebibliography}{}
+%\softraggedright
 
-\bibitem[Smith et~al.(2009)Smith, Jones]{smith02}
-P. Q. Smith, and X. Y. Jones. ...reference text...
+%\bibitem[Smith et~al.(2009)Smith, Jones]{smith02}
+%P. Q. Smith, and X. Y. Jones. ...reference text...
 
-\end{thebibliography}
+%\end{thebibliography}
 
 \end{document}

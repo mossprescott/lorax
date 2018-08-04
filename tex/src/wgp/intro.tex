@@ -1,46 +1,83 @@
 \section{Introduction}
+\label{intro}
+
+intro: position rel. to other work. summarize entire paper.; the most important connected ideas
+
+Language Workbench
+
+- AST-based, edit via projection, execute via generation
+
+- workbench provides many of the services of an IDE as common platform
+
+- implementations are multi-man-decade efforts
+
+LISP approach
+
+- s-expressions (code and data), small kernel language, simple execution model
+
+- extension via reduction
+
+- limitations of s-expressions (e.g. hygiene)
+
+define what the thing is, what the methodology is (lang. oriented meta-prog?)
+
+thesis:
+
+- methodology enables system to be an order of mag. smaller than same thing using previous approaches
+
+-- wider range of extensions
+
+-- also simpler/smaller
+
+-- prototype
+
+-- case studies that illustrate
+
+
+- lessons learned
+
+
+
 
 %\subsection{Role of Language Def. and Ext.}
-Many kinds of programmers are interested in creating new computer languages, yet the technology that is most often used to construct new languages does not support creative activity well at all. Meanwhile, mature languages now come with very sophisticated editing tools\cite{eclipse}, but these tools require a large effort to create, and any new language therefore is at a major competitive disadvantage.
+%Many kinds of programmers are interested in creating new computer languages, yet the technology that is most often used to construct new languages does not support creative activity well at all. Meanwhile, mature languages now come with very sophisticated editing tools\cite{eclipse}, but these tools require a large effort to create, and any new language therefore is at a major competitive disadvantage.
 
-...another approach, often identified with the Lisp community, views the task of writing a program as combined with the building of a language into one activity \cite{on-lisp}...
+%...another approach, often identified with the Lisp community, views the task of writing a program as combined with the building of a language into one activity \cite{on-lisp}...
 
-Limitations of text as a vis. repr., and of parsers as a way of interacting with the compiler...
+%Limitations of text as a vis. repr., and of parsers as a way of interacting with the compiler...
 
-Promise and problems of structure editing as an approach...
-
-
-\subsection{What a language's syntax can and should be}
-
-Programs can look as good onscreen as they do in a paper or textbook...
-
-When programs contain elements that have a familiar non-textual representation, they should be presented that way. Math, images, etc.
-
-Take advantage of other forms of interaction besides character editing. 
-
-Modern devices make all this possible. High res.~displays, sophisticated fonts, mice for cryin' out loud...
+%Promise and problems of structure editing as an approach...
 
 
-\subsection{Proposal and success criteria}
+%\subsection{What a language's syntax can and should be}
 
-A new system for creating, transforming, and executing new languages, based on:
+%Programs can look as good onscreen as they do in a paper or textbook...
 
-\begin{itemize}
-\item AST as primary representation.
-\item Transformation of ASTs.
-\item Kernel language as target of reduction for execution, and as platform for implementing transformations.
-\item Presentation language as a second target of reduction.
-\end{itemize}
+%When programs contain elements that have a familiar non-textual representation, they should be presented that way. Math, images, etc.
 
-Goals:
-\begin{itemize}
-\item As easy to add elements as in LISP.
-\item Presentation as good as published pseudo-code.
-\item Editor can handle arbitrary language extension.
-\item Modest implementation complexity.
-\end{itemize}
+%Take advantage of other forms of interaction besides character editing. 
+
+%Modern devices make all this possible. High res.~displays, sophisticated fonts, mice for cryin' out loud...
+
+%
+%\subsection{Proposal and success criteria}
+
+%A new system for creating, transforming, and executing new languages, based on:
+
+%\begin{itemize}
+%\item AST as primary representation.
+%\item Transformation of ASTs.
+%\item Kernel language as target of reduction for execution, and as platform for implementing transformations.
+%\item Presentation language as a second target of reduction.
+%\end{itemize}
+
+%Goals:
+%\begin{itemize}
+%\item As easy to add elements as in LISP.
+%\item Presentation as good as published pseudo-code.
+%\item Editor can handle arbitrary language extension.
+%\item Modest implementation complexity.
+%\end{itemize}
 
 \subsection{Roadmap}
-Section 2 reviews the strengths and weaknesses of existing approaches. Section 3 presents a new approach based on ASTs from the ground up.
-Section 4 shows examples of how the system works, using a prototype.
-Section 5: related work. Section 6 concludes.
+Section~\ref{studies} illustrates the vision with examples using our prototype system. Section~\ref{lorax} presents an overview of the system. In Section~\ref{ast} we describe how programs are represented and how transformations are defined. Our new language for programs and mathematical notation is presented in Section~\ref{expr}. In Section~\ref{eval}, we evaluate the success of the system by comparison with some existing tools. Related work is discussed in Section~\ref{related}, and Section~\ref{conclusion} concludes.

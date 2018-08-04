@@ -1,48 +1,12 @@
-\subsection{ASTs and Transformations}
-[An open, general, persistent representation for trees; durable identity for all nodes; advantages thereof. ]
+\section{Lorax}
+\label{lorax}
 
-[Reductions and checkers \emph{based on attribute grammars}; attributes computed by functions in kernel language.]
+In the Language Oriented Meta-Programming System, 
 
-\subsection{Transformations for Execution}
-Introduce the kernel language, making it as little different from LC as poss.; handling of quotations. How a GPL is built from it.
+All programs represented as ASTs using a common representation.
 
-\begin{figure}[ht]
-	\begin{tabular}{ll}
-	construct & concrete syntax
-	\\
-	\hline
-	binding & $\kw{let}~x = e_1~\kw{in}~e_2$
-	\\
-	variable reference & $x$
-	\\
-	lambda abstraction & $\kw{fn}~x \rightarrow e$
-	\\
-	application (call-by-value) & $e_1(e_2)$
-	\\
-	conditional & $\kw{if}~e_1~\kw{then}~e_2~\kw{else}~e_3$
-	\\
-	special values & \kw{nil}, \kw{true}, \kw{false}
-	\\
-	literals (integers, strings, names) & 1, \textsf{abc}, \textit{foo}
-	\\
-	external reference & \texttt{cons}
-	\\
-	quotation & \todo{?}
-	\\
-	un-quotation & \todo{?}
-	\\
-	pattern-matching & $\kw{match}~e_1~\kw{with}~p \rightarrow e_2~\kw{else}~e_3$
-	\end{tabular}
+A couple of pre-defined languages: kernel language, expression language
 
-	\caption{A kernel meta-language}
-	\label{fig-kernel}
-\end{figure}
+Languages defined by transformation: core language, grammar language
 
-Figure~\ref{fig-kernel} shows...
-
-
-\subsection{Transformations for Presentation}
-Brief description of the high-level presentation AST; how source is reduced to it; how it supports easy extension and modularity. Very brief mention of how it actually gets rendered [via a further reduction to a low-level language, via attributes].
-
-\subsection{A few details}
-Tracking of source nodes; parenthesization (just an example, without harping on it).
+Reductions/transformations written in the kernel language, which 

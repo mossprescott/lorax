@@ -1,7 +1,13 @@
-\section{Case Studies}
+\section{Language-oriented Meta-programming}
 \label{studies}
 
-To evaluate the success of \Meta\ at supporting the addition of new language constructs, I implemented two of them, using the grammar language to extend the \Meta\ core language. The first is a simple extension of the syntax for constructing lists (one of the basic data types of the core language), and the second introduces a completely new kind of value.
+The Language Oriented\cite{ward} approach essentially consists of three steps:
+\begin{enumerate}
+\item Define a language which accurately and conveniently expresses the program you want to write.
+\item Implement the program in the new language.
+\item Implement the new language using existing tools.
+\end{enumerate}
+
 
 %
 % Definition of 'for':
@@ -16,64 +22,58 @@ Several core language nodes provide support for using the primitive cons-list va
 
 \subsubsection{List Comprehension in Lorax}
 
-\begin{figure}[th]
+\begin{figure*}[th]
 	\centering
 	
-	\includegraphics[scale=0.35]{src/image/cons.pdf}
+	\todo{add []'s}
+	\includegraphics[scale=0.8]{src/image/for-grammar.pdf}
 	
-	\caption{Declaration of the \kw{cons}, \kw{match-cons}, and \kw{for} node of the core language.}
+	\caption{Defining a syntax for list comprehensions.}
 	\label{fig-for-grammar}
-\end{figure}
+\end{figure*}
 
 Figure \ref{fig-for-grammar} shows the declarations of the two primitive constructs for working with with lists (\kw{cons} and \kw{match-cons}), and a list comprehension (\kw{for}) node constructed from them. For the present purpose, the first two nodes can be regarded as part of the base language, and the list comprehension syntax as an extension to be added to that language.
 
-%First is the constructor for lists: \kw{cons}. This node, displayed as a colon operator (as in Haskell), evaluates its \kw{first} child and uses Clojure's \cl{cons} function to construct a cons-cell with the resulting value as its head. \cl{lazy-seq} is applied to the \kw{rest} child, so that it is not evaluated until the value is needed. This introduces laziness into the core language (recall that the kernel language's semantics is entirely strict), allowing infinite lists to be constructed. Note: the application of \cl{lazy-seq} is translated by the meta-compiler to an application of the corresponding macro (with no special effort); if \cl{lazy-seq} was treated as an ordinary (strict) function application, some additional nodes would be required to wrap \kw{rest} in a lambda abstraction, say, to defer its evaluation.
+The \emph{expand} reduction for the \kw{for} node evaluates its \kw{seq} child, and then applies a recursive function to it. This function attempts to match its argument as a non-empty list (using \kw{match-cons}). If so, the \kw{x} child is bound to the first value, and \kw{expr} is evaluated and then the function is applied to the rest of the list. Note that one of the bindings (\kw{x}) was supplied by the programmer, and the other ($xs$) is local to the reduction.
 
-%A \kw{match-cons} node de-constructs a list (see the second declaration in Figure~\ref{fig-for-grammar}). Its children consist of an expression (\kw{expr}) to be evaluated bindings for the head (\kw{first}) and the remainder (\kw{rest}) of the list, an expression (\kw{body}) to be evaluated if the match succeeds, and an alternative expression (\kw{else}) to be evaluated if the list is empty. The \emph{expand} reduction implements this by first binding the value of \kw{expr} to $x$ (a variable local to the reduction), then applying Clojure's \cl{seq} function, which tests whether the value represents a non-empty list. If so, the two bindings are bound to the parts of the cell using the corresponding Clojure primitive, and the \kw{body} expression is evaluated.
+%\subsubsection{List Comprehension in Lisp}
 
-%These two nodes are all that is required to construct a variety of syntax for lists, none of which will need to use the lower-level primitives. The \kw{for} (list comprehension) node is also defined in Figure \ref{fig-for-grammar}. 
-The \emph{expand} reduction for the \kw{for} node evaluates its \kw{seq} child, and then applies a recursive function to it. This function attempts to match its argument as a non-empty list (using \kw{match-cons}). If so, the \kw{x} child is bound to the first value, and \kw{expr} is evaluated and then the function is applied to the rest of the list. Note that one of the bindings (\kw{x}) was supplied by the programmer, and the other ($xs$) is local to the reduction. %Both \kw{x} and $xs$ are in scope when \kw{expr} is evaluated, thus in the new syntax, the binding introduced by \kw{x} is in scope in \kw{expr}, but not in \kw{seq}.
+%\begin{figure}[th]
+%\centering
+%\begin{verbatim}
+%=> (defmacro simple-for
+%     [[x xs] expr]
+%     `((fn f# [s#]
+%         (if (seq s#)
+%           (let [[~x & r#] s#]
+%             (cons ~expr
+%               (lazy-seq (f# r#))))))
+%         ~xs))
 
-%The rest of the core language's syntax for working with lists is defined in a similar manner, using the \kw{cons} and \kw{match-cons} nodes, often in combination with a recursive function to traverse the list. Some examples of the resulting syntax are shown in Figure~\ref{fig-core}. Languages such as Haskell and Python provide such features as integral parts of their fixed grammar and compiler, but in \Meta\ equal or greater expressivity is achieved with a very small implementation effort and with complete modularity---any or all of these nodes can be removed or redefined by simply editing the grammar, without any impact on the rest of the language.
+%=> (simple-for [x (range 1 11)] (* x x))
+%(1 4 9 16 25 36 49 64 81 100)
+%\end{verbatim}
 
-\subsubsection{List Comprehension in Lisp}
+%\caption{List comprehension macro in Clojure}
+%\label{fig-for-lisp}
+%\end{figure}
 
-\begin{figure}[t]
-\centering
-\begin{verbatim}
-=> (defmacro simple-for
-     [[x xs] expr]
-     `((fn f# [s#]
-         (if (seq s#)
-           (let [[~x & r#] s#]
-             (cons ~expr
-               (lazy-seq (f# r#))))))
-         ~xs))
+%For comparison, the definition of a Clojure macro with equivalent capability is shown in Figure~\ref{fig-for-lisp}. The macro operates in a very similar way to the \Meta\ syntax declaration, so a fairly direct comparison of the two is revealing.
 
-=> (simple-for [x (range 1 11)] (* x x))
-(1 4 9 16 25 36 49 64 81 100)
-\end{verbatim}
+%Both declarations make use of quasi-quoted syntax to construct a reduced program fragment. In \Meta, the rendering of quoted nodes using a contrasting background color provides a clear visual cue of the embedded structure. It's clear at a glance where the three components of the syntax are substituted into the reduced program. In Clojure, quotation and un-quotation are indicated with lexical signifiers (as in \cl{`(\dots)} and \cl{\textasciitilde x}), and it's up to the reader to count parentheses to understand what is evaluated when. To avoid unintended variable capture, names introduced in the Clojure reduction are marked with another signifier (as in `\cl{x\#}') which causes a new name to be generated each time the quotation is evaluated. In \Meta, no such signifiers are needed, because variable references are unambiguous---the meta-compiler takes care of generating new, unique labels when the quotation is expanded.
 
-\caption{List comprehension macro in Clojure}
-\label{fig-for-lisp}
-\end{figure}
-
-For comparison, the definition of a Clojure macro with equivalent capability is shown in Figure~\ref{fig-for-lisp}. The macro operates in a very similar way to the \Meta\ syntax declaration, so a fairly direct comparison of the two is revealing.
-
-Both declarations make use of quasi-quoted syntax to construct a reduced program fragment. In \Meta, the rendering of quoted nodes using a contrasting background color provides a clear visual cue of the embedded structure. It's clear at a glance where the three components of the syntax are substituted into the reduced program. In Clojure, quotation and un-quotation are indicated with lexical signifiers (as in `\cl{`(\dots)}' and `\cl{\textasciitilde x}'), and it's up to the reader to count parentheses to understand what is evaluated when. To avoid unintended variable capture, names introduced in the Clojure reduction are marked with another signifier (as in `\cl{x\#}') which causes a new name to be generated each time the quotation is evaluated. In \Meta, no such signifiers are needed, because variable references are unambiguous---the meta-compiler takes care of generating new, unique labels when the quotation is expanded.
-
-Thus the reduction/macro is of roughly equivalent complexity in the either system, but \Meta's handling of quotations and variable references makes the reduction both easier to read (via visual cues) and easier to write (by avoiding subtle issues of variable capture).
+%Thus the reduction/macro is of roughly equivalent complexity in the either system, but \Meta's handling of quotations and variable references makes the reduction both easier to read (via visual cues) and easier to write (by avoiding subtle issues of variable capture).
 
 \subsubsection{Concrete Syntax}
-In addition to this definition of semantics, \Meta's declaration defines a new syntax for the comprehension, which is designed to be familiar from both the mathematical notation of set theory and the comparable construct in Haskell. In \Meta, the reduction for this syntax is entirely trivial, simply giving the arrangement of the three child nodes and the symbols to be placed between them. The effort involved to provide such a simple reduction is essentially nil. For the programmer using the extended language, this syntax gives list comprehensions a distinct appearance. 
+In addition to this definition of semantics, \Meta's declaration defines a new syntax for the comprehension, which is intended to be familiar from both the mathematical notation of set theory and the comparable construct in Haskell. In \Meta, the reduction for this syntax is entirely trivial, simply giving the arrangement of the three child nodes and the symbols to be placed between them. The effort involved to provide such a simple reduction is essentially nil. For the programmer using the extended language, this syntax gives list comprehensions a distinct appearance. 
 
-Returning to Clojure, the new syntax is limited to the few common elements used by all syntax in the language, with little more than the name ``simple-for'' distinguishing it from any other expression. A more illustrative comparison is with Haskell's similar construct. In Haskell, one can write the same example as follows:
-\begin{verbatim}
-[ x^2 | x <- [1..10] ]
-\end{verbatim}
-which has the same basic structure as the \Meta\ version, except that it suffers slightly for being limited to the ASCII character set.
+%Returning to Clojure, the new syntax is limited to the few common elements used by all syntax in the language, with little more than the name ``simple-for'' distinguishing it from any other expression. A more illustrative comparison is with Haskell's similar construct. In Haskell, one can write the same example as follows:
+%\begin{verbatim}
+%[ x^2 | x <- [1..10] ]
+%\end{verbatim}
+%which has the same basic structure as the \Meta\ version, except that it suffers slightly for being limited to the ASCII character set.
 
-However, Haskell's list comprehension syntax is baked into the compiler, and the programmer has no ability to add a new syntax of this kind without modifying the Haskell compiler's front-end. This is typical of languages with free-form syntax; what the language provides may work well, but the specification of syntax is inaccessible to the user (i.e.~it's outside the reach of what can be accomplished with a reasonable effort). \todo{Template Haskell? others?}
+%However, Haskell's list comprehension syntax is baked into the compiler, and the programmer has no ability to add a new syntax of this kind without modifying the Haskell compiler's front-end. This is typical of languages with free-form syntax; what the language provides may work well, but the specification of syntax is inaccessible to the user (i.e.~it's outside the reach of what can be accomplished with a reasonable effort). \todo{Template Haskell? others?}
 
 \subsubsection{Evaluation}
 \Meta's facilities for declaring new syntax and specifying semantics and concrete syntax allow new syntax to be introduced with an effort that compares well to Lisp's macro facility. However, both the declaration of the new syntax and its use are significantly more readable than the corresponding Lisp programs, or even the syntax from Haskell which is designed for just this purpose. Meanwhile, the effort involved is much less than the effort would be to add such a construct to a language such as Haskell.
@@ -88,8 +88,8 @@ The preceding section showed how the facilities of the platform can be exposed a
 \subsubsection{Enumerating the Positive Rationals}
 In a delightful Functional Pearl \cite{gibbons}, Gibbons et al.\ present Haskell programs which generate the infinite series of all positive rational numbers. They begin with the idea of traversing the infinite matrix $a_{ij} = i/j$ which contains every positive ratio, but also contains many equivalent, unreduced ratios (e.g. $\nicefrac{1}{2}$, $\nicefrac{2}{4}$, $\dots$).
 
-The authors show that a series containing all positive rationals in reduced form, without duplicates, is obtained by iterating the function 
-$x' = 1/{(\lfloor x \rfloor + 1 - \{x\})},$\footnote{In the authors' notation, $\lfloor x \rfloor$ is the floor, or whole-number part of $x$, and $\{x\}$ is the fractional part: $\{x\} = x - \lfloor x \rfloor$, $x > 0$.} beginning with $x=1$. This is a surprisingly simple formula, but it is somewhat computationally undesirable in that calculating $\lfloor x \rfloor$ and $\{x\}$ involves division.
+The authors show that a series containing all positive rationals in reduced form, without duplicates, is obtained by iterating the following function beginning with $x=1$:\footnote{In the authors' notation, $\lfloor x \rfloor$ is the floor, or whole-number part of $x$, and $\{x\}$ is the fractional part: $\{x\} = x - \lfloor x \rfloor$, $x > 0$.}
+$$x' = 1/{(\lfloor x \rfloor + 1 - \{x\})}$$ This is a surprisingly simple formula, but it is somewhat computationally undesirable in that calculating $\lfloor x \rfloor$ and $\{x\}$ involves division.
 
 Interestingly, this formula can be implemented using only ``a constant number of arbitrary-precision integer additions and subtractions, but no divisions or multiplications'' by choosing a different representation for ratios. It happens that the five necessary operations---reciprocal, floor, addition of an integer, negate, and fractional part---can all be efficiently performed on ratios represented as \emph{regular continued fractions}. A continued fraction has the form\footnote{Incidentally, this expression is a frequently-cited exception to \TeX's rules for formatting fractions---all the nested expressions are best typeset at the same size, to emphasize the recursive structure. \Meta\ does not provide a way to override that behavior, so continued fractions do not look quite this nice in \Meta!}
 $$a_0 + \frac{1}{
@@ -98,7 +98,9 @@ $$a_0 + \frac{1}{
             \displaystyle a_n}}}$$
 A regular continued fraction is one in which all the coefficients except $a_0$ are positive, and $a_n > 1$ (except for the special case 1). Every rational has a unique representation as a regular continued fraction.
 
-Having arrived at this elegant result, the authors proceed to reduce their formulas to the notation of Haskell for implementation, using lists of integer coefficients to represent continued fractions. In the process, the origins of the code are completely obscured by the loss of the original notation. For example, one of four cases for negation of a regular continued fraction looks like this:\footnote{Actually, what's shown in the paper has been pretty-printed for publication \cite{lhs2tex}. In the actual source code, it must have looked something like this: \cl{negatecf [n\_0, 2] = [-n\_0-1, 2]}.}
+Having arrived at this elegant result, the authors proceed to reduce their formulas to the notation of Haskell for implementation, using lists of integer coefficients to represent continued fractions. In the process, the origins of the code are completely obscured by the loss of the original notation. For example, one of four cases for negation of a regular continued fraction looks like this:\footnote{Actually, what's shown in the paper has been pretty-printed for publication \cite{lhs2tex}. In the actual source code, it looks even less like math: 
+
+\centering \cl{negatecf [n\_0, 2] = [-n\_0-1, 2]}.}
 %$$\mathit{negatecf} (n_0 : 1 : n_2 : ns) = (-n_0 - 1) : (n_2 + 1) : ns$$
 %$$-\left(n_0 + \frac{1}{\displaystyle 1 + \frac{1}{n_2 + \cdots}}\right) = (-n_0 - 1) + \frac{1}{(n_2 + 1) + \cdots}$$
 $$\mathit{negatecf}\:[n_0, 2] = [-n_0-1, 2]$$
@@ -113,9 +115,7 @@ In \Meta, one can extend the language with a new kind of value for these fractio
 \begin{figure}[th]
   \centering
   
-%  \todo{split into columns?}
-  
-  \includegraphics[scale=0.4]{src/image/continued-ops.pdf}
+  \includegraphics[scale=0.45]{src/image/continued-ops.pdf}
   
   \caption{Grammar for operations on continued fractions as runtime values.}
   \label{fig-cf}
@@ -149,7 +149,7 @@ The complete expression and the first 15 fractions (converted to simple ratios) 
 \begin{figure}[t]
   \centering
     
-  \includegraphics[scale=0.6]{src/image/rationals.pdf}
+  \includegraphics[scale=0.6]{src/image/rationals2.pdf}
   
   \caption{Enumerating the rationals, using continued fractions.}
   \label{fig-rationals}
